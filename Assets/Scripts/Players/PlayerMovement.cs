@@ -1,13 +1,23 @@
 
+using System;
 using System.Collections;
-using Unity.VisualScripting;
+
 using UnityEngine;
 
 using UnityEngine.InputSystem;
 
+public enum PlayerState{
+    Walking,
+    Running,
+    Crouching,
+    Hiding
+}
+
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
+    private PlayerState currentState;
+
     [Header("Initialize")]
     [SerializeField] private Rigidbody playerRb;
 
@@ -20,10 +30,12 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Sprinting")]
     [SerializeField] private float addedSprintSpeed;
-    private bool isSprinting;
+    private bool enabledSprinting;
 
     [Header("Crouching")]
-    //[SerializeField] private 
+    [SerializeField] private float crouchSpeedMultiplier;
+    private bool enabledCrouching;
+    public static event Action<bool> onCrouch;
 
     [Header("Jump")]
     [SerializeField] private float jumpForce;
@@ -36,28 +48,56 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheckTransform;
     [SerializeField] private LayerMask groundCheckLayer;
     private bool isGrounded;
-    
+
+    [Header("Debugging Properties")]
+    [SerializeField] private PlayerDebugStats playerDebugScriptable;
+    public static event Action<PlayerDebugStats> onUpdateStats; 
+    [SerializeField] private bool canDebug;
 
     void Start()
     {
-        moveSpeed = baseMoveSpeed;
-        isSprinting = false;
+        moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
+
+        //setting booleans
+        enabledCrouching = false;
+        enabledSprinting = false;
         canJump = true;
+
+        //initializing player rigidbody component
         playerRb = gameObject.GetComponent<Rigidbody>();
+
+        //subscribe to debugging event
+        DisplayPlayerProperties.onEnableDebugging += EnableDebugging;
+        canDebug = true;
+    }
+
+    private void EnableDebugging(bool enableDebugging){
+        canDebug = enableDebugging;
     }
 
     public void OnMove(InputAction.CallbackContext ctx){
         inputDir = ctx.ReadValue<Vector2>(); //getting the player's input values. example: input A returns (-1, 0)
     }
 
+    public void OnCrouch(InputAction.CallbackContext ctx){
+        //later probably add a way to switch between toggle to crouch and hold to crouch (for now its toggle to crouch)
+        if(ctx.performed && !enabledCrouching && isGrounded){
+            onCrouch?.Invoke(true);
+            enabledCrouching = true;
+        }else if(ctx.performed && enabledCrouching && isGrounded){
+            onCrouch?.Invoke(false);
+            enabledCrouching = false;   
+        }
+    }
+
     public void OnSprint(InputAction.CallbackContext ctx){
         //later probably add a limit to the spring and/or stamina bar
-        if(ctx.performed){
-            isSprinting = true;
-        }
-        if(ctx.canceled){
-            isSprinting = false;
-        }
+        if(ctx.performed && !enabledSprinting && isGrounded)
+            enabledSprinting = true;
+        
+        if(ctx.canceled && enabledSprinting)
+            enabledSprinting = false;
+        
     }
 
     public void OnJump(InputAction.CallbackContext ctx){
@@ -79,16 +119,47 @@ public class PlayerMovement : MonoBehaviour
         //checking to see if sphere collider is touching the ground to determine if player is grounded or not
         isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
 
-        //apply movespeed increase if sprinting
-        if(isSprinting){
-            moveSpeed = baseMoveSpeed + addedSprintSpeed;
-        }else{
-            moveSpeed = baseMoveSpeed;
-        }
-
         Vector3 moveDir = transform.right * inputDir.x + transform.forward * inputDir.y; //getting direction of movement. Multiplies player's X and Z values by input direction
         moveDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster
         LimitSpeed();
+
+        switch(currentState){
+            case PlayerState.Walking:
+                moveSpeed = baseMoveSpeed;
+                if(enabledSprinting && !enabledCrouching)
+                    currentState = PlayerState.Running;
+                else if(enabledCrouching){
+                    currentState = PlayerState.Crouching;
+                    }
+                break;
+            case PlayerState.Running:
+                moveSpeed = baseMoveSpeed + addedSprintSpeed;
+                if(enabledCrouching){
+                    enabledSprinting = false;
+                    currentState = PlayerState.Crouching;
+                }else if(!enabledSprinting && !enabledCrouching)             
+                    currentState = PlayerState.Walking;
+                break;
+            case PlayerState.Crouching:
+                moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
+                if(enabledSprinting){
+                    enabledCrouching = false;
+                    currentState = PlayerState.Running;
+                }else if(!enabledCrouching && !enabledSprinting)
+                    currentState = PlayerState.Walking;
+                break;
+            case PlayerState.Hiding:
+                break;
+            default:
+                break;
+        }
+
+        //updating stats for debugging. get rid of or need bool to turn this off because it does take resources
+        if(canDebug){
+            playerDebugScriptable.playerSpeed = moveSpeed;
+            playerDebugScriptable.playerVelocity = playerRb.linearVelocity;
+            onUpdateStats?.Invoke(playerDebugScriptable);
+        }
     }
 
     private void LimitSpeed(){
@@ -111,5 +182,9 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+    }
+
+    private void OnDestroy() {
+        DisplayPlayerProperties.onEnableDebugging -= EnableDebugging;
     }
 }

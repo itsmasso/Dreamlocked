@@ -126,7 +126,7 @@ public class PlayerMovement : MonoBehaviour
         switch(currentState){
             case PlayerState.Walking:
                 moveSpeed = baseMoveSpeed;
-                if(enabledSprinting && !enabledCrouching)
+                if(enabledSprinting)
                     currentState = PlayerState.Running;
                 else if(enabledCrouching){
                     currentState = PlayerState.Crouching;
@@ -137,15 +137,16 @@ public class PlayerMovement : MonoBehaviour
                 if(enabledCrouching){
                     enabledSprinting = false;
                     currentState = PlayerState.Crouching;
-                }else if(!enabledSprinting && !enabledCrouching)             
+                }else if(!enabledSprinting)             
                     currentState = PlayerState.Walking;
                 break;
             case PlayerState.Crouching:
                 moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
                 if(enabledSprinting){
                     enabledCrouching = false;
+                    onCrouch?.Invoke(false);
                     currentState = PlayerState.Running;
-                }else if(!enabledCrouching && !enabledSprinting)
+                }else if(!enabledCrouching)
                     currentState = PlayerState.Walking;
                 break;
             case PlayerState.Hiding:

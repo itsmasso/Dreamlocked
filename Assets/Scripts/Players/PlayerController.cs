@@ -1,0 +1,204 @@
+using UnityEngine;
+using FishNet.Object;
+using Unity.Cinemachine;
+using UnityEngine.InputSystem;
+using System;
+
+using System.Collections;
+
+public enum PlayerState
+{
+	Walking,
+	Running,
+	Crouching,
+	Hiding
+}
+public class PlayerController : NetworkBehaviour
+{
+ 	[SerializeField] private PlayerState currentState;
+
+	[Header("Initialize")]
+	[SerializeField] private CharacterController characterController;
+	[SerializeField] private PlayerScriptable playerScriptableObj;
+	
+	[Header("Camera")]
+	[SerializeField] private Transform headPosition;
+	private float targetCamHeight;
+	private float currentCamHeight;
+	private float cameraSmoothDampVelocity = 0f;
+	private CinemachineCamera cmCam;
+
+	[Header("Movement")]
+	private float baseMoveSpeed;
+	private float moveSpeed;
+	private Vector2 inputDir; 
+	private Vector3 smoothedDirection;
+	private Vector3 playerVelocity;
+	private Vector3 smoothDampVelocity = Vector3.zero;
+	[SerializeField] private float moveSmoothTime = 0.1f;
+	[SerializeField] private float gravity = -15f;
+
+	[Header("Sprinting")]
+	[SerializeField] private float addedSprintSpeed;
+	private bool enabledSprinting;
+
+	[Header("Crouching")]
+	[SerializeField] private float standHeight;
+	[SerializeField] private float crouchHeight = 0.6f;
+	[SerializeField] private float crouchSpeedMultiplier;
+	[SerializeField] private float crouchSmoothTime = 5f;
+	private bool enabledCrouching;
+	[Header("Jump")]
+	[SerializeField] private float jumpHeight;
+	[SerializeField] private float airResistanceMultiplier;
+	[Header("Ground Check")]
+	[SerializeField] private Transform groundCheckTransform;
+	[SerializeField] private LayerMask groundCheckLayer;
+	private bool isGrounded;
+	
+	public override void OnStartClient()
+	{
+		base.OnStartClient();
+		if(base.IsOwner)
+		{
+			cmCam = FindFirstObjectByType<CinemachineCamera>();
+			if(cmCam != null)
+			{
+				cmCam.Follow = headPosition;
+			}
+		}
+		else
+		{
+			gameObject.GetComponent<PlayerInput>().enabled = false;
+			this.enabled = false;
+		}
+	}
+
+	void Start()
+	{
+		Cursor.lockState = CursorLockMode.Locked;
+		baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
+		moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
+		targetCamHeight = standHeight;
+
+		//setting booleans
+		enabledCrouching = false;
+		enabledSprinting = false;
+
+
+		//initializing player rigidbody component
+		characterController = GetComponent<CharacterController>();
+	}
+
+
+	public void OnMove(InputAction.CallbackContext ctx)
+	{
+		inputDir = ctx.ReadValue<Vector2>(); //getting the player's input values. example: input A returns (-1, 0)
+	}
+	
+	public void OnCrouch(InputAction.CallbackContext ctx)
+	{
+		//later probably add a way to switch between toggle to crouch and hold to crouch (for now its toggle to crouch)
+		if(ctx.performed && !enabledCrouching && isGrounded)
+		{
+			targetCamHeight = crouchHeight;
+			enabledCrouching = true;
+		}else if(ctx.performed && enabledCrouching && isGrounded)
+		{
+			targetCamHeight = standHeight;
+			enabledCrouching = false;   
+		}
+	}
+
+	public void OnSprint(InputAction.CallbackContext ctx)
+	{
+		//later probably add a limit to the spring and/or stamina bar
+		if(ctx.performed && !enabledSprinting && isGrounded)
+			enabledSprinting = true;
+		
+		if(ctx.canceled && enabledSprinting)
+			enabledSprinting = false;
+		
+	}
+
+	public void OnJump(InputAction.CallbackContext ctx)
+	{
+		if(isGrounded && ctx.performed)
+		{
+			playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+		}
+	}
+	
+	private void CrouchFunctionality()
+	{
+		currentCamHeight = Mathf.SmoothDamp(currentCamHeight, targetCamHeight, ref cameraSmoothDampVelocity, crouchSmoothTime * Time.deltaTime);
+		Vector3 newCamPosition = headPosition.localPosition;
+		newCamPosition.y = currentCamHeight;
+		headPosition.localPosition = newCamPosition;
+	}
+	
+	void Update()
+	{
+		//checking to see if sphere collider is touching the ground to determine if player is grounded or not
+		isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
+		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
+		moveDir.y = 0;
+		Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
+		smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
+		// Apply gravity
+		if(!isGrounded)
+			playerVelocity.y += gravity * Time.deltaTime;
+			
+		characterController.Move(playerVelocity * Time.deltaTime);
+		
+		if(isGrounded)
+			characterController.Move(smoothedDirection * moveSpeed * Time.deltaTime);	
+		else
+			characterController.Move(smoothedDirection * moveSpeed * airResistanceMultiplier * Time.deltaTime);	
+			
+		CrouchFunctionality();
+		
+		switch(currentState)
+		{
+			case PlayerState.Walking:
+				moveSpeed = baseMoveSpeed;
+				if(enabledSprinting)
+					currentState = PlayerState.Running;
+				else if(enabledCrouching)
+				{
+					currentState = PlayerState.Crouching;
+				}
+				break;
+			case PlayerState.Running:
+				moveSpeed = baseMoveSpeed + addedSprintSpeed;
+				if(enabledCrouching)
+				{
+					enabledSprinting = false;
+					targetCamHeight = crouchHeight;
+					currentState = PlayerState.Crouching;
+				}
+				else if(!enabledSprinting)             
+					currentState = PlayerState.Walking;
+				break;
+			case PlayerState.Crouching:
+					
+				moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
+				if(enabledSprinting)
+				{
+					enabledCrouching = false;
+					targetCamHeight = standHeight;
+					currentState = PlayerState.Running;
+				}
+				else if(!enabledCrouching)
+					currentState = PlayerState.Walking;
+				break;
+			case PlayerState.Hiding:
+				break;
+			default:
+				break;
+		}
+	
+	}
+
+
+}

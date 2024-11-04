@@ -1,11 +1,13 @@
 
 using System;
 using System.Collections;
+using FishNet.Object;
+using Unity.Cinemachine;
 
 using UnityEngine;
-
 using UnityEngine.InputSystem;
 
+/*
 public enum PlayerState
 {
 	Walking,
@@ -13,15 +15,22 @@ public enum PlayerState
 	Crouching,
 	Hiding
 }
-
+*/
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 {
 	private PlayerState currentState;
 
 	[Header("Initialize")]
 	[SerializeField] private Rigidbody playerRb;
 	[SerializeField] private PlayerScriptable playerScriptableObj;
+	
+	[Header("Camera")]
+	[SerializeField] private Transform headPosition;
+	private float targetCamHeight;
+	private float currentCamHeight;
+	private float velocity = 0f;
+	private CinemachineCamera cmCam;
 
 	[Header("Movement")]
 	private float baseMoveSpeed;
@@ -29,16 +38,18 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private float groundDrag; //adding drag to movement so player is not slippery on the ground
 	private Vector2 inputDir; 
 	private Vector3 moveDirection;
+	[SerializeField] private float velocityReductionFactor = 0.5f;
 
 	[Header("Sprinting")]
 	[SerializeField] private float addedSprintSpeed;
 	private bool enabledSprinting;
 
 	[Header("Crouching")]
+	[SerializeField] private float standHeight;
+	[SerializeField] private float crouchHeight = 0.6f;
 	[SerializeField] private float crouchSpeedMultiplier;
+	[SerializeField] private float crouchSmoothTime = 5f;
 	private bool enabledCrouching;
-	public static event Action<bool> onCrouch;
-
 	[Header("Jump")]
 	[SerializeField] private float jumpForce;
 	[SerializeField] private float fallForce;
@@ -50,16 +61,35 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	private bool isGrounded;
-
+	
 	[Header("Debugging Properties")]
 	[SerializeField] private PlayerDebugStats playerDebugScriptable;
 	public static event Action<PlayerDebugStats> onUpdateStats; 
 	[SerializeField] private bool canDebug;
+	public override void OnStartClient()
+	{
+		base.OnStartClient();
+		if(base.IsOwner)
+		{
+			cmCam = FindFirstObjectByType<CinemachineCamera>();
+			if(cmCam != null)
+			{
+				cmCam.Follow = headPosition;
+			}
+		}
+		else
+		{
+			gameObject.GetComponent<PlayerInput>().enabled = false;
+			this.enabled = false;
+		}
+	}
 
 	void Start()
 	{
+		Cursor.lockState = CursorLockMode.Locked;
 		baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
 		moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
+		targetCamHeight = standHeight;
 
 		//setting booleans
 		enabledCrouching = false;
@@ -78,22 +108,47 @@ public class PlayerMovement : MonoBehaviour
 	{
 		canDebug = enableDebugging;
 	}
+	
+	public void OnCollisionStay(Collision collision)
+	{
+		
+		IPlayerCollision otherPlayer = collision.gameObject.GetComponent<IPlayerCollision>();
+		if(otherPlayer != null)
+		{
+			//reduce velocity when colliding with other players so players cant push each other too much
+			Vector3 directionToPlayer = (transform.position - collision.gameObject.transform.position).normalized;
+			//if dot product is closer to 1, then that means these two vectors are in the same direction, if dot product is 0 then these two vectors are forming a 90 deg angle
+			float dotProduct = Vector3.Dot(playerRb.linearVelocity.normalized, directionToPlayer); 
+			
+			if(dotProduct > 0.5)
+			{	
+				Vector3 playerVelocity = new Vector3(playerRb.linearVelocity.x, 0f, playerRb.linearVelocity.z);
+				playerVelocity /= velocityReductionFactor;
+				playerRb.linearVelocity = new Vector3(playerVelocity.x, playerRb.linearVelocity.y, playerVelocity.z);
+			
+			}
+
+			
+		}
+	}
+	
 
 	public void OnMove(InputAction.CallbackContext ctx)
 	{
 		inputDir = ctx.ReadValue<Vector2>(); //getting the player's input values. example: input A returns (-1, 0)
 	}
+	
 
 	public void OnCrouch(InputAction.CallbackContext ctx)
 	{
 		//later probably add a way to switch between toggle to crouch and hold to crouch (for now its toggle to crouch)
 		if(ctx.performed && !enabledCrouching && isGrounded)
 		{
-			onCrouch?.Invoke(true);
+			targetCamHeight = crouchHeight;
 			enabledCrouching = true;
 		}else if(ctx.performed && enabledCrouching && isGrounded)
 		{
-			onCrouch?.Invoke(false);
+			targetCamHeight = standHeight;
 			enabledCrouching = false;   
 		}
 	}
@@ -125,20 +180,37 @@ public class PlayerMovement : MonoBehaviour
 		yield return new WaitForSeconds(jumpCooldown);
 		canJump = true;
 	}
-
+	
+	private void CalculateMovementDirection()
+	{
+		//Vector3 moveDir = playerCam.transform.right * inputDir.x + playerCam.transform.forward * inputDir.y; 
+		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
+		moveDir.y = 0;
+		moveDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster		
+	}
+	
+	private void ApplyCrouching()
+	{
+		currentCamHeight = Mathf.SmoothDamp(currentCamHeight, targetCamHeight, ref velocity, crouchSmoothTime * Time.deltaTime);
+		Vector3 newCamPosition = headPosition.localPosition;
+		newCamPosition.y = currentCamHeight;
+		headPosition.localPosition = newCamPosition;
+	}
+	
 	void Update()
 	{
 		//checking to see if sphere collider is touching the ground to determine if player is grounded or not
 		isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
-
-		Vector3 moveDir = transform.right * inputDir.x + transform.forward * inputDir.y; //getting direction of movement. Multiplies player's X and Z values by input direction
-		moveDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster
+		CalculateMovementDirection();
 		LimitSpeed();
+		ApplyCrouching();
+		
 
 		switch(currentState)
 		{
 			case PlayerState.Walking:
 				moveSpeed = baseMoveSpeed;
+				//Uncrouch();
 				if(enabledSprinting)
 					currentState = PlayerState.Running;
 				else if(enabledCrouching)
@@ -148,6 +220,7 @@ public class PlayerMovement : MonoBehaviour
 				break;
 			case PlayerState.Running:
 				moveSpeed = baseMoveSpeed + addedSprintSpeed;
+				//Uncrouch();
 				if(enabledCrouching)
 				{
 					enabledSprinting = false;
@@ -157,11 +230,11 @@ public class PlayerMovement : MonoBehaviour
 					currentState = PlayerState.Walking;
 				break;
 			case PlayerState.Crouching:
+					
 				moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
 				if(enabledSprinting)
 				{
 					enabledCrouching = false;
-					onCrouch?.Invoke(false);
 					currentState = PlayerState.Running;
 				}
 				else if(!enabledCrouching)
@@ -180,6 +253,7 @@ public class PlayerMovement : MonoBehaviour
 			playerDebugScriptable.playerVelocity = playerRb.linearVelocity;
 			onUpdateStats?.Invoke(playerDebugScriptable);
 		}
+	
 	}
 
 	private void LimitSpeed()
@@ -215,4 +289,6 @@ public class PlayerMovement : MonoBehaviour
 	{
 		DisplayPlayerProperties.onEnableDebugging -= EnableDebugging;
 	}
+
+
 }

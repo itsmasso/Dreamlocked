@@ -61,11 +61,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	private bool isGrounded;
-	
-	[Header("Debugging Properties")]
-	[SerializeField] private PlayerDebugStats playerDebugScriptable;
-	public static event Action<PlayerDebugStats> onUpdateStats; 
-	[SerializeField] private bool canDebug;
 	public override void OnStartClient()
 	{
 		base.OnStartClient();
@@ -99,16 +94,8 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 		//initializing player rigidbody component
 		playerRb = gameObject.GetComponent<Rigidbody>();
 
-		//subscribe to debugging event
-		DisplayPlayerProperties.onEnableDebugging += EnableDebugging;
-		canDebug = true;
 	}
 
-	private void EnableDebugging(bool enableDebugging)
-	{
-		canDebug = enableDebugging;
-	}
-	
 	public void OnCollisionStay(Collision collision)
 	{
 		
@@ -183,7 +170,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 	
 	private void CalculateMovementDirection()
 	{
-		//Vector3 moveDir = playerCam.transform.right * inputDir.x + playerCam.transform.forward * inputDir.y; 
 		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
 		moveDir.y = 0;
 		moveDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster		
@@ -210,7 +196,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 		{
 			case PlayerState.Walking:
 				moveSpeed = baseMoveSpeed;
-				//Uncrouch();
 				if(enabledSprinting)
 					currentState = PlayerState.Running;
 				else if(enabledCrouching)
@@ -220,7 +205,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 				break;
 			case PlayerState.Running:
 				moveSpeed = baseMoveSpeed + addedSprintSpeed;
-				//Uncrouch();
 				if(enabledCrouching)
 				{
 					enabledSprinting = false;
@@ -244,14 +228,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 				break;
 			default:
 				break;
-		}
-
-		//updating stats for debugging. get rid of or need bool to turn this off because it does take resources
-		if(canDebug)
-		{
-			playerDebugScriptable.playerSpeed = moveSpeed;
-			playerDebugScriptable.playerVelocity = playerRb.linearVelocity;
-			onUpdateStats?.Invoke(playerDebugScriptable);
 		}
 	
 	}
@@ -283,11 +259,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 			}
 		}
 
-	}
-
-	private void OnDestroy() 
-	{
-		DisplayPlayerProperties.onEnableDebugging -= EnableDebugging;
 	}
 
 

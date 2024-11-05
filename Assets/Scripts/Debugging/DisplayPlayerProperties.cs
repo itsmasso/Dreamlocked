@@ -11,7 +11,7 @@ public class DisplayPlayerProperties : MonoBehaviour
 	[SerializeField] private bool debuggingOn;
 	private void Start()
 	{
-		PlayerMovementRB.onUpdateStats += SetPlayerPropertyText;
+		//PlayerMovementRB.onUpdateStats += SetPlayerPropertyText;
 	}
 
 	private void SetPlayerPropertyText(PlayerDebugStats playerStats)
@@ -38,6 +38,6 @@ public class DisplayPlayerProperties : MonoBehaviour
 	}
 	private void OnDestroy() 
 	{
-		PlayerMovementRB.onUpdateStats -= SetPlayerPropertyText;
+		//PlayerMovementRB.onUpdateStats -= SetPlayerPropertyText;
 	}
 }

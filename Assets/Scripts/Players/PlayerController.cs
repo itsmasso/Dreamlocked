@@ -37,6 +37,7 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField, Range(0, 30)] private float frequency = 15f;
 	[SerializeField, Range(10f, 100f)] private float smoothtime = 30.0f;
 	[SerializeField] private float sprintBobMultiplier = 1.5f;
+	[SerializeField] private float headBobVelocityScale;
 	
 	[Header("Movement")]
 	private float baseMoveSpeed;
@@ -155,18 +156,11 @@ public class PlayerController : NetworkBehaviour
 	private void StartHeadBob()
 	{
 		Vector3 pos = Vector3.zero;
+		float headBobSpeedFactor = Mathf.Clamp(Mathf.Pow(moveSpeed * headBobVelocityScale, 0.75f), 0.1f, 2f); //Taking root of speed to make speed factor diminishing
 		
-		//change to make it based on velocity with it being clamped
-		if(enabledSprinting)
-		{
-			pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * frequency * sprintBobMultiplier) * bobAmount * 6f * sprintBobMultiplier, smoothtime * Time.deltaTime);
-			pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * frequency /2f * sprintBobMultiplier) * bobAmount * 0.7f * sprintBobMultiplier, smoothtime * Time.deltaTime);
-		}
-		else
-		{
-			pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * frequency) * bobAmount * 6f, smoothtime * Time.deltaTime);
-			pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * frequency /2f) * bobAmount * 0.7f, smoothtime * Time.deltaTime);
-		}
+		//Debug.Log(headBobSpeedFactor);
+		pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * (frequency * headBobSpeedFactor)) * bobAmount * 6f * headBobSpeedFactor, smoothtime * Time.deltaTime);
+		pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * (frequency /2f * headBobSpeedFactor)) * bobAmount * 0.7f * headBobSpeedFactor, smoothtime * Time.deltaTime);
 		
 		headPosition.localPosition += pos;
 	}
@@ -189,7 +183,7 @@ public class PlayerController : NetworkBehaviour
 	{
 		StopHeadBob();
 		if(camNoiseChannel != null)
-		{		
+		{	
 			if(inputDir == Vector2.zero || !isGrounded)
 			{
 				

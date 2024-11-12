@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3be4e83cd307af4bb5b3e38df6e910d, type: 3}
   m_Name: PlayerScriptable
   m_EditorClassIdentifier: 
-  baseMovementSpeed: 5
+  baseMovementSpeed: 4.5
   health: 100

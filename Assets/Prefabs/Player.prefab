@@ -465,11 +465,12 @@ MonoBehaviour:
   enableHeadBob: 1
   idleBobAmplitude: 0.3
   idleBobFrequency: 0.4
-  bobAmount: 0.0155
-  frequency: 13
+  bobAmount: 0.018
+  frequency: 14
   smoothtime: 45
-  sprintBobMultiplier: 1.4
-  headBobVelocityScale: 0.2
+  verticalBobMultiplier: 10
+  horizontalBobMultiplier: 0.7
+  headBobVelocityChangeScale: 0.2
 --- !u!114 &5310495392972413353
 MonoBehaviour:
   m_ObjectHideFlags: 0

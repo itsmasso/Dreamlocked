@@ -26,8 +26,9 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField, Range(0, 2f)] private float bobAmount = 0.02f; //amplitude
 	[SerializeField, Range(0, 30)] private float frequency = 15f;
 	[SerializeField, Range(10f, 100f)] private float smoothtime = 30.0f;
-	[SerializeField] private float sprintBobMultiplier = 1.5f;
-	[SerializeField] private float headBobVelocityScale;
+	[SerializeField, Range(5f, 20f)] private float verticalBobMultiplier = 10f;
+	[SerializeField, Range(0.1f, 5f)] private float horizontalBobMultiplier = 0.7f;
+	[SerializeField] private float headBobVelocityChangeScale;
 	
 
 	public override void OnStartClient()
@@ -66,11 +67,11 @@ public class PlayerCamera : NetworkBehaviour
 	private void StartHeadBob()
 	{
 		Vector3 pos = Vector3.zero;
-		float headBobSpeedFactor = Mathf.Clamp(Mathf.Pow(playerController.moveSpeed * headBobVelocityScale, 0.75f), 0.1f, 2f); //Taking root of speed to make speed factor diminishing
+		float headBobSpeedFactor = Mathf.Clamp(Mathf.Pow(playerController.moveSpeed * headBobVelocityChangeScale, 0.75f), 0.1f, 2f); //Taking root of speed to make speed factor diminishing
 		
 		//Debug.Log(headBobSpeedFactor);
-		pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * (frequency * headBobSpeedFactor)) * bobAmount * 6f * headBobSpeedFactor, smoothtime * Time.deltaTime);
-		pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * (frequency /2f * headBobSpeedFactor)) * bobAmount * 0.7f * headBobSpeedFactor, smoothtime * Time.deltaTime);
+		pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * (frequency * headBobSpeedFactor)) * bobAmount * verticalBobMultiplier * headBobSpeedFactor, smoothtime * Time.deltaTime);
+		pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * (frequency /2f * headBobSpeedFactor)) * bobAmount * horizontalBobMultiplier * headBobSpeedFactor, smoothtime * Time.deltaTime);
 		
 		camFollowPivot.localPosition += pos;
 	}

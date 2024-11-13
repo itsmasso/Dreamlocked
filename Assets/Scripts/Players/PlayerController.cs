@@ -3,6 +3,7 @@ using FishNet.Object;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using System;
+using UnityEngine.TextCore.Text;
 
 
 
@@ -22,27 +23,15 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private PlayerScriptable playerScriptableObj;
 	
 	[Header("Camera")]
-	[SerializeField] private Transform headPosition;
-	private Vector3 headOriginalPosition;
+	[SerializeField] private Transform camFollowPivot;
 	private float targetCamHeight;
 	private float currentCamHeight;
 	private float cameraSmoothDampVelocity = 0f;
-	private CinemachineCamera cmCam;
 
-	[Header("Head Bob")]
-	private CinemachineBasicMultiChannelPerlin camNoiseChannel;
-	[SerializeField] private bool enableHeadBob = true;
-	[SerializeField] private float idleBobAmplitude = 0.2f, idleBobFrequency = 0.4f;
-	[SerializeField, Range(0, 2f)] private float bobAmount = 0.02f; //amplitude
-	[SerializeField, Range(0, 30)] private float frequency = 15f;
-	[SerializeField, Range(10f, 100f)] private float smoothtime = 30.0f;
-	[SerializeField] private float sprintBobMultiplier = 1.5f;
-	[SerializeField] private float headBobVelocityScale;
-	
 	[Header("Movement")]
 	private float baseMoveSpeed;
-	private float moveSpeed;
-	private Vector2 inputDir; 
+	public float moveSpeed;
+	public Vector2 inputDir; 
 	private Vector3 smoothedDirection;
 	private Vector3 playerVelocity;
 	private Vector3 smoothDampVelocity = Vector3.zero;
@@ -66,23 +55,18 @@ public class PlayerController : NetworkBehaviour
 	[Header("Ground Check")]
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
-	private bool isGrounded;
+	public bool isGrounded;
 	
 	public override void OnStartClient()
 	{
 		base.OnStartClient();
 		if(base.IsOwner)
 		{
-			cmCam = FindFirstObjectByType<CinemachineCamera>();
-			camNoiseChannel = cmCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
-			
-			if(cmCam != null)
-			{
-				cmCam.Follow = headPosition;
-			}
+
 		}
 		else
 		{
+			gameObject.GetComponent<CharacterController>().enabled = false;
 			gameObject.GetComponent<PlayerInput>().enabled = false;
 			gameObject.GetComponent<PlayerController>().enabled = false;
 			
@@ -91,11 +75,10 @@ public class PlayerController : NetworkBehaviour
 
 	void Start()
 	{
-		Cursor.lockState = CursorLockMode.Locked;
+
 		baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
 		moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
 		targetCamHeight = standHeight;
-		headOriginalPosition = headPosition.localPosition;
 		
 		//setting booleans
 		enabledCrouching = false;
@@ -148,62 +131,16 @@ public class PlayerController : NetworkBehaviour
 	private void CrouchFunctionality()
 	{
 		currentCamHeight = Mathf.SmoothDamp(currentCamHeight, targetCamHeight, ref cameraSmoothDampVelocity, crouchSmoothTime * Time.deltaTime);
-		Vector3 newCamPosition = headPosition.localPosition;
+		Vector3 newCamPosition = camFollowPivot.localPosition;
 		newCamPosition.y = currentCamHeight;
-		headPosition.localPosition = newCamPosition;
-	}
-	
-	private void StartHeadBob()
-	{
-		Vector3 pos = Vector3.zero;
-		float headBobSpeedFactor = Mathf.Clamp(Mathf.Pow(moveSpeed * headBobVelocityScale, 0.75f), 0.1f, 2f); //Taking root of speed to make speed factor diminishing
-		
-		//Debug.Log(headBobSpeedFactor);
-		pos.y += Mathf.Lerp(pos.y, Mathf.Sin(Time.time * (frequency * headBobSpeedFactor)) * bobAmount * 6f * headBobSpeedFactor, smoothtime * Time.deltaTime);
-		pos.x += Mathf.Lerp(pos.x, Mathf.Cos(Time.time * (frequency /2f * headBobSpeedFactor)) * bobAmount * 0.7f * headBobSpeedFactor, smoothtime * Time.deltaTime);
-		
-		headPosition.localPosition += pos;
-	}
-	
-	private void StopHeadBob()
-	{
-		if(headPosition.localPosition == headOriginalPosition) return;
-		headPosition.localPosition = Vector3.Lerp(headPosition.localPosition, headOriginalPosition, 1 * Time.deltaTime);
-	}
-	
-	private void StopHeadSway()
-	{
-		if(camNoiseChannel.AmplitudeGain == 0 || camNoiseChannel.FrequencyGain == 0) return;
-		camNoiseChannel.AmplitudeGain = Mathf.Lerp(camNoiseChannel.AmplitudeGain, 0, 1 * Time.deltaTime);
-		camNoiseChannel.FrequencyGain = Mathf.Lerp(camNoiseChannel.FrequencyGain, 0, 1 * Time.deltaTime);
-	}
-	
-	
-	private void HeadBobbing()
-	{
-		StopHeadBob();
-		if(camNoiseChannel != null)
-		{	
-			if(inputDir == Vector2.zero || !isGrounded)
-			{
-				
-				camNoiseChannel.AmplitudeGain = idleBobAmplitude;
-				camNoiseChannel.FrequencyGain = idleBobFrequency;
-
-			}
-			else
-			{
-				StartHeadBob();
-				StopHeadSway();
-			}
-		}
-
+		camFollowPivot.localPosition = newCamPosition;
 	}
 	
 	void Update()
 	{
 		//checking to see if sphere collider is touching the ground to determine if player is grounded or not
 		isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
+		
 		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
 		moveDir.y = 0;
 		Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
@@ -220,7 +157,6 @@ public class PlayerController : NetworkBehaviour
 			characterController.Move(smoothedDirection * moveSpeed * airResistanceMultiplier * Time.deltaTime);	
 			
 		CrouchFunctionality();
-		HeadBobbing();
 		
 		switch(currentState)
 		{

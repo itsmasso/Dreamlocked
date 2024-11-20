@@ -1,7 +1,7 @@
 
 using UnityEngine;
-
-public abstract class InteractableObjectBase : MonoBehaviour, IInteractable
+using FishNet.Object;
+public abstract class InteractableObjectBase : NetworkBehaviour, IInteractable
 {
 	[SerializeField] private Rigidbody objectRB;
 	[SerializeField] private LayerMask groundLayer;
@@ -9,10 +9,10 @@ public abstract class InteractableObjectBase : MonoBehaviour, IInteractable
 	{
 		
 	}
-	public virtual void Interact(GameObject parent)
+	public virtual void Interact(GameObject other)
 	{
 		objectRB.isKinematic = true;
-		transform.parent = parent.transform;
+		transform.parent = other.transform;
 		transform.localPosition = Vector3.zero;
 		transform.localRotation = Quaternion.identity;
 		int holdItemLayer = LayerMask.NameToLayer("ItemHold");

@@ -51,6 +51,7 @@ public class PlayerCamera : NetworkBehaviour
 			camFollowPivot.gameObject.SetActive(false);
 			this.enabled = false;
 		}
+		
 	}
 	
 	void Start()

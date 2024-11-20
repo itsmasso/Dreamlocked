@@ -7,10 +7,11 @@ using System.Collections;
 
 
 
+
 public class PlayerInteractScript : NetworkBehaviour
 {
 	[SerializeField] private float interactRange;
-	[SerializeField] private GameObject itemPosition;
+	public GameObject itemParent;
 	private InteractableObjectBase heldObject;
 	
 	[SerializeField] private bool pressedInteract;
@@ -22,12 +23,13 @@ public class PlayerInteractScript : NetworkBehaviour
 		base.OnStartClient();
 		if(base.IsOwner)
 		{
-			
+			mainCameraPosition = Camera.main.transform;
 		}
 		else
 		{
 			this.enabled = false;
 		}
+		
 	}
 	
 	public void OnInteract(InputAction.CallbackContext ctx)
@@ -44,7 +46,7 @@ public class PlayerInteractScript : NetworkBehaviour
 	{
 		if(ctx.performed && heldObject != null)
 		{
-			heldObject.DropItem();
+			DropObjectServer(heldObject.gameObject);
 			heldObject = null;
 		}
 	}
@@ -58,7 +60,7 @@ public class PlayerInteractScript : NetworkBehaviour
 	void Start()
 	{
 		pressedInteract = false;
-		mainCameraPosition = Camera.main.transform;
+		//mainCameraPosition = Camera.main.transform;
 	}
 	
 	private void PlayerInteract()
@@ -70,17 +72,53 @@ public class PlayerInteractScript : NetworkBehaviour
 			Debug.Log("raycast hit");
 			if(interactable != null && pressedInteract)
 			{
-				interactable.Interact(itemPosition);
-				heldObject = hit.collider.gameObject.GetComponent<InteractableObjectBase>();
+				//turn into switch case later on maybe?
+				
+				//the current interactable is an object that can be picked up
+				InteractableObjectBase interactableObj = hit.collider.gameObject.GetComponent<InteractableObjectBase>();
+				if(interactableObj != null)
+				{
+					ObjectInteractServer(hit.collider.gameObject);
+					heldObject = interactableObj;
+				}
+
 				pressedInteract = false;
 			}
 		}
 		Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 	}
-
-	void Update()
+	
+	[ServerRpc(RequireOwnership = false)]
+	private void ObjectInteractServer(GameObject interactableObj)
 	{
-		PlayerInteract();
+		ObjectInteractObserver(interactableObj);
+	}
+	
+	[ObserversRpc]
+	private void ObjectInteractObserver(GameObject interactableObj)
+	{
+		interactableObj.GetComponent<InteractableObjectBase>().Interact(itemParent);
+	}
+	
+	[ServerRpc(RequireOwnership = false)]
+	private void DropObjectServer(GameObject heldObj)
+	{
+		DropObjectObserver(heldObj);
+	}
+	
+	[ObserversRpc]
+	private void DropObjectObserver(GameObject heldObj)
+	{
+		heldObj.GetComponent<InteractableObjectBase>().DropItem();
+	}
+	
+
+	private void Update()
+	{
+		if(mainCameraPosition != null)
+		{
+			PlayerInteract();
+		}
 		
 	}
 }

@@ -61,7 +61,7 @@ namespace FishNet.Managing.Server
 
             /* Try to iterate all timed observers every half a second.
              * This value will increase as there's more observers or timed conditions. */
-            float timeMultiplier = 1f + (float)((base.NetworkManager.ServerManager.Clients.Count * 0.005f) + (_timedNetworkObservers.Count * 0.0005f));
+            float timeMultiplier = 1f + ((base.NetworkManager.ServerManager.Clients.Count * 0.005f) + (_timedNetworkObservers.Count * 0.0005f));
             //Check cap this way for readability.
             float completionTime = Mathf.Min((0.5f * timeMultiplier), base.NetworkManager.ObserverManager.MaximumTimedObserversDuration);
             uint completionTicks = base.NetworkManager.TimeManager.TimeToTicks(completionTime, TickRounding.RoundUp);
@@ -174,7 +174,7 @@ namespace FishNet.Managing.Server
         {
             List<NetworkObject> cache = CollectionCaches<NetworkObject>.RetrieveList();
             Spawned.ValuesToList(ref cache);
-            
+
             return cache;
         }
 
@@ -194,7 +194,7 @@ namespace FishNet.Managing.Server
 
                 sortedRootCache.AddOrdered(item);
             }
-            
+
             /* After all root are ordered check
              * their nested. Order nested in segments
              * of each root then insert after the root.
@@ -356,7 +356,7 @@ namespace FishNet.Managing.Server
                 if (_writer.Length > 0)
                 {
                     NetworkManager.TransportManager.SendToClient((byte)Channel.Reliable, _writer.GetArraySegment(), nc);
-                    _writer.Reset();
+                    _writer.Clear();
 
                     foreach (NetworkObject n in nobCache)
                         n.OnSpawnServer(nc);
@@ -373,7 +373,7 @@ namespace FishNet.Managing.Server
         {
             if (ApplicationState.IsQuitting())
                 return;
-            _writer.Reset();
+            _writer.Clear();
 
             conn.UpdateHashGridPositions(!timedOnly);
             //If observer state changed then write changes.

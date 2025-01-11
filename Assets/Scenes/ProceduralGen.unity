@@ -330,15 +330,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19760aad257e1384fbbb65cae4476ce5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: {x: 250, y: 250}
-  roomCount: 65
-  roomMaxSize: {x: 30, y: 30}
-  roomMinSize: {x: 10, y: 10}
+  mapSize: {x: 200, y: 200}
+  mapPadding: 20
+  nodeRadius: 2
+  roomCount: 40
+  roomMaxSize: {x: 24, y: 24}
+  roomMinSize: {x: 12, y: 12}
   roomPrefab: {fileID: 6422846919728686822, guid: d195880fd0dfc4c4f966fd2583ae0b8f, type: 3}
-  spaceBetweenRooms: 5
+  spaceBetweenRooms: 4
   rooms: []
-  maxIteration: 30
-  spawnCycleChance: 0.125
+  maxIteration: 45
+  spawnCycleChance: 0.2
   color: {r: 0, g: 1, b: 0, a: 1}
 --- !u!4 &947442396
 Transform:
@@ -349,7 +351,7 @@ Transform:
   m_GameObject: {fileID: 947442394}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.3500667, y: 0, z: 2.3095915}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -122,7 +122,7 @@ public class Prims_MST
 				new Vector3(edge.vertexU.x, 1, edge.vertexU.y),
 				new Vector3(edge.vertexV.x, 1, edge.vertexV.y),
 				Color.blue,
-				10f
+				100f
 			);
 		}
 		return mstEdges;

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.IO;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
+
 public enum CellType
 {
 	None,
@@ -9,23 +10,19 @@ public enum CellType
 	Hallway,
 	Stairs,
 }
-public class GridPoint
-{
-	public Vector2Int pos;
-	public CellType cellType;
-	public GridPoint(Vector2Int pos, CellType cellType)
-	{
-		this.pos = pos;
-		this.cellType = cellType;
-	}
-}
-
 
 public class RoomGenerator : MonoBehaviour
 {	
+
 	[Header("Map Properties")]
 	[SerializeField] private Vector2Int mapSize;
-	[SerializeField] private List<GridPoint> grid;
+	private Vector3 worldBottomLeft;
+	[SerializeField] private int mapPadding;
+	
+	[Header("Grid Properties")]
+	[SerializeField] private float nodeRadius;
+	private float nodeDiameter;
+	[SerializeField] private Grid2D grid;
 	[Header("Room Properties")]
 	[SerializeField] private int roomCount;
 	[SerializeField] private Vector2Int roomMaxSize, roomMinSize;
@@ -35,36 +32,61 @@ public class RoomGenerator : MonoBehaviour
 	[SerializeField] private int spaceBetweenRooms;
 	[SerializeField] private List<RectInt> rooms;
 	[SerializeField] private int maxIteration = 30;
+
 	
 	private DelaunayTriangulation delaunay;
 	private Prims_MST prims;
 	private HashSet<Prims_MST.Edge> selectedEdges;
 	[Header("Create Path Algorithm (MST/Prims)")]
 	[SerializeField] private float spawnCycleChance = 0.125f;
+	
+	[Header("Astar pathfinding")]
+	private HashSet<Node> hallways;
+	private AStarPathfinder aStarPathFinder;
 
 	[Header("Gizmos Draw")]
 	public Color color = Color.green;
+	private bool finishedGenerating;
 	
 	private void Start()
 	{
+		mapPadding = roomMaxSize.x < roomMaxSize.y ? roomMaxSize.y : roomMaxSize.x;
+		nodeDiameter = nodeRadius*2;
+		spaceBetweenRooms = (int)(Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter);
+		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.forward * mapSize.y/2;
+
 		Generate();
 	}
 	
 	private void Generate()
 	{
-		grid = new List<GridPoint>();
+		finishedGenerating = false;
+		grid = new Grid2D(mapSize, nodeRadius, transform.position);
+		grid.CreateGrid();
 		rooms = new List<RectInt>();
+		hallways  = new HashSet<Node>();
+		aStarPathFinder = new AStarPathfinder(grid);
+		
 		PlaceRooms();
 		Triangulate();
 		CreatePaths();
+		CreateHallways();
+		finishedGenerating = true;
 	}
+	
 	
 	private void PlaceRooms()
 	{
 		for(int i = 0; i < roomCount; i++)
-		{
-			Vector2Int roomPos = new Vector2Int(Random.Range(0, mapSize.x), Random.Range(0, mapSize.y));
-			Vector2Int roomSize = new Vector2Int(Random.Range(roomMinSize.x, roomMaxSize.x + 1), Random.Range(roomMinSize.y, roomMaxSize.y + 1));
+		{		
+			int randomXPos = (int)(Random.Range(Mathf.RoundToInt((worldBottomLeft.x + mapPadding)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.x + mapSize.x - mapPadding)/nodeDiameter)) * nodeDiameter);
+			int randomYPos = (int)(Random.Range(Mathf.RoundToInt((worldBottomLeft.z + mapPadding)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.z + mapSize.y - mapPadding)/nodeDiameter)) * nodeDiameter);
+
+			int randomWidth = (int)(Random.Range(roomMinSize.x/(int)nodeDiameter, roomMaxSize.x /(int)nodeDiameter + 1) * nodeDiameter);
+			int randomHeight = (int)(Random.Range(roomMinSize.y /(int)nodeDiameter, roomMaxSize.y /(int)nodeDiameter + 1) * nodeDiameter);
+
+			Vector2Int roomPos = new Vector2Int(randomXPos, randomYPos);
+			Vector2Int roomSize = new Vector2Int(randomWidth, randomHeight);
 
 			RectInt newRoom = new RectInt(roomPos, roomSize);
 			rooms.Add(newRoom);	
@@ -75,10 +97,12 @@ public class RoomGenerator : MonoBehaviour
 		foreach(RectInt room in rooms)
 		{
 			SpawnRoom(room, roomPrefab);
-			foreach(Vector2Int pos in room.allPositionsWithin)
+			for(int x = 0; x < room.width/nodeDiameter; x++)
 			{
-				GridPoint newGridPoint = new GridPoint(pos, CellType.Room);
-				grid.Add(newGridPoint);
+				for(int y = 0; y < room.height/nodeDiameter; y++)
+				{
+					grid.SetNodeType(new Vector3(room.min.x + (x * nodeDiameter + nodeRadius), 0, room.min.y + (y * nodeDiameter + nodeRadius)), CellType.Room);
+				}
 			}
 		}
 	}
@@ -100,6 +124,7 @@ public class RoomGenerator : MonoBehaviour
 	
 	private void SpaceRooms()
 	{
+	
 		bool allRoomsSeperated = false;
 		int iterations = 0;
 		while(!allRoomsSeperated && iterations < maxIteration)
@@ -123,10 +148,14 @@ public class RoomGenerator : MonoBehaviour
 						allRoomsSeperated = false;
 						//get direction of the two rooms
 						Vector2 direction = (roomA.center - roomB.center).normalized;
-
 						//Move rooms away from each other
-						roomA.position += Vector2Int.RoundToInt(direction);
-						roomB.position -= Vector2Int.RoundToInt(direction); // Move in opposite direction
+						
+						roomA.position += new Vector2Int((int)(Mathf.RoundToInt(direction.x) * nodeDiameter), (int)(Mathf.RoundToInt(direction.y) * nodeDiameter));
+						roomB.position -= new Vector2Int((int)(Mathf.RoundToInt(direction.x) * nodeDiameter), (int)(Mathf.RoundToInt(direction.y) * nodeDiameter)); // Move in opposite direction
+						
+						//clamp positions to make sure rooms stay within bounds
+						roomA.position = new Vector2Int(Mathf.Clamp(roomA.position.x, (int)worldBottomLeft.x + mapPadding, (int)worldBottomLeft.x + mapSize.x - mapPadding), Mathf.Clamp(roomA.position.y, (int)worldBottomLeft.z + mapPadding, (int)worldBottomLeft.z + mapSize.y - mapPadding));
+						roomB.position = new Vector2Int(Mathf.Clamp(roomB.position.x, (int)worldBottomLeft.x + mapPadding, (int)worldBottomLeft.x + mapSize.x - mapPadding), Mathf.Clamp(roomB.position.y, (int)worldBottomLeft.z + mapPadding, (int)worldBottomLeft.z +mapSize.y - mapPadding));
 
 						//Update the rooms in the list
 						rooms[currentRoom] = roomA;
@@ -138,7 +167,24 @@ public class RoomGenerator : MonoBehaviour
 		}
 		if(iterations == maxIteration)
 		{
-			Debug.LogWarning("Max iterations reached! Some rooms may overlap.");
+			Debug.LogWarning("Max iterations reached! Removing overlapped rooms.");
+			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
+			{
+				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
+				{
+					//Skip if comparing the same room
+					if (currentRoom == otherRoom)
+						continue;
+
+					RectInt roomA = rooms[currentRoom];
+					RectInt roomB = rooms[otherRoom];
+
+					if (IsRoomTooClose(roomA, roomB, spaceBetweenRooms))
+					{
+						rooms.Remove(roomB);
+					}
+				}
+			}
 		}
 			
 	}
@@ -192,6 +238,23 @@ public class RoomGenerator : MonoBehaviour
 		
 	}
 	
+	private void CreateHallways()
+	{
+		foreach(Prims_MST.Edge edge in selectedEdges)
+		{
+			List<Node> path = new List<Node>();
+			path = aStarPathFinder.FindPath(new Vector3(edge.vertexU.x, 0, edge.vertexU.y), new Vector3(edge.vertexV.x, 0, edge.vertexV.y));
+			
+			foreach(Node n in path)
+			{
+				hallways.Add(n);
+			}
+			
+		}
+	}
+	
+	
+	
 	private void SpawnRoom(RectInt room, GameObject prefab)
 	{
 		GameObject newRoomObject = Instantiate(prefab, new Vector3(room.xMin + room.width / 2f, 0, room.yMin + room.height / 2f), Quaternion.identity);
@@ -199,19 +262,30 @@ public class RoomGenerator : MonoBehaviour
 	}
 	
 	private void OnDrawGizmos() {
-		Gizmos.color = color;
+		
 
-		if(Application.isPlaying)
+		if(Application.isPlaying && finishedGenerating)
 		{
-			foreach(RectInt room in rooms)
+			if(grid != null)
 			{
-
-				Gizmos.color = Color.red;
-
-				Vector3 center = new Vector3(room.xMin + room.width / 2f, 1 / 2f, room.yMin + room.height / 2f);
-				Vector3 size = new Vector3(room.width, 1, room.height);
-
-				Gizmos.DrawWireCube(center, size);
+				foreach(Node n in grid.grid)
+				{
+					Gizmos.color = color;
+				
+					if(n.cellType == CellType.Room)
+					{
+						Gizmos.color = Color.red;
+					}
+				
+					if(hallways != null)
+					{
+						if(hallways.Contains(n))
+						{
+							Gizmos.color = Color.blue;
+						}
+					}
+					Gizmos.DrawCube(n.pos, Vector3.one * (grid.nodeDiameter-.1f));
+				}
 			}
 		}
 	}

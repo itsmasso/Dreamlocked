@@ -13,6 +13,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 207815
   packageName: 'FishNet: Networking Evolved'
-  packageVersion: 4.5.3R
+  packageVersion: 4.5.6R
   assetPath: Assets/FishNet/Runtime/Utility/LocalTransformTickSmoother.cs
-  uploadId: 704561
+  uploadId: 716045

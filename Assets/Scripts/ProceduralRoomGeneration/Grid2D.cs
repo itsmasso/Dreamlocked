@@ -53,7 +53,8 @@ public class Grid2D
 		for(int x = -1; x <= 1; x++){
 			for(int y = -1; y <= 1; y++)
 			{
-				if(x == 0 && y == 0){
+				//ignores diagonals. ensures only one of the offsets (x or y) is non-zero. This excludes diagonal neighbors, where both x and y are non-zero.
+				if(Mathf.Abs(x) + Mathf.Abs(y) != 1){
 					continue;
 				}
 				int checkX = node.gridX + x;

@@ -1,43 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class AStarPathfinder
 {
 	private Grid2D grid;
+	private Heap<Node> openSet;
+	private HashSet<Node> closedSet;
 	public AStarPathfinder(Grid2D grid)
 	{
 		this.grid = grid;
+		openSet = new Heap<Node>(grid.MaxSize); //set of nodes to be evaluated
+		closedSet = new HashSet<Node>();
 	}
 	
 	public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
 	{
 
-		List<Node> path = new List<Node>();
 		Node startNode = grid.GetNode(startPos);
 		Node targetNode = grid.GetNode(targetPos);
 		
-		List<Node> openSet = new List<Node>(); //set of nodes to be evaluated
-		HashSet<Node> closedSet = new HashSet<Node>(); //set of nodes already evaluated
+		//Heap<Node> openSet = new Heap<Node>(grid.MaxSize); 
+		openSet.Clear();
+		closedSet.Clear();
+		//HashSet<Node> closedSet = new HashSet<Node>(); //set of nodes already evaluated
 		
 		openSet.Add(startNode);
 	
 		while(openSet.Count > 0){
-			Node currentNode = openSet[0];
-			for(int i = 1; i < openSet.Count; i++)
-			{
-				if(openSet[i].fCost < currentNode.fCost || openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost)
-				{
-					currentNode = openSet[i];
-				}
-			}
-			
-			openSet.Remove(currentNode);
+			Node currentNode = openSet.RemoveFirst();
 			closedSet.Add(currentNode);
 			if(currentNode == targetNode)
-			{
-				path = RetracePath(startNode, targetNode);
-				
-				return path;
+			{		
+				return RetracePath(startNode, targetNode);
 			}
 			
 			foreach(Node neighbour in grid.GetNeighbours(currentNode)){
@@ -76,7 +71,7 @@ public class AStarPathfinder
 				
 			}
 		}
-		return path;
+		return null;
 	}
 	
 	private List<Node> RetracePath(Node startNode, Node endNode)

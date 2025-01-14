@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using System.Diagnostics;
 
 public enum CellType
 {
@@ -46,7 +47,6 @@ public class RoomGenerator : MonoBehaviour
 
 	[Header("Gizmos Draw")]
 	public Color color = Color.green;
-	private bool finishedGenerating;
 	
 	private void Start()
 	{
@@ -54,14 +54,16 @@ public class RoomGenerator : MonoBehaviour
 		nodeDiameter = nodeRadius*2;
 		spaceBetweenRooms = (int)(Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter);
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.forward * mapSize.y/2;
-
+		grid = new Grid2D(mapSize, nodeRadius, transform.position);
 		Generate();
 	}
 	
 	private void Generate()
 	{
-		finishedGenerating = false;
-		grid = new Grid2D(mapSize, nodeRadius, transform.position);
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+		
+		
 		grid.CreateGrid();
 		rooms = new List<RectInt>();
 		hallways  = new HashSet<Node>();
@@ -71,7 +73,9 @@ public class RoomGenerator : MonoBehaviour
 		Triangulate();
 		CreatePaths();
 		CreateHallways();
-		finishedGenerating = true;
+		
+		sw.Stop();
+		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 	}
 	
 	
@@ -167,7 +171,8 @@ public class RoomGenerator : MonoBehaviour
 		}
 		if(iterations == maxIteration)
 		{
-			Debug.LogWarning("Max iterations reached! Removing overlapped rooms.");
+			//Debug.LogWarning("Max iterations reached! Removing overlapped rooms.");
+			List<RectInt> roomsToRemove = new List<RectInt>();
 			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
 			{
 				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
@@ -175,15 +180,22 @@ public class RoomGenerator : MonoBehaviour
 					//Skip if comparing the same room
 					if (currentRoom == otherRoom)
 						continue;
-
-					RectInt roomA = rooms[currentRoom];
+					
+					RectInt roomA = rooms[currentRoom];			
 					RectInt roomB = rooms[otherRoom];
 
 					if (IsRoomTooClose(roomA, roomB, spaceBetweenRooms))
 					{
-						rooms.Remove(roomB);
+						if(!roomsToRemove.Contains(roomB))
+						{
+							roomsToRemove.Add(roomB);
+						}
 					}
 				}
+			}
+			foreach(RectInt room in roomsToRemove)
+			{
+				rooms.Remove(room);
 			}
 		}
 			
@@ -228,7 +240,7 @@ public class RoomGenerator : MonoBehaviour
 		//Debug
 		foreach (Prims_MST.Edge edge in selectedEdges)
 		{
-			Debug.DrawLine(
+			UnityEngine.Debug.DrawLine(
 				new Vector3(edge.vertexU.x, 1, edge.vertexU.y),
 				new Vector3(edge.vertexV.x, 1, edge.vertexV.y),
 				Color.blue,
@@ -264,7 +276,7 @@ public class RoomGenerator : MonoBehaviour
 	private void OnDrawGizmos() {
 		
 
-		if(Application.isPlaying && finishedGenerating)
+		if(Application.isPlaying)
 		{
 			if(grid != null)
 			{

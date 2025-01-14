@@ -333,11 +333,11 @@ MonoBehaviour:
   mapSize: {x: 200, y: 200}
   mapPadding: 20
   nodeRadius: 2
-  roomCount: 40
+  roomCount: 33
   roomMaxSize: {x: 24, y: 24}
   roomMinSize: {x: 12, y: 12}
   roomPrefab: {fileID: 6422846919728686822, guid: d195880fd0dfc4c4f966fd2583ae0b8f, type: 3}
-  spaceBetweenRooms: 4
+  spaceBetweenRooms: 12
   rooms: []
   maxIteration: 45
   spawnCycleChance: 0.2

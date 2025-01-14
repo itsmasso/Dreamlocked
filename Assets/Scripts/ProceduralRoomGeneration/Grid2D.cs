@@ -24,6 +24,14 @@ public class Grid2D
 		
 	}
 	
+	public int MaxSize
+	{
+		get
+		{
+			return gridSizeX * gridSizeY;
+		}
+	}
+	
 	public void CreateGrid()
 	{
 		grid = new Node[gridSizeX, gridSizeY];

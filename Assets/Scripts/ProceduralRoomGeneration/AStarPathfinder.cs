@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class AStarPathfinder
 {
-	private Grid2D grid;
+	private Grid3D grid;
 	private Heap<Node> openSet;
 	private HashSet<Node> closedSet;
-	public AStarPathfinder(Grid2D grid)
+	
+	
+	public AStarPathfinder(Grid3D grid)
 	{
 		this.grid = grid;
 		openSet = new Heap<Node>(grid.MaxSize); //set of nodes to be evaluated
@@ -36,18 +38,17 @@ public class AStarPathfinder
 			}
 			
 			foreach(Node neighbour in grid.GetNeighbours(currentNode)){
-				if(closedSet.Contains(neighbour))
+				if(neighbour.cellType == CellType.Room || closedSet.Contains(neighbour))
 				{
 					continue;
 				}
 				
+				if (neighbour.gridY != currentNode.gridY)
+	   				continue;
+				
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
 				
-				if(neighbour.cellType == CellType.Room)
-				{
-					newMovementCostToNeighbour += 10;
-				}
-				else if(neighbour.cellType == CellType.None)
+				if(neighbour.cellType == CellType.None)
 				{
 					newMovementCostToNeighbour += 5;
 				}
@@ -83,7 +84,6 @@ public class AStarPathfinder
 			
 			path.Add(currentNode);
 			currentNode = currentNode.previousNode;
-			currentNode.cellType = CellType.Hallway;
 		}
 		path.Reverse();
 		return path;
@@ -93,12 +93,14 @@ public class AStarPathfinder
 	{
 		int distX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
 		int distY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+		int distZ = Mathf.Abs(nodeA.gridZ - nodeB.gridZ);
 		
-		if(distX > distY)
-		{
-			return 14*distY + 10*(distX-distY);
-		}
-		return 14*distX + 10*(distY-distX);
+		int max = Mathf.Max(distX, Mathf.Max(distY, distZ));
+		int min = Mathf.Min(distX, Mathf.Min(distY, distZ));
+		int mid = distX + distY + distZ - max - min;
+
+		return 14 * min + 10 * mid + 10 * (max - min - mid);
+		
 	
 	}
 

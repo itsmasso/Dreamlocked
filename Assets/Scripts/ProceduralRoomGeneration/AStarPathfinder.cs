@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -16,7 +17,7 @@ public class AStarPathfinder
 		closedSet = new HashSet<Node>();
 	}
 	
-	public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
+	public List<Node> FindPath(Vector3 startPos, Vector3 targetPos, bool ignoreYPositions)
 	{
 
 		Node startNode = grid.GetNode(startPos);
@@ -43,18 +44,22 @@ public class AStarPathfinder
 					continue;
 				}
 				
-				if (neighbour.gridY != currentNode.gridY)
+				if (neighbour.gridY != currentNode.gridY && ignoreYPositions)
 	   				continue;
+
 				
 				int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
 				
-				if(neighbour.cellType == CellType.None)
+				if(ignoreYPositions)
 				{
+					if(neighbour.cellType == CellType.None)
+					{
 					newMovementCostToNeighbour += 5;
-				}
-				else if(neighbour.cellType == CellType.Hallway)
-				{
+					}
+					else if(neighbour.cellType == CellType.Hallway)
+					{
 					newMovementCostToNeighbour += 1;
+					}
 				}
 				
 				if(newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
@@ -65,6 +70,7 @@ public class AStarPathfinder
 					
 					if(!openSet.Contains(neighbour))
 					{
+
 						openSet.Add(neighbour);
 			
 					}

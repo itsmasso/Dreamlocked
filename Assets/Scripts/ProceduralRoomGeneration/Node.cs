@@ -11,6 +11,7 @@ using UnityEngine;
 		public int hCost; //backward cost
 		public Node previousNode;
 		int heapIndex;
+	
 		public Node(CellType cellType, Vector3 pos, int gridX, int gridY, int gridZ)
 		{
 			this.gridX = gridX;
@@ -18,6 +19,7 @@ using UnityEngine;
 			this.gridZ = gridZ;
 			this.cellType = cellType;
 			this.pos = pos;
+			
 		}
 		
 		public int fCost

@@ -13,8 +13,7 @@ public enum CellType
 	Room,
 	Hallway,
 	Stairs,
-	HallwayDoor,
-	StairDoor,
+	Door,
 }
 
 public class RoomGenerator : MonoBehaviour
@@ -27,6 +26,17 @@ public class RoomGenerator : MonoBehaviour
 		Left
 	
 	}
+	
+	public class Room
+	{
+		public BoundsInt bounds;
+		public bool isStairs;
+		public Room(BoundsInt bounds, bool isStairs)
+		{
+			this.bounds = bounds;
+			this.isStairs = isStairs;
+		}
+	}
 
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
@@ -38,16 +48,21 @@ public class RoomGenerator : MonoBehaviour
 	
 	[Header("Grid Properties")]
 	[SerializeField] private float nodeRadius;
-	private float nodeDiameter;
+	private int nodeDiameter;
 	[SerializeField] private Grid3D grid;
+	
+	[Header("Prefab Components")]
+	[SerializeField] private GameObject roomCeilingPrefab, roomFloorPrefab, wallPrefab, doorPrefab;
+	[SerializeField] private float wallThickness,ceilingThickness,floorThickness;
+	
 	[Header("Room Properties")]
-	[SerializeField] private int roomCount;
+	[SerializeField] private int roomsPerFloor;
 	[SerializeField] private Vector3Int roomMaxSize, roomMinSize;
-	[SerializeField] private GameObject roomPrefab;
 	
 	[Header("Spawn Room Algorithm")]
 	[SerializeField] private int spaceBetweenRooms;
-	[SerializeField] private List<BoundsInt> rooms;
+	[SerializeField] private List<Room> rooms;
+	
 	[SerializeField] private int maxIteration = 30;
 
 	
@@ -59,11 +74,11 @@ public class RoomGenerator : MonoBehaviour
 	
 	[Header("Create Hallways (A*)")]
 	private HashSet<Node> hallways;
-	private HashSet<Node> hallwayDoors;
 	private AStarPathfinder hallwayPathFinder;
 	
 	[Header("Stairs")]
-	[SerializeField] private int stairsPerFloor;
+	[SerializeField] private int chanceToSpawnStairs;
+	[SerializeField] private int spawnStairGuarenteedPity;
 
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
@@ -73,10 +88,9 @@ public class RoomGenerator : MonoBehaviour
 	
 	private void Start()
 	{
-		currentFloor++;
-		nodeDiameter = nodeRadius*2;
-		mapSize.y = Mathf.RoundToInt(floorHeight * floors*nodeDiameter);
-		spaceBetweenRooms = (int)(Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter);
+		nodeDiameter = Mathf.RoundToInt(nodeRadius*2);
+		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
+		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		Generate();
@@ -89,86 +103,265 @@ public class RoomGenerator : MonoBehaviour
 		
 		currentFloor = 0;
 		grid.CreateGrid();
-		rooms = new List<BoundsInt>();
+		rooms = new List<Room>();
 		hallwayPathFinder = new AStarPathfinder(grid);
 		hallways  = new HashSet<Node>();
 		
 		
-		while(currentFloor < floors)
-		{
-			List<BoundsInt> roomsInFloor = new List<BoundsInt>();
-			
-			
-			PlaceRooms(roomsInFloor);
-			Triangulate(roomsInFloor);
-			CreatePaths();
-			CreateHallways();
-			currentFloor++;
-		}
-		foreach(BoundsInt room in rooms)
-		{
-			SpawnRoom(room, roomPlaceholder);
-		}
-		//CreateStairs();
-		
+		CreateRooms();
+		MarkRoomsInGrid(rooms);
+		CreateHallways();
+
+		foreach(Room room in rooms)
+			SpawnRoom(room.bounds);
+		/*
+		foreach(Node n in grid.grid)
+			if(n.cellType == CellType.Hallway)
+				SpawnHallways(n, hallwayPlaceholder);
+		*/
 		sw.Stop();
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 	}
 	
-	
-	private void PlaceRooms(List<BoundsInt> roomsInFloor)
+	private Vector3Int GetRandomRoomPosition(int currentFloor)
 	{
+		//calculating min and max based on grid/map size
+		int roomXPos = UnityEngine.Random.Range(Mathf.RoundToInt((worldBottomLeft.x + roomMaxSize.x + nodeDiameter)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.x + mapSize.x - roomMaxSize.x - nodeDiameter)/nodeDiameter)) * nodeDiameter;
+		int roomYPos = (int)worldBottomLeft.y + currentFloor * floorHeight;
+		int roomZPos = UnityEngine.Random.Range(Mathf.RoundToInt((worldBottomLeft.z + roomMaxSize.z + nodeDiameter)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.z + mapSize.z - roomMaxSize.z - nodeDiameter)/nodeDiameter)) * nodeDiameter;
+	
+		//ensure positions snap to grid
+		while(roomXPos % nodeDiameter != 0)
+			roomXPos++;
+		while(roomYPos % nodeDiameter != 0 && roomYPos > 0)
+			roomYPos++;
+		while(roomZPos % nodeDiameter != 0)
+			roomZPos++;
 		
-		for(int i = 0; i < roomCount; i++)
-		{		
-			int randomXPos = (int)(UnityEngine.Random.Range(Mathf.RoundToInt((worldBottomLeft.x + roomMaxSize.x)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.x + mapSize.x - roomMaxSize.x)/nodeDiameter)) * nodeDiameter);
-			int randomZPos = (int)(UnityEngine.Random.Range(Mathf.RoundToInt((worldBottomLeft.z + roomMaxSize.z)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.z + mapSize.z - roomMaxSize.z)/nodeDiameter)) * nodeDiameter);
-			
-			//ensure it snaps to grid
-			while(randomXPos % nodeDiameter != 0)
-				randomXPos++;
-				
-			while(randomZPos % nodeDiameter != 0)
-				randomZPos++;
-			
-			int randomWidth = (int)(UnityEngine.Random.Range(roomMinSize.x/(int)nodeDiameter, roomMaxSize.x /(int)nodeDiameter + 1) * nodeDiameter);
-			int randomHeight = (int)(UnityEngine.Random.Range(roomMinSize.y /(int)nodeDiameter, roomMaxSize.y /(int)nodeDiameter + 1) * nodeDiameter);
-			int randomLength = (int)(UnityEngine.Random.Range(roomMinSize.z /(int)nodeDiameter, roomMaxSize.z /(int)nodeDiameter + 1) * nodeDiameter);
-			
-			if(randomHeight <=0)
-				randomHeight = (int)nodeDiameter;
-				
-			
-			int roomYPos = currentFloor * floorHeight;
-			
-			while(roomYPos % nodeDiameter != 0)
-				roomYPos++;
-			
-			Vector3Int roomPos = new Vector3Int(randomXPos, roomYPos, randomZPos);
-			
-			Vector3Int roomSize = new Vector3Int(randomWidth, randomHeight, randomLength);
+		Vector3Int roomPos = new Vector3Int(roomXPos, roomYPos, roomZPos);
+		
+		return roomPos;
+	}
+	
+	private Vector3Int GetRandomRoomSize()
+	{
+		//picking random room sizes
+		int roomWidth = UnityEngine.Random.Range(roomMinSize.x/nodeDiameter, roomMaxSize.x /nodeDiameter + 1) * nodeDiameter;
+		int roomHeight = UnityEngine.Random.Range(Mathf.Max(roomMinSize.y / nodeDiameter, 1), Mathf.Min(roomMaxSize.y / (nodeDiameter + 1), floorHeight/nodeDiameter)) * nodeDiameter;
+		int roomLength = UnityEngine.Random.Range(roomMinSize.z /nodeDiameter, roomMaxSize.z /nodeDiameter + 1) * nodeDiameter;
 
-			BoundsInt newRoom = new BoundsInt(roomPos, roomSize);
+		//ensure height snaps to grid
+		while(roomHeight % nodeDiameter != 0)
+			roomHeight++;
 			
-			roomsInFloor.Add(newRoom);
-			SpaceRooms(roomsInFloor);
-		}
-		
-		
-		
-		foreach(BoundsInt room in roomsInFloor)
+		Vector3Int roomSize = new Vector3Int(roomWidth, roomHeight, roomLength);	
+		return roomSize;
+	}
+	
+	private void CreateRooms()
+	{
+		for(int floorCount = 0; floorCount < floors; floorCount++)
 		{
-			rooms.Add(room);
-			for(int x = 0; x < room.size.x/nodeDiameter; x++)
-			{
-				for(int y = 0; y < room.size.y/nodeDiameter; y++)
+			int pity = 0;
+			for(int roomCount = 0; roomCount < roomsPerFloor; roomCount++)
+			{	
+				float randomNum = UnityEngine.Random.value;
+				
+				if((randomNum < chanceToSpawnStairs/100f || pity >= spawnStairGuarenteedPity) && floorCount < floors-1)
 				{
-					for(int z = 0; z < room.size.z/nodeDiameter; z++)
+					//spawn stair room
+					//if width is 2 blocks wide, then we want length to be 1 block wide to determine direction of stair room
+					float randomDirection = UnityEngine.Random.Range(1, 3);
+					int roomWidth = Mathf.RoundToInt(randomDirection * nodeDiameter);
+					int roomHeight = Mathf.RoundToInt(2 * nodeDiameter);
+					int roomLength = randomDirection == 1 ? Mathf.RoundToInt(2*nodeDiameter) : Mathf.RoundToInt(nodeDiameter);
+					
+					Vector3Int roomPos = GetRandomRoomPosition(floorCount);
+				
+					Vector3Int roomSize = new Vector3Int(roomWidth, roomHeight, roomLength);
+
+					Room newRoom = new Room(new BoundsInt(roomPos, roomSize), true);
+
+					rooms.Add(newRoom);
+					pity = 0;
+					
+				}
+				else
+				{
+					//spawn normal room
+					pity++;
+					Vector3Int roomPos = GetRandomRoomPosition(floorCount);
+					Vector3Int roomSize = GetRandomRoomSize();	
+				
+					Room newRoom = new Room(new BoundsInt(roomPos, roomSize), false);
+			
+					rooms.Add(newRoom); 
+				}
+				
+				SpaceRooms(rooms);
+			}
+		}
+	}
+	
+	
+	private void MarkRoomsInGrid(List<Room> rooms)
+	{
+		//marking the rooms in the grid
+		foreach(Room room in rooms)
+		{
+			for(int x = 0; x < room.bounds.size.x/nodeDiameter; x++)
+			{
+				for(int y = 0; y < room.bounds.size.y/nodeDiameter; y++)
+				{
+					for(int z = 0; z < room.bounds.size.z/nodeDiameter; z++)
 					{
-						Vector3 nodePos = new Vector3(room.min.x + (x * nodeDiameter + nodeRadius), room.min.y + (y * nodeDiameter + nodeRadius), room.min.z + (z * nodeDiameter + nodeRadius));
-						grid.SetNodeType(nodePos, CellType.Room);
+						Vector3 nodePos = new Vector3(room.bounds.min.x + (x * nodeDiameter + nodeRadius), room.bounds.min.y + (y * nodeDiameter + nodeRadius), room.bounds.min.z + (z * nodeDiameter + nodeRadius));
+						//Check if the room is a stair room	
+						if (room.isStairs)
+						{
+							//Check if the current node position corresponds to a top or bottom corner
+							bool isBottomCorner = x == 0 && z == 0 && y == 0; 
+							bool isTopCorner = x == room.bounds.size.x / nodeDiameter - 1 &&
+										y == room.bounds.size.y / nodeDiameter - 1 &&
+										z == room.bounds.size.z / nodeDiameter - 1;
+
+							if (isBottomCorner)
+							{
+								Vector3 bottomDoorPos;
+								
+								if(room.bounds.size.x < room.bounds.size.z)
+									bottomDoorPos = new Vector3(nodePos.x, nodePos.y, nodePos.z - nodeDiameter);
+								else
+									bottomDoorPos = new Vector3(nodePos.x - nodeDiameter, nodePos.y, nodePos.z);
+									
+								grid.SetNodeType(bottomDoorPos, CellType.Door);
+						
+							}else if(isTopCorner)
+							{
+								Vector3 topDoorPos;
+								
+								if(room.bounds.size.x < room.bounds.size.z)
+									topDoorPos = new Vector3(nodePos.x, nodePos.y, nodePos.z + nodeDiameter);
+								else
+									topDoorPos = new Vector3(nodePos.x + nodeDiameter, nodePos.y, nodePos.z);
+								
+								grid.SetNodeType(topDoorPos, CellType.Door);
+				
+							}
+						}
+
+						//Default to marking the node as part of the room
+						if(grid.GetNode(nodePos).cellType != CellType.Door)
+						{
+							grid.SetNodeType(nodePos, CellType.Room);
+						}
 					}
 				}
+			}
+			
+		}
+		
+		//Mark a random room edge position as a door
+		foreach(Room room in rooms)
+		{
+			if(!room.isStairs)
+			{
+				grid.SetNodeType(GenerateRoomDoorNode(room.bounds).pos, CellType.Door);
+			}
+		}
+
+	}
+	
+	
+	private void SpaceRooms(List<Room> rooms)
+	{
+		bool allRoomsSeperated = false;
+		int iterations = 0;
+		while(!allRoomsSeperated && iterations < maxIteration)
+		{
+			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
+			{
+				allRoomsSeperated = true;
+				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
+				{
+					
+					//skip if comparing the same room
+					if (currentRoom == otherRoom)
+						continue;
+						
+					Room roomA = rooms[currentRoom];
+					Room roomB = rooms[otherRoom];
+
+					//if rooms are too close to each other, adjust their positions
+					if (IsRoomTooClose(roomA.bounds, roomB.bounds, spaceBetweenRooms))
+					{
+						allRoomsSeperated = false;
+						//get direction of the two rooms
+						Vector3 direction = (roomA.bounds.center - roomB.bounds.center).normalized;
+
+						int xMovement = Mathf.RoundToInt(direction.x * nodeDiameter);
+						int zMovement = Mathf.RoundToInt(direction.z * nodeDiameter);
+						
+						//ensure positions snap to grid
+						while(xMovement % nodeDiameter != 0)
+							xMovement++;
+						while(zMovement % nodeDiameter != 0)
+							zMovement++;
+							
+						Vector3Int movement = new Vector3Int(xMovement,0,zMovement);
+						
+						//Move rooms away from each other
+						roomA.bounds.position += movement;
+						roomB.bounds.position -= movement; // Move in opposite direction
+						
+						//clamp positions to make sure rooms stay within bounds
+						roomA.bounds.position = new Vector3Int(
+							Mathf.Clamp(roomA.bounds.position.x, (int)worldBottomLeft.x + nodeDiameter, (int)(worldBottomLeft.x + mapSize.x - roomA.bounds.size.x - nodeDiameter)),
+							roomA.bounds.position.y,
+							Mathf.Clamp(roomA.bounds.position.z, (int)worldBottomLeft.z + nodeDiameter, (int)(worldBottomLeft.z + mapSize.z - roomA.bounds.size.z - nodeDiameter))
+						);
+						roomB.bounds.position = new Vector3Int(
+							Mathf.Clamp(roomB.bounds.position.x, (int)worldBottomLeft.x + nodeDiameter, (int)(worldBottomLeft.x + mapSize.x - roomB.bounds.size.x - nodeDiameter)),
+							roomB.bounds.position.y,
+							Mathf.Clamp(roomB.bounds.position.z, (int)worldBottomLeft.z + nodeDiameter, (int)(worldBottomLeft.z + mapSize.z - roomB.bounds.size.z - nodeDiameter))
+						);
+
+						//Update the rooms in the list
+						rooms[currentRoom] = roomA;
+						rooms[otherRoom] = roomB;
+					}
+				}
+			}
+			iterations++;
+		}
+		if(iterations == maxIteration)
+		{
+			//Debug.LogWarning("Max iterations reached! Removing overlapped rooms.");
+			List<Room> roomsToRemove = new List<Room>();
+			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
+			{
+				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
+				{
+					//Skip if comparing the same room
+					if (currentRoom == otherRoom)
+						continue;
+					
+					Room roomA = rooms[currentRoom];			
+					Room roomB = rooms[otherRoom];
+
+					if (IsRoomTooClose(roomA.bounds, roomB.bounds, spaceBetweenRooms))
+					{
+						if(!roomsToRemove.Contains(roomB))
+						{
+							roomsToRemove.Add(roomB);
+						}
+					}
+				}
+			}
+			
+			foreach(Room room in roomsToRemove)
+			{
+				rooms.Remove(room);
 			}
 		}
 	}
@@ -186,125 +379,43 @@ public class RoomGenerator : MonoBehaviour
 		);
 		
 		bool overlapX = roomA.xMin < expandedRoomB.xMax && roomA.xMax > expandedRoomB.xMin;
+		bool overlapY =  roomA.yMin < expandedRoomB.yMax && roomA.yMax > expandedRoomB.yMin;
 		bool overlapZ = roomA.zMin < expandedRoomB.zMax && roomA.zMax > expandedRoomB.zMin;
 		
-		return overlapX && overlapZ;
+		return overlapX && overlapZ && overlapY;
 	}
 	
-	private void SpaceRooms(List<BoundsInt> rooms)
+	private void CreateHallways()
 	{
-		
-		bool allRoomsSeperated = false;
-		int iterations = 0;
-		while(!allRoomsSeperated && iterations < maxIteration)
+		for(int floorCount = 0; floorCount < floors; floorCount++)
 		{
-			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
-			{
-				allRoomsSeperated = true;
-				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
-				{
-					
-					//skip if comparing the same room
-					if (currentRoom == otherRoom)
-						continue;
-						
-					BoundsInt roomA = rooms[currentRoom];
-					BoundsInt roomB = rooms[otherRoom];
-
-					//if rooms are too close to each other, adjust their positions
-					if (IsRoomTooClose(roomA, roomB, spaceBetweenRooms))
-					{
-						allRoomsSeperated = false;
-						//get direction of the two rooms
-						Vector3 direction = (roomA.center - roomB.center).normalized;
-						
-						int xMovement = Mathf.RoundToInt(direction.x * nodeDiameter);
-						int zMovement = Mathf.RoundToInt(direction.z * nodeDiameter);
-						
-						//ensure positions snap to grid
-						while(xMovement % nodeDiameter != 0)
-							xMovement++;
-						while(zMovement % nodeDiameter != 0)
-							zMovement++;
-							
-						Vector3Int movement = new Vector3Int(
-							xMovement,
-							0,
-							zMovement
-						);
-						
-						//Move rooms away from each other
-						roomA.position += movement;
-						roomB.position -= movement; // Move in opposite direction
-						
-						//clamp positions to make sure rooms stay within bounds
-						roomA.position = new Vector3Int(
-							Mathf.Clamp(roomA.position.x, (int)worldBottomLeft.x, (int)(worldBottomLeft.x + mapSize.x - roomA.size.x)),
-							roomA.position.y,
-							Mathf.Clamp(roomA.position.z, (int)worldBottomLeft.z, (int)(worldBottomLeft.z + mapSize.z - roomA.size.z))
-						);
-						roomB.position = new Vector3Int(
-							Mathf.Clamp(roomB.position.x, (int)worldBottomLeft.x, (int)(worldBottomLeft.x + mapSize.x - roomB.size.x)),
-							roomB.position.y,
-							Mathf.Clamp(roomB.position.z, (int)worldBottomLeft.z, (int)(worldBottomLeft.z + mapSize.z - roomB.size.z))
-						);
-
-						//Update the rooms in the list
-						rooms[currentRoom] = roomA;
-						rooms[otherRoom] = roomB;
-					}
-				}
-			}
-			iterations++;
+			Triangulate(floorCount);
+			CreatePaths(floorCount);
+			PathfindHallways(floorCount);
 		}
-		if(iterations == maxIteration)
-		{
-			//Debug.LogWarning("Max iterations reached! Removing overlapped rooms.");
-			List<BoundsInt> roomsToRemove = new List<BoundsInt>();
-			for (int currentRoom = 0; currentRoom < rooms.Count; currentRoom++)
-			{
-				for (int otherRoom = 0; otherRoom < rooms.Count; otherRoom++)
-				{
-					//Skip if comparing the same room
-					if (currentRoom == otherRoom)
-						continue;
-					
-					BoundsInt roomA = rooms[currentRoom];			
-					BoundsInt roomB = rooms[otherRoom];
-
-					if (IsRoomTooClose(roomA, roomB, spaceBetweenRooms))
-					{
-						if(!roomsToRemove.Contains(roomB))
-						{
-							roomsToRemove.Add(roomB);
-						}
-					}
-				}
-			}
-			foreach(BoundsInt room in roomsToRemove)
-			{
-				rooms.Remove(room);
-			}
-		}
-			
 	}
+	
 
-	private void Triangulate(List<BoundsInt> roomsInFloor)
+	private void Triangulate(int currentFloor)
 	{
 		List<Vector2> roomPoints = new List<Vector2>();
-		foreach(BoundsInt room in roomsInFloor)
+		for(int x = 0; x < mapSize.x/nodeDiameter; x++)
 		{
-			Node roomEdge = GetRandomRoomEdgePosition(room);
-			if(roomEdge == null)
-				UnityEngine.Debug.Log("room edge is null");
-		
-			roomPoints.Add(new Vector3(roomEdge.pos.x,roomEdge.pos.z));
+			for(int z = 0; z < mapSize.z/nodeDiameter; z++)
+			{
+				Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.up * (currentFloor * nodeDiameter + nodeRadius) + Vector3.forward * (z * nodeDiameter + nodeRadius);
+			
+				if(grid.GetNode(worldPoint).cellType == CellType.Door)
+				{
+					roomPoints.Add(new Vector2(grid.GetNode(worldPoint).pos.x,grid.GetNode(worldPoint).pos.z));
+				}
+			}
 		}
 		delaunay = new DelaunayTriangulation(roomPoints, new Vector2Int(mapSize.x, mapSize.z));
 		delaunay.Triangulation();
 	}
 	
-	private void CreatePaths()
+	private void CreatePaths(int currentFloor)
 	{
 		//Create list of edges used for prims algorithm class
 		List<Prims_MST.Edge> edges = new List<Prims_MST.Edge>();
@@ -328,13 +439,12 @@ public class RoomGenerator : MonoBehaviour
 				selectedEdges.Add(edge);
 			}
 		}
-		
 		//Debug
 		foreach (Prims_MST.Edge edge in selectedEdges)
 		{
 			UnityEngine.Debug.DrawLine(
-				new Vector3(edge.vertexU.x, currentFloor * floorHeight, edge.vertexU.y),
-				new Vector3(edge.vertexV.x, currentFloor * floorHeight, edge.vertexV.y),
+				new Vector3(edge.vertexU.x, (int)worldBottomLeft.y + currentFloor * floorHeight, edge.vertexU.y),
+				new Vector3(edge.vertexV.x, (int)worldBottomLeft.y + currentFloor * floorHeight, edge.vertexV.y),
 				Color.blue,
 				10f
 			);
@@ -342,92 +452,63 @@ public class RoomGenerator : MonoBehaviour
 		
 	}
 	
-	private void CreateHallways()
+	private void PathfindHallways(int currentFloor)
 	{
 		foreach(Prims_MST.Edge edge in selectedEdges)
 		{
 			List<Node> path = new List<Node>();
-			Vector3 hallwayDoorA = new Vector3(edge.vertexU.x, (currentFloor * floorHeight)+nodeDiameter, edge.vertexU.y);
-			Vector3 hallwayDoorB = new Vector3(edge.vertexV.x, (currentFloor * floorHeight)+nodeDiameter, edge.vertexV.y);
-			grid.SetNodeType(hallwayDoorA, CellType.HallwayDoor);
-			grid.SetNodeType(hallwayDoorB, CellType.HallwayDoor);
+
+			Vector3 hallwayDoorA = new Vector3(edge.vertexU.x, (int)worldBottomLeft.y + (currentFloor * floorHeight) + nodeRadius, edge.vertexU.y);
+			Vector3 hallwayDoorB = new Vector3(edge.vertexV.x, (int)worldBottomLeft.y + (currentFloor * floorHeight)+ nodeRadius, edge.vertexV.y);
+			grid.SetNodeType(hallwayDoorA, CellType.Door);
+			grid.SetNodeType(hallwayDoorB, CellType.Door);
 			
-			path = hallwayPathFinder.FindPath(hallwayDoorA, hallwayDoorB);
+			path = hallwayPathFinder.FindPath(hallwayDoorA, hallwayDoorB, true);
 			
 			foreach(Node n in path)
 			{
-				if(n.cellType != CellType.Room && n.cellType != CellType.HallwayDoor){
+				if(n.cellType != CellType.Room && n.cellType != CellType.Door){
 					grid.SetNodeType(n.pos, CellType.Hallway);
 					hallways.Add(n);
 				}
-	
-				
 			}
-			
 		}
 	}
 	
-	private void CreateStairs()
+	private Node GenerateRoomDoorNode(BoundsInt room)
 	{
-		int stairsPlaced = 0;
-		int iterations= 0;
-		while(stairsPlaced < stairsPerFloor && iterations < 50)
-		{
-			iterations++;
-			BoundsInt randomRoom = rooms[UnityEngine.Random.Range(0, rooms.Count)];
-			Node stairNode = GetRandomRoomEdgePosition(randomRoom);
-			if(stairNode == null)
-				continue;
-			stairNode.cellType = CellType.Stairs;
-			stairsPlaced++;
-			
-		}
-		if(iterations >= 50)
-		{
-			UnityEngine.Debug.Log("Placing stairs reached max iterations!");
-		}
-	}
-	
-	private Node GetRandomRoomEdgePosition(BoundsInt room)
-	{
-		
+		//check which sides of the room have space 
 		List<RoomEdgeDirections> invalidDirections = new List<RoomEdgeDirections>();
-		//if there is no space on right edge
-		if(room.position.x + room.size.x + nodeDiameter >= transform.position.x + mapSize.x/2)
+		
+		if(room.position.x + room.size.x + nodeDiameter >= transform.position.x + mapSize.x/2) //if there is no space on right edge
 			invalidDirections.Add(RoomEdgeDirections.Right);
-		//if there is no space on left edge
-		if(room.position.x - room.size.x - nodeDiameter <= transform.position.x - mapSize.x/2)
+		
+		if(room.position.x - room.size.x - nodeDiameter <= transform.position.x - mapSize.x/2) //if there is no space on left edge
 			invalidDirections.Add(RoomEdgeDirections.Left);
-		//if there is no space on top edge
-		if(room.position.z + room.size.z + nodeDiameter >= transform.position.z + mapSize.z/2)
+		
+		if(room.position.z + room.size.z + nodeDiameter >= transform.position.z + mapSize.z/2) //if there is no space on top edge
 			invalidDirections.Add(RoomEdgeDirections.Top);
-		//if there is no space on bottom edge
-		if(room.position.z - room.size.z - nodeDiameter <= transform.position.z - mapSize.z/2)
+			
+		if(room.position.z - room.size.z - nodeDiameter <= transform.position.z - mapSize.z/2) //if there is no space on bottom edge
 			invalidDirections.Add(RoomEdgeDirections.Bottom);
 		
 		if(GetRandomDirectionExlcuding(out RoomEdgeDirections randomDirection, invalidDirections.ToArray()))
 		{
-			
 			switch(randomDirection)
 			{
 				case RoomEdgeDirections.Top:
-					
-					return grid.GetNode(new Vector3(room.min.x + (UnityEngine.Random.Range(0, (room.size.x/nodeDiameter)-1) * nodeDiameter + nodeRadius), 0, room.max.z - nodeRadius));
+					return grid.GetNode(new Vector3(room.min.x + (UnityEngine.Random.Range(1, (room.size.x/nodeDiameter)-2) * nodeDiameter + nodeRadius), room.min.y + nodeRadius, room.max.z + nodeRadius));
 				case RoomEdgeDirections.Bottom:		
-					return grid.GetNode(new Vector3(room.min.x + (UnityEngine.Random.Range(0, (room.size.x/nodeDiameter)-1) * nodeDiameter + nodeRadius), 0, room.min.z + nodeRadius));
+					return grid.GetNode(new Vector3(room.min.x + (UnityEngine.Random.Range(1, (room.size.x/nodeDiameter)-2) * nodeDiameter + nodeRadius), room.min.y + nodeRadius, room.min.z - nodeRadius));
 				case RoomEdgeDirections.Left:
-					
-					return grid.GetNode(new Vector3(room.min.x + nodeRadius, 0, room.min.z + (UnityEngine.Random.Range(0, (room.size.z/nodeDiameter)-1) * nodeDiameter + nodeRadius)));
+					return grid.GetNode(new Vector3(room.min.x - nodeRadius, room.min.y + nodeRadius, room.min.z + (UnityEngine.Random.Range(1, (room.size.z/nodeDiameter)-2) * nodeDiameter + nodeRadius)));
 				case RoomEdgeDirections.Right:
-					
-					return grid.GetNode(new Vector3(room.max.x - nodeRadius, 0, room.min.z + (UnityEngine.Random.Range(0, (room.size.z/nodeDiameter)-1) * nodeDiameter + nodeRadius)));
+					return grid.GetNode(new Vector3(room.max.x + nodeRadius, room.min.y + nodeRadius, room.min.z + (UnityEngine.Random.Range(1, (room.size.z/nodeDiameter)-2) * nodeDiameter + nodeRadius)));
 				default:
 					break;
 			}
 		}
 		return null;
-		
-		
 	}
 	
 	private bool GetRandomDirectionExlcuding(out RoomEdgeDirections randomDirection, RoomEdgeDirections[] exclude)
@@ -446,15 +527,46 @@ public class RoomGenerator : MonoBehaviour
 		return true;
 	}
 
-	
-	
-	private void SpawnRoom(BoundsInt room, GameObject prefab)
+	private void SpawnRoom(BoundsInt room)
 	{
-		//make sure prefabs of room spawn with no walls and generate walls based on grid cell type
-		GameObject newRoomObject = Instantiate(prefab, new Vector3(room.xMin + room.size.x / 2f, room.yMin + room.size.y / 2f, room.zMin + room.size.z / 2f), Quaternion.identity);
-		newRoomObject.GetComponent<Transform>().localScale = new Vector3(room.size.x, room.size.y, room.size.z);
+		Vector3 ceilingPosition = new Vector3(room.xMin + room.size.x / 2f, room.yMin + room.size.y, room.zMin + room.size.z / 2f);
+		Vector3 floorPosition = new Vector3(room.xMin + room.size.x / 2f, room.yMin, room.zMin + room.size.z / 2f);
+		
+		GameObject ceiling = Instantiate(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
+		GameObject floor = Instantiate(roomFloorPrefab, floorPosition, Quaternion.identity);
+		
+		
+		ceiling.GetComponent<Transform>().localScale = new Vector3(room.size.x, ceilingThickness, room.size.z);
+		floor.GetComponent<Transform>().localScale = new Vector3(room.size.x, floorThickness, room.size.z);
+		
+		for(int x = 0; x < room.size.x/nodeDiameter; x++)
+		{
+			for(int y = 0; y < room.size.y/nodeDiameter; y++)
+			{
+				for(int z = 0; z < room.size.z/nodeDiameter; z++)
+				{
+					Vector3 nodePos = new Vector3(room.min.x + (x * nodeDiameter + nodeRadius), room.min.y + (y * nodeDiameter + nodeRadius), room.min.z + (z * nodeDiameter + nodeRadius));
+					Vector3 wallPosition = nodePos;
+					if(x == 0)
+					{
+						//checking z nodes
+						wallPosition = new Vector3(nodePos.x - nodeRadius - wallThickness / 2f, nodePos.y, nodePos.z);
+						GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+						wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
+					}
+					
+					
+				}
+			}
+		}
+		
 	}
 	
+	private void SpawnHallways(Node node, GameObject prefab)
+	{
+		GameObject newRoomObject = Instantiate(prefab, node.pos, Quaternion.identity);
+		newRoomObject.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, nodeDiameter);
+	}
 	
 	private void OnDrawGizmos() {
 		
@@ -481,7 +593,7 @@ public class RoomGenerator : MonoBehaviour
 					{
 						Gizmos.color = Color.blue;
 					}
-					if(n.cellType == CellType.HallwayDoor)
+					if(n.cellType == CellType.Door)
 					{
 						Gizmos.color = Color.yellow;
 					}

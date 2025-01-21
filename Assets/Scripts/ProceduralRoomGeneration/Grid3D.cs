@@ -37,8 +37,10 @@ public class Grid3D
 	
 	public void CreateGrid()
 	{
+		
 		grid = new Node[gridSizeX, gridSizeY, gridSizeZ];
 		Vector3 worldBottomLeft = gridCenterPos - Vector3.right * gridWorldSize.x/2 - Vector3.up * gridWorldSize.y/2 - Vector3.forward * gridWorldSize.z/2;
+		
 		for(int x = 0; x < gridSizeX; x++)
 		{
 			for(int y = 0; y < gridSizeY; y++)
@@ -46,7 +48,7 @@ public class Grid3D
 				for(int z = 0; z < gridSizeZ; z++)
 				{
 					Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.up * (y * nodeDiameter + nodeRadius) + Vector3.forward * (z * nodeDiameter + nodeRadius);
-					
+
 					CellType cellType = CellType.None;
 					grid[x,y,z] = new Node(cellType, worldPoint, x, y, z);
 					
@@ -56,41 +58,39 @@ public class Grid3D
 		}
 	}
 	
-	public List<Node> GetNeighbours(Node node){
+	public List<Node> GetNeighbours(Node node)
+	{
 		List<Node> neighbours = new List<Node>();
-		for(int x = -1; x <= 1; x++){
-			for(int y = -1; y <= 1; y++)
+
+		
+		int[,] directions = new int[,]
+		{
+			{ 1, 0, 0 },  //Right
+			{ -1, 0, 0 }, //Left
+			{ 0, 1, 0 },  //Up
+			{ 0, -1, 0 }, //Down
+			{ 0, 0, 1 },  //Forward
+			{ 0, 0, -1 }  //Backward
+		};
+
+		for (int i = 0; i < directions.GetLength(0); i++)
+		{
+			int checkX = node.gridX + directions[i, 0];
+			int checkY = node.gridY + directions[i, 1];
+			int checkZ = node.gridZ + directions[i, 2];
+
+			//Check bounds
+			if (checkX >= 0 && checkX < gridSizeX &&
+				checkY >= 0 && checkY < gridSizeY &&
+				checkZ >= 0 && checkZ < gridSizeZ)
 			{
-				for(int z = -1; z <= 1; z++)
-				{
-					//Ignore the node itself
-					if (x == 0 && y == 0 && z == 0)
-					{
-						continue;
-					}
-					//Ignore diagonals (ensures only one offset is non-zero)
-			   	 	if (Mathf.Abs(x) + Mathf.Abs(y) + Mathf.Abs(z) != 1)
-			   	 	{
-						continue;
-					}
-					
-					int checkX = node.gridX + x;
-					int checkY = node.gridY + y;
-					int checkZ = node.gridZ + z;
-					
-					if(checkX >= 0 && checkX < gridSizeX && 
-						checkY >= 0 && checkY < gridSizeY && 
-						checkZ >= 0 && checkZ < gridSizeZ)
-					{
-						neighbours.Add(grid[checkX, checkY, checkZ]);
-					}
-				}
-				
+				neighbours.Add(grid[checkX, checkY, checkZ]);
 			}
 		}
-		
+
 		return neighbours;
 	}
+
 	
 	public Node GetNode(Vector3 worldPosition)
 	{

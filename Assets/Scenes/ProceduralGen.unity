@@ -341,12 +341,12 @@ MonoBehaviour:
   wallThickness: 0.4
   ceilingThickness: 0.4
   floorThickness: 0.4
-  roomsPerFloor: 30
+  roomsPerFloor: 15
   roomMaxSize: {x: 24, y: 8, z: 24}
-  roomMinSize: {x: 12, y: 4, z: 12}
-  spaceBetweenRooms: 12
+  roomMinSize: {x: 20, y: 4, z: 20}
+  spaceBetweenRooms: 8
   maxIteration: 45
-  spawnCycleChance: 0.2
+  spawnCycleChance: 0.8
   chanceToSpawnStairs: 30
   spawnStairGuarenteedPity: 4
   color: {r: 0, g: 1, b: 0, a: 0.53333336}

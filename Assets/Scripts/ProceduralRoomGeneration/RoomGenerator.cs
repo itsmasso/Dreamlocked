@@ -546,13 +546,30 @@ public class RoomGenerator : MonoBehaviour
 				for(int z = 0; z < room.size.z/nodeDiameter; z++)
 				{
 					Vector3 nodePos = new Vector3(room.min.x + (x * nodeDiameter + nodeRadius), room.min.y + (y * nodeDiameter + nodeRadius), room.min.z + (z * nodeDiameter + nodeRadius));
-					Vector3 wallPosition = nodePos;
 					if(x == 0)
 					{
-						//checking z nodes
-						wallPosition = new Vector3(nodePos.x - nodeRadius - wallThickness / 2f, nodePos.y, nodePos.z);
+						//checking z nodes on the left 
+						Vector3 wallPosition = new Vector3(nodePos.x - nodeRadius - wallThickness / 2f, nodePos.y, nodePos.z);
 						GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 						wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
+					}
+					if(z == 0){
+						//checking x nodes on the bottom
+						Vector3 wallPosition = new Vector3(nodePos.x, nodePos.y, nodePos.z - nodeRadius - wallThickness / 2f);
+						GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+						wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
+					}
+					if(x == room.size.x/nodeDiameter-1){
+						//checking x nodes on the right
+						Vector3 wallPosition = new Vector3(nodePos.x + nodeRadius + wallThickness / 2f, nodePos.y, nodePos.z);
+						GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+						wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
+					}
+					if(z == room.size.z/nodeDiameter-1){
+						//checking x nodes on top
+						Vector3 wallPosition = new Vector3(nodePos.x, nodePos.y, nodePos.z + nodeRadius + wallThickness / 2f);
+						GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+						wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
 					}
 					
 					

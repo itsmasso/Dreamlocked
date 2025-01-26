@@ -163,7 +163,7 @@ namespace FishNet.Object
             {
                 if (RuntimeParentNetworkBehaviour != null)
                     return RuntimeParentNetworkBehaviour;
-                else if (InitializedParentNetworkBehaviour != null)
+                if (InitializedParentNetworkBehaviour != null)
                     return InitializedParentNetworkBehaviour;
 
                 return null;
@@ -446,16 +446,18 @@ namespace FishNet.Object
             if (!_initializedValusSet)
                 return;
 
+            /* There is however chance the object can get destroyed before deinitializing
+             * as clientHost. If not clientHost its safe to skip deinitializing again.
+             * But if clientHost, check if the client has deinitialized. If not then do
+             * so now for the client side. */
+            bool exitMethod = false;
+            
             /* If already deinitializing then FishNet is in the process of,
              * or has finished cleaning up this object. */
             //callStopNetwork = (ServerManager.Objects.GetFromPending(ObjectId) == null);
             if (IsDeinitializing)
             {
-                /* There is however chance the object can get destroyed before deinitializing
-                 * as clientHost. If not clientHost its safe to skip deinitializing again.
-                 * But if clientHost, check if the client has deinitialized. If not then do
-                 * so now for the client side. */
-                bool exitMethod = false;
+
                 if (IsHostStarted)
                 {
                     if (!_onStartClientCalled)
@@ -465,18 +467,18 @@ namespace FishNet.Object
                 {
                     exitMethod = true;
                 }
-
-                if (exitMethod)
-                {
-                    NetworkBehaviour_OnDestroy();
-                    return;
-                }
             }
 
             if (Owner.IsValid)
                 Owner.RemoveObject(this);
             if (NetworkObserver != null)
                 NetworkObserver.Deinitialize(destroyed: true);
+            
+            if (exitMethod)
+            {
+                NetworkBehaviour_OnDestroy();
+                return;
+            }
 
             if (NetworkManager != null)
             {
@@ -515,7 +517,10 @@ namespace FishNet.Object
             if (NetworkBehaviours.Count > 0)
             {
                 NetworkBehaviour thisNb = NetworkBehaviours[0];
-                if (RuntimeParentNetworkBehaviour != null)
+                /* A null check must also be run on the RuntimeChildNbs because the collection is stored
+                 * when an object is destroyed, and if the other object OnDestroy runs before this one deinitializes/destroys
+                 * then the collection will be null. */
+                if (RuntimeParentNetworkBehaviour != null && RuntimeParentNetworkBehaviour.NetworkObject.RuntimeChildNetworkBehaviours != null)
                     RuntimeParentNetworkBehaviour.NetworkObject.RuntimeChildNetworkBehaviours.Remove(thisNb);
             }
 

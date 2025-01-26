@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -332,7 +332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapSize: {x: 200, y: 200, z: 200}
   floorHeight: 4
-  floors: 2
+  floors: 4
   nodeRadius: 2
   roomCeilingPrefab: {fileID: 1483525889784960174, guid: 44e4fcffc259eb04783b6ecdbe8c2ee6, type: 3}
   roomFloorPrefab: {fileID: 1483525889784960174, guid: 44e4fcffc259eb04783b6ecdbe8c2ee6, type: 3}
@@ -341,20 +341,23 @@ MonoBehaviour:
   wallThickness: 0.4
   ceilingThickness: 0.4
   floorThickness: 0.4
-  roomsPerFloor: 15
-  roomMaxSize: {x: 24, y: 8, z: 24}
-  roomMinSize: {x: 20, y: 4, z: 20}
+  bedRoomPrefabList:
+  - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
+  - {fileID: 4367447932712270340, guid: 58ae3534c710f6b4a94103ce19c4fcc4, type: 3}
+  roomsPerFloor: 30
   spaceBetweenRooms: 8
+  rooms: []
   maxIteration: 45
   spawnCycleChance: 0.8
+  stairRooms:
+  - {fileID: 3286224633064905065, guid: 4a211cb806fb0c0449b1f73fc319186d, type: 3}
   chanceToSpawnStairs: 30
   spawnStairGuarenteedPity: 4
   color: {r: 0, g: 1, b: 0, a: 0.53333336}
   drawGizmos: 1
   drawAllNodes: 0
-  roomPlaceholder: {fileID: 6422846919728686822, guid: d195880fd0dfc4c4f966fd2583ae0b8f, type: 3}
-  hallwayPlaceholder: {fileID: 6422846919728686822, guid: 70c9ee27c7d341d42a56cb5554bf9e2c, type: 3}
-  doorPlaceholder: {fileID: 6422846919728686822, guid: 724c1e5d8ed00c04a98c9ffda043dbed, type: 3}
+  redMat: {fileID: 2100000, guid: d6dedbe52f0151c458fb824da406e873, type: 2}
+  blueMat: {fileID: 2100000, guid: c95ce2e609a2f5b49849c776a768eb82, type: 2}
 --- !u!4 &947442396
 Transform:
   m_ObjectHideFlags: 0
@@ -388,7 +391,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &1278449939
 AudioListener:
   m_ObjectHideFlags: 0

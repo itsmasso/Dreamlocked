@@ -38,7 +38,7 @@ public class AStarPathfinder
 				return RetracePath(startNode, targetNode);
 			}
 			
-			foreach(Node neighbour in grid.GetNeighbours(currentNode)){
+			foreach(Node neighbour in grid.GetAllNeighbours(currentNode)){
 				if(neighbour.cellType == CellType.Room || closedSet.Contains(neighbour))
 				{
 					continue;

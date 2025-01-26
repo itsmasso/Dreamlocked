@@ -58,7 +58,7 @@ public class Grid3D
 		}
 	}
 	
-	public List<Node> GetNeighbours(Node node)
+	public List<Node> GetAllNeighbours(Node node)
 	{
 		List<Node> neighbours = new List<Node>();
 

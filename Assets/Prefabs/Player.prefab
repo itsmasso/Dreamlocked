@@ -256,7 +256,7 @@ Transform:
   m_GameObject: {fileID: 5868904841335411019}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.66, z: 0.282}
+  m_LocalPosition: {x: 0, y: 0.66, z: 0.358}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -680,6 +680,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
+  _initializedValusSet: 0
   NetworkObserver: {fileID: 0}
   _enablePrediction: 0
   _predictionType: 0
@@ -701,7 +702,8 @@ MonoBehaviour:
   SerializedTransformProperties:
     Position: {x: -0.2902836, y: 0.92, z: -0.32028633}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
-    LocalScale: {x: 1, y: 1, z: 1}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
 --- !u!114 &9050884824598355238
 MonoBehaviour:
   m_ObjectHideFlags: 0

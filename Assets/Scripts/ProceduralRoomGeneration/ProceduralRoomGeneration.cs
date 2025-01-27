@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+
 using UnityEngine;
 using System.Diagnostics;
-using UnityEditor.Timeline;
 using System;
-using Unity.VisualScripting;
+using System.Linq;
+
 
 public enum CellType
 {
@@ -16,7 +15,7 @@ public enum CellType
 	Door,
 }
 
-public class RoomGenerator : MonoBehaviour
+public class ProceduralRoomGeneration : MonoBehaviour
 {	
 	private enum RoomEdgeDirections
 	{
@@ -39,24 +38,28 @@ public class RoomGenerator : MonoBehaviour
 	[SerializeField] private Grid3D grid;
 	
 	[Header("Prefab Components")]
-	[SerializeField] private GameObject roomCeilingPrefab, roomFloorPrefab, wallPrefab, doorPrefab;
-	[SerializeField] private float wallThickness,ceilingThickness,floorThickness;
+	[SerializeField] private GameObject roomCeilingPrefab;
+	[SerializeField] private GameObject roomFloorPrefab;
+	[SerializeField] private GameObject wallPrefab;
+	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
 	
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
+	
 	[Header("Room Properties")]
 	[SerializeField] private int roomsPerFloor;
 	
 	[Header("Spawn Room Algorithm")]
 	[SerializeField] private int spaceBetweenRooms;
-	[SerializeField] private List<GameObject> rooms;
+	public List<GameObject> rooms {get; private set;}
 	
 	[SerializeField] private int maxIteration = 30;
 
-	
+	//Delaunay Triangulation
 	private DelaunayTriangulation delaunay;
+	
+	[Header("Create Path Algorithm (MST/Prims)")]
 	private Prims_MST prims;
 	private HashSet<Prims_MST.Edge> selectedEdges;
-	[Header("Create Path Algorithm (MST/Prims)")]
 	[SerializeField] private float spawnCycleChance = 0.125f;
 	
 	[Header("Create Hallways (A*)")]
@@ -72,19 +75,17 @@ public class RoomGenerator : MonoBehaviour
 	public Color color = new Color(1, 0, 0, 0.1f);
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] private bool drawAllNodes;
-	[SerializeField] private Material redMat, blueMat;
 	
-	private void Start()
+	private void Awake()
 	{
 		nodeDiameter = Mathf.RoundToInt(nodeRadius*2);
 		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
-		Generate();
 	}
 	
-	private void Generate()
+	public void Generate()
 	{
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
@@ -93,7 +94,6 @@ public class RoomGenerator : MonoBehaviour
 		rooms = new List<GameObject>();
 		hallwayPathFinder = new AStarPathfinder(grid);
 		hallways  = new HashSet<Node>();
-		
 		
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
@@ -105,12 +105,15 @@ public class RoomGenerator : MonoBehaviour
 				SpawnHallways(n);
 			if(n.cellType == CellType.Door)
 				SpawnDoorWay(n);
-
 		}
-			
-	
+
 		sw.Stop();
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+	}
+	
+	public Vector3 GetPlayerSpawnPosition(){
+		GameObject room = rooms.FirstOrDefault(r => r.GetComponent<Room>().isStairs == false);
+		return new Vector3(room.transform.position.x, room.transform.position.y + room.GetComponent<Room>().size.y/2, room.transform.position.z);
 	}
 	
 	private Vector3Int GetRandomRoomPosition(int currentFloor, Vector3 size)
@@ -436,16 +439,12 @@ public class RoomGenerator : MonoBehaviour
 		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
 		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
 		
-		ceiling.GetComponent<Renderer>().material = blueMat;
-		floor.GetComponent<Renderer>().material = blueMat;
-		
 		if(grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.Room)
 		{
 			//wall on the left
 			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-			wall.GetComponent<Renderer>().material = blueMat;
 		}
 		
 		if(grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.Room)
@@ -454,7 +453,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-			wall.GetComponent<Renderer>().material = blueMat;
+
 		}
 		
 		if(grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.Room)
@@ -463,7 +462,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-			wall.GetComponent<Renderer>().material = blueMat;
+
 		}
 		
 		if(grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.Room)
@@ -472,7 +471,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-			wall.GetComponent<Renderer>().material = blueMat;
+
 		}
 	}
 	
@@ -487,8 +486,6 @@ public class RoomGenerator : MonoBehaviour
 		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
 		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
 		
-		ceiling.GetComponent<Renderer>().material = blueMat;
-		floor.GetComponent<Renderer>().material = blueMat;
 		
 		if(grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.None)
 		{
@@ -496,7 +493,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-			wall.GetComponent<Renderer>().material = blueMat;
+	
 		}
 		
 		if(grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.None)
@@ -505,7 +502,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-			wall.GetComponent<Renderer>().material = blueMat;
+		
 		}
 		
 		if(grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.None)
@@ -514,7 +511,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-			wall.GetComponent<Renderer>().material = blueMat;
+		
 		}
 		
 		if(grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.None)
@@ -523,7 +520,7 @@ public class RoomGenerator : MonoBehaviour
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-			wall.GetComponent<Renderer>().material = blueMat;
+	
 		}
 
 	}

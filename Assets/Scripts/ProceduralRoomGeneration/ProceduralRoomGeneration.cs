@@ -82,14 +82,14 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
-		grid = new Grid3D(mapSize, nodeRadius, transform.position);
+		
 	}
 	
 	public void Generate()
 	{
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
-		
+		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
 		hallwayPathFinder = new AStarPathfinder(grid);
@@ -163,6 +163,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			
 
 				GameObject room = Instantiate(newRoom, transform.position, Quaternion.Euler(0, chosenAngle, 0));
+				room.transform.SetParent(gameObject.transform);
 				Room roomComponent = room.GetComponent<Room>();
 				room.transform.position = GetRandomRoomPosition(floorCount, roomComponent.size);
 				roomComponent.position = Vector3Int.RoundToInt(room.transform.position);
@@ -194,7 +195,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 					for(int z = 0; z < room.size.z/nodeDiameter; z++)
 					{
 						Vector3 nodePos = new Vector3(room.Min.x + (x * nodeDiameter + nodeRadius), room.Min.y + (y * nodeDiameter + nodeRadius), room.Min.z + (z * nodeDiameter + nodeRadius));
-
+						
 						//Default to marking the node as part of the room
 						if(grid.GetNode(nodePos).cellType != CellType.Door)
 						{
@@ -206,7 +207,6 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			
 		}
 		
-		//Mark a random room edge position as a door
 		foreach(GameObject roomObj in rooms)
 		{
 			Room room = roomObj.GetComponent<Room>();
@@ -412,8 +412,6 @@ public class ProceduralRoomGeneration : MonoBehaviour
 
 			Vector3 hallwayDoorA = new Vector3(edge.vertexU.x, (int)worldBottomLeft.y + (currentFloor * floorHeight) + nodeRadius, edge.vertexU.y);
 			Vector3 hallwayDoorB = new Vector3(edge.vertexV.x, (int)worldBottomLeft.y + (currentFloor * floorHeight)+ nodeRadius, edge.vertexV.y);
-			grid.SetNodeType(hallwayDoorA, CellType.Door);
-			grid.SetNodeType(hallwayDoorB, CellType.Door);
 			
 			path = hallwayPathFinder.FindPath(hallwayDoorA, hallwayDoorB, true);
 			
@@ -436,6 +434,9 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		GameObject ceiling = Instantiate(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
 		GameObject floor = Instantiate(roomFloorPrefab, floorPosition, Quaternion.identity);
 		
+		floor.transform.SetParent(transform);
+		ceiling.transform.SetParent(transform);
+		
 		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
 		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
 		
@@ -444,6 +445,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the left
 			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
 		}
 		
@@ -452,6 +454,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the right
 			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
 
 		}
@@ -461,6 +464,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the top
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
 
 		}
@@ -470,6 +474,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the bottom
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
 
 		}
@@ -483,6 +488,9 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		GameObject ceiling = Instantiate(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
 		GameObject floor = Instantiate(roomFloorPrefab, floorPosition, Quaternion.identity);
 		
+		floor.transform.SetParent(transform);
+		ceiling.transform.SetParent(transform);
+		
 		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
 		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
 		
@@ -492,6 +500,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the left
 			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
 	
 		}
@@ -501,6 +510,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the right
 			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
 		
 		}
@@ -510,6 +520,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the top
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
 		
 		}
@@ -519,6 +530,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			//wall on the bottom
 			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
 			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
+			wall.transform.SetParent(transform);
 			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
 	
 		}

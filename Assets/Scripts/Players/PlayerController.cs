@@ -16,7 +16,7 @@ public enum PlayerState
 }
 public class PlayerController : NetworkBehaviour
 {
- 	[SerializeField] private PlayerState currentState;
+ 	public PlayerState currentState {get; private set;}
 
 	[Header("Initialize")]
 	[SerializeField] private CharacterController characterController;

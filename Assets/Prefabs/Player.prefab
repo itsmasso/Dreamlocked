@@ -256,7 +256,7 @@ Transform:
   m_GameObject: {fileID: 5868904841335411019}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.66, z: 0.358}
+  m_LocalPosition: {x: 0, y: 0.66, z: 0.305}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -424,7 +424,6 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 7330874318991505153}
   _networkObjectCache: {fileID: 7330874318991505153}
-  currentState: 0
   characterController: {fileID: 4619842117627133740}
   playerScriptableObj: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
   camFollowPivot: {fileID: 2601825304741367845}
@@ -459,18 +458,20 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 7330874318991505153}
   _networkObjectCache: {fileID: 0}
+  playerMesh: {fileID: 8885744511735704606}
   itemCamera: {fileID: 971296411582484195}
   camFollowPivot: {fileID: 2601825304741367845}
   itemPivot: {fileID: 2335370017990003819}
-  enableHeadBob: 1
   idleBobAmplitude: 0.3
   idleBobFrequency: 0.4
-  bobAmount: 0.0175
-  frequency: 14
-  smoothtime: 45
-  verticalBobMultiplier: 10
-  horizontalBobMultiplier: 0.7
-  headBobVelocityChangeScale: 0.2
+  walkBobSpeed: 12
+  walkBobAmount: 0.04
+  sprintBobSpeed: 15
+  sprintBobAmount: 0.08
+  crouchBobSpeed: 8
+  crouchBobAmount: 0.02
+  originalCamPos: {x: 0, y: 0, z: 0}
+  bobDuration: 2
 --- !u!114 &5310495392972413353
 MonoBehaviour:
   m_ObjectHideFlags: 0

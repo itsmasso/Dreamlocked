@@ -19,7 +19,6 @@ public class AStarPathfinder
 	
 	public List<Node> FindPath(Vector3 startPos, Vector3 targetPos, bool ignoreYPositions)
 	{
-
 		Node startNode = grid.GetNode(startPos);
 		Node targetNode = grid.GetNode(targetPos);
 		
@@ -32,6 +31,7 @@ public class AStarPathfinder
 	
 		while(openSet.Count > 0){
 			Node currentNode = openSet.RemoveFirst();
+			
 			closedSet.Add(currentNode);
 			if(currentNode == targetNode)
 			{		
@@ -39,6 +39,7 @@ public class AStarPathfinder
 			}
 			
 			foreach(Node neighbour in grid.GetAllNeighbours(currentNode)){
+				
 				if(neighbour.cellType == CellType.Room || closedSet.Contains(neighbour))
 				{
 					continue;

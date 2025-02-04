@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ad70174b079c2f4ebc7931d3dd1af6f, type: 3}
-  m_Name: DefaultPrefabObjects
+  m_Script: {fileID: 11500000, guid: 675298afef7e5ff4d86d7b160c64bd66, type: 3}
+  m_Name: ItemListScriptableObject
   m_EditorClassIdentifier: 
-  _prefabs:
-  - {fileID: 7330874318991505153, guid: c58e4e7fde9f52b4e82288982ef50fd6, type: 3}
-  - {fileID: 2242401469423085175, guid: 60ee2b2a562c1f544b7ac8417cefcef8, type: 3}
+  itemListSO:
+  - {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}

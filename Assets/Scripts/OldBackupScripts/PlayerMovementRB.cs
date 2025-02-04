@@ -1,7 +1,7 @@
 
 using System;
 using System.Collections;
-using FishNet.Object;
+
 using Unity.Cinemachine;
 
 using UnityEngine;
@@ -17,7 +17,7 @@ public enum PlayerState
 }
 */
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
+public class PlayerMovementRB : MonoBehaviour, IPlayerCollision
 {
 	private PlayerState currentState;
 
@@ -61,23 +61,6 @@ public class PlayerMovementRB : NetworkBehaviour, IPlayerCollision
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	private bool isGrounded;
-	public override void OnStartClient()
-	{
-		base.OnStartClient();
-		if(base.IsOwner)
-		{
-			cmCam = FindFirstObjectByType<CinemachineCamera>();
-			if(cmCam != null)
-			{
-				cmCam.Follow = headPosition;
-			}
-		}
-		else
-		{
-			gameObject.GetComponent<PlayerInput>().enabled = false;
-			this.enabled = false;
-		}
-	}
 
 	void Start()
 	{

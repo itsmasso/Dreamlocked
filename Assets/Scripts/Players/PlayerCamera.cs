@@ -1,8 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
-using FishNet.Object;
-using FishNet.Connection;
+using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.Rendering.Universal;
 
@@ -13,7 +12,8 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField] private MeshRenderer playerMesh;
 	[Header("Camera Properties")]
 	private Transform mainCameraPosition;
-	private CinemachineCamera cmCam;
+	[SerializeField] private CinemachineCamera cmCam;
+	[SerializeField] private CinemachinePanTilt cmCamPanTilt;
 	[SerializeField] private Camera itemCamera;
 	[SerializeField] private Transform camFollowPivot;
 	
@@ -32,51 +32,33 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField] private float crouchBobAmount = 0.025f; //how much the camera moves
 	[SerializeField] private Vector3 originalCamPos;
 	private float bobbingTimer;
-	private float movingTimer;
-	[SerializeField] private float bobDuration = 2.0f;
-	
-	
-	
+	private float movingTimer;	
 
-	public override void OnStartClient()
-	{
-		base.OnStartClient();
-		if(base.IsOwner)
-		{
-			cmCam = FindFirstObjectByType<CinemachineCamera>();
-			camNoiseChannel = cmCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
-			playerMesh.enabled = false;
-			if(cmCam != null)
-			{
-				cmCam.Follow = camFollowPivot;
-			}
-			
-		}
-		else
-		{
-			
-			camFollowPivot.gameObject.SetActive(false);
-			playerMesh.enabled = true;
-			this.enabled = false;
-		}
-		
-	}
 	
 	void Start()
 	{
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = false;
-		playerController = gameObject.GetComponent<PlayerController>();
-		Invoke("SetDefaultPos", 1.5f); //maybe make sure to prevent player movement after 1.5 seconds
-		mainCameraPosition = Camera.main.transform;
-		Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
+		if(!IsOwner)
+		{
+			playerMesh.enabled = true;
+			this.enabled = false;
+		}else
+		{
+			cmCam = FindFirstObjectByType<CinemachineCamera>();
+			cmCamPanTilt = cmCam.gameObject.GetComponent<CinemachinePanTilt>();
+			cmCam.Follow = camFollowPivot;
+			camNoiseChannel = cmCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+			playerMesh.enabled = false;
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
+			playerController = gameObject.GetComponent<PlayerController>();
+			originalCamPos = camFollowPivot.localPosition;
+			mainCameraPosition = Camera.main.transform;
+			Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
+		}
+		
 
 	}
-	
-	private void SetDefaultPos()
-	{
-		originalCamPos = camFollowPivot.localPosition;
-	}
+
 
 	private void StartHeadBob()
 	{
@@ -84,7 +66,7 @@ public class PlayerCamera : NetworkBehaviour
 	
 		float bobAmount = playerController.currentState == PlayerState.Crouching ? crouchBobAmount : playerController.currentState == PlayerState.Running ? sprintBobAmount : walkBobAmount;
 		camFollowPivot.localPosition = new Vector3(
-			camFollowPivot.localPosition.x + Mathf.Cos(bobbingTimer/2f) * bobAmount * 0.05f,
+			camFollowPivot.localPosition.x + Mathf.Cos(bobbingTimer/2f) * bobAmount * 0.06f,
 			camFollowPivot.localPosition.y + Mathf.Sin(bobbingTimer) * bobAmount,
 			camFollowPivot.localPosition.z
 		);
@@ -135,9 +117,14 @@ public class PlayerCamera : NetworkBehaviour
 	
 	void LateUpdate()
 	{	
-		itemCamera.transform.rotation = mainCameraPosition.rotation;
-		itemPivot.localRotation = mainCameraPosition.rotation;
-		HeadBobbing();
+		if(cmCam != null)
+		{
+			Quaternion targetRotation = Quaternion.Euler(0, cmCamPanTilt.PanAxis.Value, 0);
+			transform.rotation =  targetRotation;
+			
+			itemCamera.transform.rotation = mainCameraPosition.rotation;
+			HeadBobbing();
+		}
 
 	}
 

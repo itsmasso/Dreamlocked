@@ -1,42 +1,49 @@
 using UnityEngine;
-using FishNet.Object;
+
 
 using UnityEngine.InputSystem;
 using System.Collections;
 
-
+using Unity.Netcode;
 
 
 
 public class PlayerInteractScript : NetworkBehaviour
 {
-	[SerializeField] private float interactRange;
-	public GameObject itemParent;
-	private InteractableObjectBase heldObject;
-	
-	[SerializeField] private bool pressedInteract;
-	[SerializeField] private LayerMask interactableLayer;
 	private Transform mainCameraPosition;
-
-	public override void OnStartClient()
+	
+	[Header("Item Properties")]
+	public GameObject itemParent;
+	public Transform itemPosition;
+	[SerializeField] private ItemListScriptableObject itemSOList;
+	private ItemScriptableObject heldObject;
+	private GameObject currentVisualItem;
+	[Header("Interact Properties")]
+	[SerializeField] private float interactRange;
+	[SerializeField] private LayerMask interactableLayer;
+	private bool pressedInteract;
+	
+	[Header("Drop Item Properties")]
+	[SerializeField] private float throwForce;
+	[SerializeField] private LayerMask groundLayer;
+	
+	
+	void Start()
 	{
-		base.OnStartClient();
-		if(base.IsOwner)
-		{
-			mainCameraPosition = Camera.main.transform;
-		}
-		else
+		if(!IsOwner)
 		{
 			this.enabled = false;
 		}
-		
+		pressedInteract = false;
+		mainCameraPosition = Camera.main.transform;
 	}
 	
 	public void OnInteract(InputAction.CallbackContext ctx)
 	{
 		if(ctx.performed)
 		{
-			pressedInteract = true;		
+			pressedInteract = true;	
+			PlayerInteract();	
 			StartCoroutine(ResetButtonPressed());
 		}
 
@@ -46,8 +53,13 @@ public class PlayerInteractScript : NetworkBehaviour
 	{
 		if(ctx.performed && heldObject != null)
 		{
-			DropObjectServer(heldObject.gameObject);
-			heldObject = null;
+			RaycastHit hit;
+			if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange, groundLayer))
+			{
+				DropItemServerRpc(hit.point, throwForce);
+				
+			}
+			Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 		}
 	}
 	
@@ -57,29 +69,24 @@ public class PlayerInteractScript : NetworkBehaviour
 		pressedInteract = false;
 	}
 	
-	void Start()
-	{
-		pressedInteract = false;
-		//mainCameraPosition = Camera.main.transform;
-	}
-	
+
 	private void PlayerInteract()
 	{
 		RaycastHit hit;
 		if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange, interactableLayer))
 		{
-			IInteractable interactable = hit.collider.gameObject.GetComponent<IInteractable>();
-			Debug.Log("raycast hit");
-			if(interactable != null && pressedInteract)
+			NetworkObject networkObj = hit.collider.GetComponent<NetworkObject>();
+			InteractableItemBase item = networkObj.GetComponent<InteractableItemBase>();
+			
+			if(item != null && pressedInteract)
 			{
 				//turn into switch case later on maybe?
 				
 				//the current interactable is an object that can be picked up
-				InteractableObjectBase interactableObj = hit.collider.gameObject.GetComponent<InteractableObjectBase>();
-				if(interactableObj != null)
+				if(item != null)
 				{
-					ObjectInteractServer(hit.collider.gameObject);
-					heldObject = interactableObj;
+					item.Interact(gameObject.GetComponent<NetworkObject>());
+					
 				}
 
 				pressedInteract = false;
@@ -88,37 +95,29 @@ public class PlayerInteractScript : NetworkBehaviour
 		Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 	}
 	
-	[ServerRpc(RequireOwnership = false)]
-	private void ObjectInteractServer(GameObject interactableObj)
+	[ClientRpc]
+	public void SpawnVisualItemClientRpc(int itemSOIndex)
 	{
-		ObjectInteractObserver(interactableObj);
+		GameObject visualItem = Instantiate(itemSOList.itemListSO[itemSOIndex].visualItemPrefab, itemPosition.position, Quaternion.identity);
+		visualItem.transform.SetParent(itemPosition);
+		currentVisualItem = visualItem;
+		heldObject = itemSOList.itemListSO[itemSOIndex];
 	}
 	
-	[ObserversRpc]
-	private void ObjectInteractObserver(GameObject interactableObj)
+	[ServerRpc]
+	private void DropItemServerRpc(Vector3 dropPosition, float throwForce)
 	{
-		interactableObj.GetComponent<InteractableObjectBase>().Interact(itemParent);
+		GameObject currentItem = Instantiate(heldObject.physicalItemPrefab, itemPosition.position, Quaternion.identity);
+		currentItem.GetComponent<NetworkObject>().Spawn(true);
+		currentItem.GetComponent<InteractableItemBase>().ThrowItem(dropPosition, throwForce);
+		DropItemClientRpc();
 	}
 	
-	[ServerRpc(RequireOwnership = false)]
-	private void DropObjectServer(GameObject heldObj)
+	[ClientRpc]
+	private void DropItemClientRpc()
 	{
-		DropObjectObserver(heldObj);
+		Destroy(currentVisualItem);
+		heldObject = null;
 	}
 	
-	[ObserversRpc]
-	private void DropObjectObserver(GameObject heldObj)
-	{
-		heldObj.GetComponent<InteractableObjectBase>().DropItem();
-	}
-	
-
-	private void Update()
-	{
-		if(mainCameraPosition != null)
-		{
-			PlayerInteract();
-		}
-		
-	}
 }

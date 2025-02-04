@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TestObject : InteractableObjectBase
+public class TestObject : InteractableItemBase
 {
     
 }

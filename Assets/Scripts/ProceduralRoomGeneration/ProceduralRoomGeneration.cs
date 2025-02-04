@@ -25,7 +25,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		Left
 	
 	}
-
+	
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
 	[SerializeField] private int floorHeight;
@@ -84,9 +84,13 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
 		
 	}
-	
-	public void Generate()
+
+
+	public void Generate(int seed)
 	{
+		
+		UnityEngine.Random.InitState(seed);
+		
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
@@ -106,9 +110,10 @@ public class ProceduralRoomGeneration : MonoBehaviour
 			if(n.cellType == CellType.Door)
 				SpawnDoorWay(n);
 		}
-
+		
 		sw.Stop();
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+		
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){

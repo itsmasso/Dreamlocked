@@ -1,11 +1,8 @@
 using UnityEngine;
-using FishNet.Object;
+using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using System;
-using UnityEngine.TextCore.Text;
-
-
 
 public enum PlayerState
 {
@@ -27,6 +24,7 @@ public class PlayerController : NetworkBehaviour
 	private float targetCamHeight;
 	private float currentCamHeight;
 	private float cameraSmoothDampVelocity = 0f;
+	
 
 	[Header("Movement")]
 	private float baseMoveSpeed;
@@ -40,7 +38,6 @@ public class PlayerController : NetworkBehaviour
 
 	[Header("Sprinting")]
 	[SerializeField] private float addedSprintSpeed;
-	public static event Action onSprint;
 	private bool enabledSprinting;
 
 	[Header("Crouching")]
@@ -57,38 +54,32 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
 	
-	public override void OnStartClient()
-	{
-		base.OnStartClient();
-		if(base.IsOwner)
-		{
 
-		}
-		else
+	void Start()
+	{
+		if(!IsOwner)
 		{
 			gameObject.GetComponent<CharacterController>().enabled = false;
 			gameObject.GetComponent<PlayerInput>().enabled = false;
 			gameObject.GetComponent<PlayerController>().enabled = false;
+		}else
+		{
+			baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
+			moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
+			targetCamHeight = standHeight;
 			
+			//setting booleans
+			enabledCrouching = false;
+			enabledSprinting = false;
+
+
+			//initializing player character controller
+			characterController = GetComponent<CharacterController>();
 		}
-	}
-
-	void Start()
-	{
-
-		baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
-		moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
-		targetCamHeight = standHeight;
 		
-		//setting booleans
-		enabledCrouching = false;
-		enabledSprinting = false;
-
-
-		//initializing player character controller
-		characterController = GetComponent<CharacterController>();
+		
 	}
-
+	
 
 	public void OnMove(InputAction.CallbackContext ctx)
 	{
@@ -142,6 +133,9 @@ public class PlayerController : NetworkBehaviour
 		isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
 		
 		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
+		
+		
+		
 		moveDir.y = 0;
 		Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
 		smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
@@ -199,6 +193,5 @@ public class PlayerController : NetworkBehaviour
 		}
 		
 	}
-
 
 }

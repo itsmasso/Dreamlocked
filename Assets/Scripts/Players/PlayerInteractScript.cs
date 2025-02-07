@@ -16,12 +16,13 @@ public class PlayerInteractScript : NetworkBehaviour
 	public GameObject itemParent;
 	public Transform itemPosition;
 	[SerializeField] private ItemListScriptableObject itemSOList;
-	private ItemScriptableObject heldObject;
+	[SerializeField]private ItemScriptableObject heldObject;
 	private GameObject currentVisualItem;
 	[Header("Interact Properties")]
 	[SerializeField] private float interactRange;
+	[SerializeField] private float sphereRadius;
 	[SerializeField] private LayerMask interactableLayer;
-	private bool pressedInteract;
+	[SerializeField] private bool pressedInteract;
 	
 	[Header("Drop Item Properties")]
 	[SerializeField] private float throwForce;
@@ -43,7 +44,6 @@ public class PlayerInteractScript : NetworkBehaviour
 		if(ctx.performed)
 		{
 			pressedInteract = true;	
-			PlayerInteract();	
 			StartCoroutine(ResetButtonPressed());
 		}
 
@@ -53,13 +53,7 @@ public class PlayerInteractScript : NetworkBehaviour
 	{
 		if(ctx.performed && heldObject != null)
 		{
-			RaycastHit hit;
-			if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange, groundLayer))
-			{
-				DropItemServerRpc(hit.point, throwForce);
-				
-			}
-			Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
+			DropItemServerRpc(Camera.main.transform.forward, throwForce);
 		}
 	}
 	
@@ -73,24 +67,22 @@ public class PlayerInteractScript : NetworkBehaviour
 	private void PlayerInteract()
 	{
 		RaycastHit hit;
-		if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange, interactableLayer))
+		if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange))
 		{
-			NetworkObject networkObj = hit.collider.GetComponent<NetworkObject>();
-			InteractableItemBase item = networkObj.GetComponent<InteractableItemBase>();
-			
-			if(item != null && pressedInteract)
-			{
-				//turn into switch case later on maybe?
-				
-				//the current interactable is an object that can be picked up
-				if(item != null)
+			Collider[] hits = Physics.OverlapSphere(hit.point, sphereRadius, interactableLayer);
+			foreach(Collider obj in hits)
+			{	
+				NetworkObject networkObj = obj.gameObject.GetComponent<NetworkObject>();
+				InteractableItemBase item = networkObj.GetComponent<InteractableItemBase>();
+				if(item != null && pressedInteract)
 				{
 					item.Interact(gameObject.GetComponent<NetworkObject>());
-					
+					pressedInteract = false;
 				}
-
-				pressedInteract = false;
 			}
+			
+			
+			
 		}
 		Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 	}
@@ -118,6 +110,10 @@ public class PlayerInteractScript : NetworkBehaviour
 	{
 		Destroy(currentVisualItem);
 		heldObject = null;
+	}
+	
+	private void Update() {
+		PlayerInteract();
 	}
 	
 }

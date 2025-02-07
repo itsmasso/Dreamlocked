@@ -687,11 +687,14 @@ MonoBehaviour:
   itemParent: {fileID: 3888133073890299233}
   itemPosition: {fileID: 4222349174482778473}
   itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
-  interactRange: 4
+  heldObject: {fileID: 0}
+  interactRange: 5
+  sphereRadius: 0.25
   interactableLayer:
     serializedVersion: 2
     m_Bits: 128
-  throwForce: 5
+  pressedInteract: 0
+  throwForce: 2
   groundLayer:
     serializedVersion: 2
     m_Bits: 8

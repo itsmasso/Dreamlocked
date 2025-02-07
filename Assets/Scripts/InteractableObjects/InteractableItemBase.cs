@@ -22,22 +22,21 @@ public abstract class InteractableItemBase : NetworkBehaviour
 		playerNetworkObj.GetComponent<PlayerInteractScript>().SpawnVisualItemClientRpc(GetItemSOIndex(itemScriptableObject));
 	}
 	
-	public virtual void ThrowItem(Vector3 target, float throwForce)
+	public virtual void ThrowItem(Vector3 direction, float throwForce)
 	{
-		ThrowItemServerRpc(target, throwForce);
+		ThrowItemServerRpc(direction, throwForce);
 	}
 	
 	[ServerRpc]
-	protected virtual void ThrowItemServerRpc(Vector3 target, float throwForce)
+	protected virtual void ThrowItemServerRpc(Vector3 direction, float throwForce)
 	{
-		ThrowItemClientRpc(target, throwForce);
+		ThrowItemClientRpc(direction, throwForce);
 	}
 	
 	[ClientRpc]
-	protected virtual void ThrowItemClientRpc(Vector3 target, float throwForce)
+	protected virtual void ThrowItemClientRpc(Vector3 direction, float throwForce)
 	{
-		Vector3 direction = (target - transform.position).normalized;
-		objectRb.AddForce(direction * throwForce, ForceMode.VelocityChange);
+		objectRb.AddForce(direction.normalized * throwForce, ForceMode.VelocityChange);
 		
 	}
 	

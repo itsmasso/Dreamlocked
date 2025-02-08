@@ -72,7 +72,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4446946686609822990}
   - component: {fileID: 971296411582484195}
-  - component: {fileID: 2851091156773715796}
   - component: {fileID: 9008494617695504437}
   m_Layer: 0
   m_Name: HoldCamera
@@ -147,14 +146,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &2851091156773715796
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3917481632484532219}
-  m_Enabled: 1
 --- !u!114 &9008494617695504437
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,11 +268,11 @@ GameObject:
   - component: {fileID: 2565760027855897461}
   - component: {fileID: 4619842117627133740}
   - component: {fileID: 6250510213837658248}
+  - component: {fileID: 1087848884883534804}
   - component: {fileID: 3109504795284010200}
   - component: {fileID: 8281037400485576814}
   - component: {fileID: 5310495392972413353}
   - component: {fileID: 2376784028857367506}
-  - component: {fileID: 3458805656693227312}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -433,6 +424,42 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &1087848884883534804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7062762779246524609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 0
+  AuthorityMode: 1
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 0
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 0
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
 --- !u!114 &3109504795284010200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,7 +716,7 @@ MonoBehaviour:
   itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
   heldObject: {fileID: 0}
   interactRange: 5
-  sphereRadius: 0.25
+  sphereRadius: 0.35
   interactableLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -698,39 +725,3 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
---- !u!114 &3458805656693227312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7062762779246524609}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f712a5b0f7d6ab14cb5c7d48874f5577, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 1
-  AuthorityMode: 1
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 1
-  SyncRotAngleX: 0
-  SyncRotAngleY: 1
-  SyncRotAngleZ: 0
-  SyncScaleX: 0
-  SyncScaleY: 0
-  SyncScaleZ: 0
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
-  SlerpPosition: 0

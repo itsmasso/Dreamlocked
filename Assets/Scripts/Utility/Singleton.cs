@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Unity.Netcode;
 
 /*
 credit: helped from Tarodev architecture video
@@ -30,6 +30,25 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 	}
 
 }
+
+public abstract class NetworkSingleton<T> : NetworkBehaviour where T : NetworkBehaviour
+{
+	public static T Instance { get; private set; }
+
+	protected virtual void Awake()
+	{
+		//if an instance of this singleton already exists, destroy this one. (only one instance of this singleton can exist at a time)
+		if (Instance != null)
+		{
+			Destroy(gameObject);
+			return;
+		}
+
+		Instance = this as T;
+	}
+
+}
+
 
 
 //singleton that won't be destroyed through scene loads. (useful for music that plays during load screens)

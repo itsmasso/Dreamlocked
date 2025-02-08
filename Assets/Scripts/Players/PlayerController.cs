@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using System;
+using System.Collections;
 
 public enum PlayerState
 {
@@ -53,17 +54,38 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
-	
 
+	public override void OnNetworkSpawn()
+	{
+		if(IsOwner)
+		{
+			
+			StartCoroutine(RegisterWithGameManager());
+		}
+	}
+	
+	private IEnumerator RegisterWithGameManager()
+	{
+		// Wait until the GameManager is initialized
+		while (GameManager.Instance == null || !GameManager.Instance.GetComponent<NetworkObject>().IsSpawned)
+		{
+			yield return null;
+		}
+
+		GameManager.Instance.SetPlayerOwnerServerRpc(NetworkObjectId);
+	}
+
+	
 	void Start()
 	{
 		if(!IsOwner)
 		{
 			gameObject.GetComponent<CharacterController>().enabled = false;
 			gameObject.GetComponent<PlayerInput>().enabled = false;
-			gameObject.GetComponent<PlayerController>().enabled = false;
+			
 		}else
 		{
+			
 			baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
 			moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
 			targetCamHeight = standHeight;
@@ -129,67 +151,70 @@ public class PlayerController : NetworkBehaviour
 	
 	void Update()
 	{
-		//checking to see if sphere collider is touching the ground to determine if player is grounded or not
-		isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
-		
-		Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
-		
-		
-		
-		moveDir.y = 0;
-		Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
-		smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
-		// Apply gravity
-		if(!isGrounded)
-			playerVelocity.y += gravity * Time.deltaTime;
-			
-		characterController.Move(playerVelocity * Time.deltaTime);
-		
-		if(isGrounded)
-			characterController.Move(smoothedDirection * moveSpeed * Time.deltaTime);	
-		else
-			characterController.Move(smoothedDirection * moveSpeed * airResistanceMultiplier * Time.deltaTime);	
-			
-		CrouchFunctionality();
-		
-		switch(currentState)
+		if(IsOwner)
 		{
-			case PlayerState.Walking:
-				moveSpeed = baseMoveSpeed;
-				if(enabledSprinting)
-					currentState = PlayerState.Running;
-				else if(enabledCrouching)
-				{
-					currentState = PlayerState.Crouching;
-				}
-				break;
-			case PlayerState.Running:
-				moveSpeed = baseMoveSpeed + addedSprintSpeed;
-				if(enabledCrouching)
-				{
-					enabledSprinting = false;
-					targetCamHeight = crouchHeight;
-					currentState = PlayerState.Crouching;
-				}
-				else if(!enabledSprinting)             
-					currentState = PlayerState.Walking;
-				break;
-			case PlayerState.Crouching:
-					
-				moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
-				if(enabledSprinting)
-				{
-					enabledCrouching = false;
-					targetCamHeight = standHeight;
-					currentState = PlayerState.Running;
-				}
-				else if(!enabledCrouching)
-					currentState = PlayerState.Walking;
-				break;
-			case PlayerState.Hiding:
-				break;
-			default:
-				break;
+			//checking to see if sphere collider is touching the ground to determine if player is grounded or not
+			isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
+			
+			Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
+			
+			
+			
+			moveDir.y = 0;
+			Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
+			smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
+			// Apply gravity
+			if(!isGrounded)
+				playerVelocity.y += gravity * Time.deltaTime;
+				
+			characterController.Move(playerVelocity * Time.deltaTime);
+			
+			if(isGrounded)
+				characterController.Move(smoothedDirection * moveSpeed * Time.deltaTime);	
+			else
+				characterController.Move(smoothedDirection * moveSpeed * airResistanceMultiplier * Time.deltaTime);	
+				
+			CrouchFunctionality();
+			
+			switch(currentState)
+			{
+				case PlayerState.Walking:
+					moveSpeed = baseMoveSpeed;
+					if(enabledSprinting)
+						currentState = PlayerState.Running;
+					else if(enabledCrouching)
+					{
+						currentState = PlayerState.Crouching;
+					}
+					break;
+				case PlayerState.Running:
+					moveSpeed = baseMoveSpeed + addedSprintSpeed;
+					if(enabledCrouching)
+					{
+						enabledSprinting = false;
+						targetCamHeight = crouchHeight;
+						currentState = PlayerState.Crouching;
+					}
+					else if(!enabledSprinting)             
+						currentState = PlayerState.Walking;
+					break;
+				case PlayerState.Crouching:
+						
+					moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
+					if(enabledSprinting)
+					{
+						enabledCrouching = false;
+						targetCamHeight = standHeight;
+						currentState = PlayerState.Running;
+					}
+					else if(!enabledCrouching)
+						currentState = PlayerState.Walking;
+					break;
+				case PlayerState.Hiding:
+					break;
+				default:
+					break;
+			}
 		}
 		
 	}

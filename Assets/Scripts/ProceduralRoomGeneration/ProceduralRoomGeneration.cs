@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Diagnostics;
 using System;
 using System.Linq;
-
+using Unity.Netcode;
 
 public enum CellType
 {
@@ -15,7 +15,7 @@ public enum CellType
 	Door,
 }
 
-public class ProceduralRoomGeneration : MonoBehaviour
+public class ProceduralRoomGeneration : NetworkBehaviour
 {	
 	private enum RoomEdgeDirections
 	{
@@ -25,6 +25,7 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		Left
 	
 	}
+	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
@@ -85,8 +86,19 @@ public class ProceduralRoomGeneration : MonoBehaviour
 		
 	}
 
+    public override void OnNetworkSpawn()
+    {
+        if (IsClient)
+        {
+            spawnIndex.OnValueChanged += (oldValue, newValue) =>
+            {
+                UnityEngine.Debug.Log($"spawn index changed from {oldValue} to {newValue}");
+            };
+        }
+    }
 
-	public void Generate(int seed)
+
+    public void Generate(int seed)
 	{
 		
 		UnityEngine.Random.InitState(seed);
@@ -117,8 +129,34 @@ public class ProceduralRoomGeneration : MonoBehaviour
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){
+		
+		List<Vector2> directions = new List<Vector2>
+		{
+			Vector2.up * 2,    // (0, 2)
+			Vector2.down * 2,  // (0, -2)
+			Vector2.left * 2,  // (-2, 0)
+			Vector2.right * 2  // (2, 0)
+		};
+		
 		GameObject room = rooms.FirstOrDefault(r => r.GetComponent<Room>().isStairs == false);
-		return new Vector3(room.transform.position.x, room.transform.position.y + room.GetComponent<Room>().size.y/2, room.transform.position.z);
+		Vector3 spawnPos = new Vector3(room.transform.position.x + directions[spawnIndex.Value].x, room.transform.position.y + room.GetComponent<Room>().size.y/2, room.transform.position.z + directions[spawnIndex.Value].y);
+		if(IsOwner)
+		{
+			IncrementSpawnIndexServerRpc();
+
+		}
+		return spawnPos;
+	}
+	
+	[ServerRpc(RequireOwnership = false)]
+	public void IncrementSpawnIndexServerRpc()
+	{
+		if(spawnIndex.Value >= 4)
+		{
+			spawnIndex.Value = 0;
+		}
+		spawnIndex.Value++;
+	
 	}
 	
 	private Vector3Int GetRandomRoomPosition(int currentFloor, Vector3 size)

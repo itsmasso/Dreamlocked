@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4395893181215863329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2366112785228832510}
+  - component: {fileID: 714363266665642365}
+  - component: {fileID: 4507854731335237695}
+  m_Layer: 0
+  m_Name: LevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2366112785228832510
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4395893181215863329}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &714363266665642365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4395893181215863329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 999550067
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &4507854731335237695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4395893181215863329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19760aad257e1384fbbb65cae4476ce5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  spawnIndex:
+    m_InternalValue: 0
+  mapSize: {x: 200, y: 200, z: 200}
+  floorHeight: 4
+  floors: 1
+  nodeRadius: 2
+  roomCeilingPrefab: {fileID: 1305380972374618748, guid: 18b26fb7e90dc0b42a436f1971c74e53, type: 3}
+  roomFloorPrefab: {fileID: 1305380972374618748, guid: 18b26fb7e90dc0b42a436f1971c74e53, type: 3}
+  wallPrefab: {fileID: 2110378738996425676, guid: 5a006b0d355b1014aba049ef661aca41, type: 3}
+  wallThickness: 0.1
+  ceilingThickness: 0.1
+  floorThickness: 0.1
+  bedRoomPrefabList:
+  - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
+  - {fileID: 4367447932712270340, guid: 58ae3534c710f6b4a94103ce19c4fcc4, type: 3}
+  roomsPerFloor: 30
+  spaceBetweenRooms: 8
+  maxIteration: 45
+  spawnCycleChance: 0.8
+  stairRooms:
+  - {fileID: 3286224633064905065, guid: 4a211cb806fb0c0449b1f73fc319186d, type: 3}
+  chanceToSpawnStairs: 30
+  spawnStairGuarenteedPity: 4
+  color: {r: 0, g: 1, b: 0, a: 0.53333336}
+  drawGizmos: 0
+  drawAllNodes: 0

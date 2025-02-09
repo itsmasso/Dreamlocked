@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6edc3ee76d5da8bda9497350d6c0ec9d
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 87744
+  packageName: A* Pathfinding Project Pro
+  packageVersion: 5.3.3
+  assetPath: Packages/com.arongranberg.astar/Documentation/documentation.html
+  uploadId: 728703

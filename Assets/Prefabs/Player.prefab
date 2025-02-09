@@ -515,8 +515,8 @@ MonoBehaviour:
   idleBobFrequency: 0.4
   walkBobSpeed: 12
   walkBobAmount: 0.04
-  sprintBobSpeed: 16
-  sprintBobAmount: 0.07
+  sprintBobSpeed: 17
+  sprintBobAmount: 0.06
   crouchBobSpeed: 8
   crouchBobAmount: 0.02
   originalCamPos: {x: 0, y: 0, z: 0}

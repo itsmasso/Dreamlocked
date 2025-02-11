@@ -1,16 +1,25 @@
 using UnityEngine;
+using Unity.Netcode;
+using Pathfinding;
 
-public class MonsterBaseScript : MonoBehaviour
+public class MonsterBaseScript : NetworkBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+	private enum MonsterStates
+	{
+		Roaming,
+		Stalking,
+		Chasing
+		
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	}
+	[SerializeField] private FollowerEntity ai;
+	[SerializeField] private GameObject seeker;
+	
+	private void Start() {
+		
+	}
+	
+	private void Update() {
+		
+	}
 }

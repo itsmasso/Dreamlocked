@@ -54,7 +54,9 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
-
+	
+//for testing purposes
+/*
 	public override void OnNetworkSpawn()
 	{
 		if(IsOwner)
@@ -74,6 +76,8 @@ public class PlayerController : NetworkBehaviour
 
 		GameManager.Instance.SetPlayerOwnerServerRpc(NetworkObjectId);
 	}
+	*/
+	
 
 	
 	void Start()
@@ -158,8 +162,6 @@ public class PlayerController : NetworkBehaviour
 			
 			Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
 			
-			
-			
 			moveDir.y = 0;
 			Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
 			smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
@@ -168,12 +170,12 @@ public class PlayerController : NetworkBehaviour
 				playerVelocity.y += gravity * Time.deltaTime;
 				
 			characterController.Move(playerVelocity * Time.deltaTime);
-			
+		
 			if(isGrounded)
 				characterController.Move(smoothedDirection * moveSpeed * Time.deltaTime);	
 			else
 				characterController.Move(smoothedDirection * moveSpeed * airResistanceMultiplier * Time.deltaTime);	
-				
+	
 			CrouchFunctionality();
 			
 			switch(currentState)

@@ -32,6 +32,7 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 	[SerializeField] private int floorHeight;
 	private Vector3 worldBottomLeft;
 	[SerializeField] private int floors;
+	[SerializeField] private AstarPath aStarComponent;
 	
 	[Header("Grid Properties")]
 	[SerializeField] private float nodeRadius;
@@ -86,19 +87,19 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 		
 	}
 
-    public override void OnNetworkSpawn()
-    {
-        if (IsClient)
-        {
-            spawnIndex.OnValueChanged += (oldValue, newValue) =>
-            {
-                UnityEngine.Debug.Log($"spawn index changed from {oldValue} to {newValue}");
-            };
-        }
-    }
+	public override void OnNetworkSpawn()
+	{
+		if (IsClient)
+		{
+			spawnIndex.OnValueChanged += (oldValue, newValue) =>
+			{
+				UnityEngine.Debug.Log($"spawn index changed from {oldValue} to {newValue}");
+			};
+		}
+	}
 
 
-    public void Generate(int seed)
+	public void Generate(int seed)
 	{
 		
 		UnityEngine.Random.InitState(seed);
@@ -123,6 +124,8 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 				SpawnDoorWay(n);
 		}
 		
+		aStarComponent.Scan();
+		
 		sw.Stop();
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		
@@ -143,7 +146,6 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 		if(IsOwner)
 		{
 			IncrementSpawnIndexServerRpc();
-
 		}
 		return spawnPos;
 	}
@@ -157,6 +159,12 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 		}
 		spawnIndex.Value++;
 	
+	}
+	
+	public Vector3 GetRandomRoomPosition()
+	{
+		return rooms[UnityEngine.Random.Range(0, rooms.Count)].transform.position;
+
 	}
 	
 	private Vector3Int GetRandomRoomPosition(int currentFloor, Vector3 size)

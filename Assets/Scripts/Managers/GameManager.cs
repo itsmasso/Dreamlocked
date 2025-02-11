@@ -4,8 +4,7 @@ using Unity.Netcode;
 
 public class GameManager : NetworkSingleton<GameManager>
 {
-	
-	[SerializeField] private ProceduralRoomGeneration levelGenerator;
+	public ProceduralRoomGeneration levelGenerator;
 
 	public NetworkObject playerOwner;
 
@@ -20,13 +19,12 @@ public class GameManager : NetworkSingleton<GameManager>
 		levelGenerator.Generate(seed.Value);
 		
 	}
-	
+	//for testing purposes
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerOwnerServerRpc(ulong networkObjectId)
 	{
 		if(IsServer)
 		{
-			
 			NetworkObject playerObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
 			playerOwner = playerObject;
 			
@@ -34,12 +32,14 @@ public class GameManager : NetworkSingleton<GameManager>
 			
 		}
 	}
+	//for testing purposes
 	[ClientRpc]
 	public void SetOwnerPlayerClientRpc(NetworkObjectReference ownerPlayerObjectRef)
 	{
 		ownerPlayerObjectRef.TryGet(out NetworkObject playerNetworkObject);
 		playerOwner = playerNetworkObject;
 		playerNetworkObject.transform.position = levelGenerator.GetPlayerSpawnPosition();
+		
 		Debug.Log($"Player on client {OwnerClientId} spawned");
 	}
 	

@@ -34,6 +34,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			
 		}
 	}
+	
 	[ClientRpc]
 	public void SetOwnerPlayerClientRpc(NetworkObjectReference ownerPlayerObjectRef)
 	{
@@ -42,6 +43,11 @@ public class GameManager : NetworkSingleton<GameManager>
 		playerNetworkObject.transform.position = levelGenerator.GetPlayerSpawnPosition();
 		Debug.Log($"Player on client {OwnerClientId} spawned");
 	}
+
+	public Vector3 GetPlayerSpawnPosition()
+    {
+        return levelGenerator.GetPlayerSpawnPosition();
+    }
 	
 
 	void Start()

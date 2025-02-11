@@ -55,25 +55,6 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
 
-	public override void OnNetworkSpawn()
-	{
-		if(IsOwner)
-		{
-			
-			StartCoroutine(RegisterWithGameManager());
-		}
-	}
-	
-	private IEnumerator RegisterWithGameManager()
-	{
-		// Wait until the GameManager is initialized
-		while (GameManager.Instance == null || !GameManager.Instance.GetComponent<NetworkObject>().IsSpawned)
-		{
-			yield return null;
-		}
-
-		GameManager.Instance.SetPlayerOwnerServerRpc(NetworkObjectId);
-	}
 
 	
 	void Start()
@@ -158,7 +139,7 @@ public class PlayerController : NetworkBehaviour
 			
 			Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
 			
-			
+			Debug.Log(transform.position);
 			
 			moveDir.y = 0;
 			Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	

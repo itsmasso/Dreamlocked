@@ -124,7 +124,11 @@ public class SteamManager : MonoBehaviour
     {
         if(NetworkManager.Singleton.IsHost)
         {
+<<<<<<< Updated upstream
             NetworkManager.Singleton.SceneManager.LoadScene("ProceduralGen", LoadSceneMode.Single);
+=======
+            NetworkManager.Singleton.SceneManager.LoadScene("PlayerScene", LoadSceneMode.Single);
+>>>>>>> Stashed changes
         }
     }
 

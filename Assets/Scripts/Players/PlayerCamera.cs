@@ -24,12 +24,12 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField] private float idleBobAmplitude = 0.2f, idleBobFrequency = 0.4f;
 	
 	[Header("Head Bob")]
-	[SerializeField] private float walkBobSpeed = 14f;
-	[SerializeField] private float walkBobAmount = 0.05f; //how much the camera moves
-	[SerializeField] private float sprintBobSpeed = 18f;
-	[SerializeField] private float sprintBobAmount = 0.1f; //how much the camera moves
-	[SerializeField] private float crouchBobSpeed = 8f;
-	[SerializeField] private float crouchBobAmount = 0.025f; //how much the camera moves
+	[SerializeField] private float walkBobSpeed;
+	[SerializeField] private float walkBobAmount; //how much the camera moves
+	[SerializeField] private float sprintBobSpeed;
+	[SerializeField] private float sprintBobAmount; //how much the camera moves
+	[SerializeField] private float crouchBobSpeed;
+	[SerializeField] private float crouchBobAmount; //how much the camera moves
 	[SerializeField] private Vector3 originalCamPos;
 	private float bobbingTimer;
 	private float movingTimer;	
@@ -66,7 +66,7 @@ public class PlayerCamera : NetworkBehaviour
 	
 		float bobAmount = playerController.currentState == PlayerState.Crouching ? crouchBobAmount : playerController.currentState == PlayerState.Running ? sprintBobAmount : walkBobAmount;
 		camFollowPivot.localPosition = new Vector3(
-			camFollowPivot.localPosition.x + Mathf.Cos(bobbingTimer/2f) * bobAmount * 0.06f,
+			camFollowPivot.localPosition.x + Mathf.Cos(bobbingTimer/2f) * bobAmount * 0.01f,
 			camFollowPivot.localPosition.y + Mathf.Sin(bobbingTimer) * bobAmount,
 			camFollowPivot.localPosition.z
 		);

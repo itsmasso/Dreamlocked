@@ -34,7 +34,7 @@ public class PlayerController : NetworkBehaviour
 	private Vector3 smoothedDirection;
 	private Vector3 playerVelocity;
 	private Vector3 smoothDampVelocity = Vector3.zero;
-	[SerializeField] private float moveSmoothTime = 0.1f;
+	[SerializeField] private float moveSmoothTime;
 	[SerializeField] private float gravity = -15f;
 
 	[Header("Sprinting")]
@@ -43,9 +43,9 @@ public class PlayerController : NetworkBehaviour
 
 	[Header("Crouching")]
 	[SerializeField] private float standHeight;
-	[SerializeField] private float crouchHeight = 0.6f;
+	[SerializeField] private float crouchHeight;
 	[SerializeField] private float crouchSpeedMultiplier;
-	[SerializeField] private float crouchSmoothTime = 5f;
+	[SerializeField] private float crouchSmoothTime;
 	private bool enabledCrouching;
 	[Header("Jump")]
 	[SerializeField] private float jumpHeight;
@@ -69,14 +69,14 @@ public class PlayerController : NetworkBehaviour
 	private IEnumerator RegisterWithGameManager()
 	{
 		// Wait until the GameManager is initialized
-		while (GameManager.Instance == null || !GameManager.Instance.GetComponent<NetworkObject>().IsSpawned)
+		while (LevelManager.Instance == null || !LevelManager.Instance.GetComponent<NetworkObject>().IsSpawned)
 		{
 			yield return null;
 		}
 
-		GameManager.Instance.SetPlayerOwnerServerRpc(NetworkObjectId);
+		LevelManager.Instance.SetPlayerSpawnPosServerRpc(NetworkObjectId);
 	}
-	*/
+*/	
 	
 
 	

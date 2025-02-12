@@ -52,7 +52,7 @@ public class CharacterSpawner : NetworkBehaviour
 	public void SetOwnerPlayerClientRpc(NetworkObjectReference ownerPlayerObjectRef)
 	{
 		ownerPlayerObjectRef.TryGet(out NetworkObject playerNetworkObject);
-		playerNetworkObject.transform.position = GameManager.Instance.levelGenerator.GetPlayerSpawnPosition();
+		playerNetworkObject.transform.position = LevelManager.Instance.levelGenerator.GetPlayerSpawnPosition();
 		
 		Debug.Log($"Player on client {OwnerClientId} spawned");
 	}

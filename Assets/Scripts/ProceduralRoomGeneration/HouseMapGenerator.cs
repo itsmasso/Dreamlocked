@@ -15,7 +15,7 @@ public enum CellType
 	Door,
 }
 
-public class ProceduralRoomGeneration : NetworkBehaviour
+public class HouseMapGenerator : NetworkBehaviour
 {	
 	private enum RoomEdgeDirections
 	{
@@ -65,7 +65,7 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 	[SerializeField] private float spawnCycleChance = 0.125f;
 	
 	[Header("Create Hallways (A*)")]
-	private HashSet<Node> hallways;
+	private List<Node> hallways;
 	private AStarPathfinder hallwayPathFinder;
 	
 	[Header("Stairs")]
@@ -110,7 +110,7 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
 		hallwayPathFinder = new AStarPathfinder(grid);
-		hallways  = new HashSet<Node>();
+		hallways  = new List<Node>();
 		
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
@@ -161,13 +161,26 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 	
 	}
 	
+	public Vector3 GetRandomHallwayPosition()
+	{
+		Node randomHallwayNode = hallways[UnityEngine.Random.Range(0, hallways.Count)];
+		return new Vector3(randomHallwayNode.pos.x, randomHallwayNode.pos.y - nodeRadius, randomHallwayNode.pos.z);
+	}
+	
 	public Vector3 GetRandomRoomPosition()
 	{
 		return rooms[UnityEngine.Random.Range(0, rooms.Count)].transform.position;
-
 	}
 	
-	private Vector3Int GetRandomRoomPosition(int currentFloor, Vector3 size)
+	public List<Vector3> GetHallwayList()
+	{
+		List<Vector3> hallwayPosList = new List<Vector3>();
+		foreach(Node node in hallways)
+			hallwayPosList.Add(node.pos);
+		return hallwayPosList;
+	}
+	
+	private Vector3Int GetRandomRoomSpawnPosition(int currentFloor, Vector3 size)
 	{
 		//calculating min and max based on grid/map size
 		int roomXPos = UnityEngine.Random.Range(Mathf.RoundToInt((worldBottomLeft.x + size.x + nodeDiameter*2)/nodeDiameter), Mathf.RoundToInt((worldBottomLeft.x + mapSize.x - size.x - nodeDiameter*2)/nodeDiameter)) * nodeDiameter;
@@ -216,7 +229,7 @@ public class ProceduralRoomGeneration : NetworkBehaviour
 				GameObject room = Instantiate(newRoom, transform.position, Quaternion.Euler(0, chosenAngle, 0));
 				room.transform.SetParent(gameObject.transform);
 				Room roomComponent = room.GetComponent<Room>();
-				room.transform.position = GetRandomRoomPosition(floorCount, roomComponent.size);
+				room.transform.position = GetRandomRoomSpawnPosition(floorCount, roomComponent.size);
 				roomComponent.position = Vector3Int.RoundToInt(room.transform.position);
 				if(chosenAngle == 90 || chosenAngle == 270)
 				{

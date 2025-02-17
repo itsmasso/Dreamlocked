@@ -6,7 +6,7 @@ public class TestingNetcodeUI : MonoBehaviour
 {
 	[SerializeField] private Button startHostButton;
 	[SerializeField] private Button startClientButton;
-	[SerializeField] private ProceduralRoomGeneration levelGenerator;
+
 
 	private void Awake()
 	{

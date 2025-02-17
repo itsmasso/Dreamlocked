@@ -1,37 +1,36 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 public class LevelManager : NetworkSingleton<LevelManager>
 {
-	public ProceduralRoomGeneration levelGenerator;
+	public HouseMapGenerator levelGenerator;
+	
+
+	[SerializeField] private UnitManager unitManager;
 	private NetworkVariable<int> seed = new NetworkVariable<int>();
-	public override void OnNetworkSpawn()
+
+    void Start()
+    {
+ 
+    }
+    public override void OnNetworkSpawn()
 	{	
 		if(IsServer)
 		{
 			seed.Value = Random.Range(1, 999999);
 		}
 		levelGenerator.Generate(seed.Value);
+		Invoke("SpawnMonster", 2f);
 		
 	}
-	//for testing purposes
-	[ServerRpc(RequireOwnership = false)]
-	public void SetPlayerSpawnPosServerRpc(ulong networkObjectId)
+	
+
+	
+	
+	private void SpawnMonster()
 	{
-		if(IsServer)
-		{
-			NetworkObject playerObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
-			
-			SetPlayerSpawnPosClientRpc(playerObject);
-			
-		}
+		unitManager.SpawnMonster(levelGenerator.GetRandomHallwayPosition());
 	}
-	//for testing purposes
-	[ClientRpc]
-	public void SetPlayerSpawnPosClientRpc(NetworkObjectReference ownerPlayerObjectRef)
-	{
-		ownerPlayerObjectRef.TryGet(out NetworkObject playerNetworkObject);
-		playerNetworkObject.transform.position = levelGenerator.GetPlayerSpawnPosition();
-		
-		Debug.Log($"Player on client {OwnerClientId} spawned");
-	}
+	
+	
 }

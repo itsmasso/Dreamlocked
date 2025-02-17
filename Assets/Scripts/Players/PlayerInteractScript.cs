@@ -84,8 +84,9 @@ public class PlayerInteractScript : NetworkBehaviour
 			
 			
 		}
-		Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
+		//Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 	}
+	
 	
 	[ClientRpc]
 	public void SpawnVisualItemClientRpc(int itemSOIndex)

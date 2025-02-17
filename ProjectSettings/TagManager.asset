@@ -14,9 +14,9 @@ TagManager:
   - UI
   - ItemHold
   - Interactable
-  - 
-  - 
-  - 
+  - Player
+  - Enemy
+  - Obstacle
   - 
   - 
   - 

@@ -55,28 +55,10 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
 	
-//for testing purposes
-/*
 	public override void OnNetworkSpawn()
 	{
-		if(IsOwner)
-		{
-			
-			StartCoroutine(RegisterWithGameManager());
-		}
+		
 	}
-	
-	private IEnumerator RegisterWithGameManager()
-	{
-		// Wait until the GameManager is initialized
-		while (LevelManager.Instance == null || !LevelManager.Instance.GetComponent<NetworkObject>().IsSpawned)
-		{
-			yield return null;
-		}
-
-		LevelManager.Instance.SetPlayerSpawnPosServerRpc(NetworkObjectId);
-	}
-*/	
 	
 
 	
@@ -217,6 +199,8 @@ public class PlayerController : NetworkBehaviour
 				default:
 					break;
 			}
+			
+			
 		}
 		
 	}

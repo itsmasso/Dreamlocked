@@ -33,7 +33,12 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField] private Vector3 originalCamPos;
 	private float bobbingTimer;
 	private float movingTimer;	
-
+	
+	[Header("Player View")]
+	[SerializeField] private LayerMask groundLayer;
+	[SerializeField] private LayerMask enemyLayer;
+	[SerializeField] private LayerMask obstacleLayer;
+	[SerializeField] private float peripheralAngle; //max angle that determines how wide the field of view extends around the player. If angle is 90 degrees, it means the view is limited to 45 to the left and right
 	
 	void Start()
 	{
@@ -115,6 +120,50 @@ public class PlayerCamera : NetworkBehaviour
 
 	}
 	
+	private void CheckForEnemyVisibility()
+	{
+		// Check if enemy in camera frustrum
+		float renderDistance = Camera.main.farClipPlane;
+		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+		Collider[] enemyColliders = Physics.OverlapSphere(Camera.main.transform.position, renderDistance, enemyLayer);
+		foreach(Collider enemyCollider in enemyColliders)
+		{
+			if(GeometryUtility.TestPlanesAABB(planes, enemyCollider.bounds))
+			{
+				// Check line of sight
+				//Debug.Log("found enemies");
+				Vector3 directionToEnemy = (enemyCollider.transform.position - Camera.main.transform.position).normalized;
+				float enemyDist = Vector3.Distance(transform.position, enemyCollider.transform.position);
+				Debug.DrawRay(Camera.main.transform.position, directionToEnemy * (enemyDist + 1), Color.red);
+				// Check field of view
+				float angle = Vector3.Angle(Camera.main.transform.forward, directionToEnemy);
+				
+				if (angle < peripheralAngle / 2) 
+				{
+					CheckForObstaclesBetweenEnemy(directionToEnemy, enemyDist);
+				}
+			}
+		}
+	}
+	
+	private void CheckForObstaclesBetweenEnemy(Vector3 directionToEnemy, float enemyDistance)
+	{
+		int obstacleLayers = obstacleLayer.value | groundLayer.value;
+		if(Physics.Raycast(Camera.main.transform.position, directionToEnemy, out RaycastHit hit, enemyDistance + 1))
+		{
+			if(((1 << hit.collider.gameObject.layer) & enemyLayer) != 0 && ((1 << hit.collider.gameObject.layer) & obstacleLayers) == 0)
+			{
+				IReactToPlayerGaze reactableMonster = hit.collider.GetComponent<IReactToPlayerGaze>();
+				if(reactableMonster != null)
+				{
+					//Debug.Log("Enemy Seen ");
+					reactableMonster.ReactToPlayerGaze(transform);
+
+				}
+			}		
+		}	
+	}
+	
 	void LateUpdate()
 	{	
 		if(cmCam != null)
@@ -126,6 +175,11 @@ public class PlayerCamera : NetworkBehaviour
 			HeadBobbing();
 		}
 
+	}
+
+	void Update()
+	{
+		CheckForEnemyVisibility();
 	}
 
 }

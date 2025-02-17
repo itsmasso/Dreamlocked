@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientSkyColor: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightingDataAsset: {fileID: 0}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -272,7 +272,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &206103247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,7 +318,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 206103247}
-    PlayerPrefab: {fileID: 7062762779246524609, guid: c58e4e7fde9f52b4e82288982ef50fd6, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 21624b5627104134095e2406563cca32, type: 2}
@@ -680,6 +680,51 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &554177577
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 554177579}
+  - component: {fileID: 554177578}
+  m_Layer: 0
+  m_Name: UnitManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &554177578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554177577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3830e4a6345aeec48a0dbaa12a3ad057, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monster: {fileID: 4207613464781364640, guid: 28be38c86f20b0341bd9362bcb46bda4, type: 3}
+--- !u!4 &554177579
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554177577}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 598.0975, y: 285.69315, z: 188.2923}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &594713907
 GameObject:
   m_ObjectHideFlags: 0
@@ -1100,7 +1145,7 @@ GameObject:
   - component: {fileID: 1200665815}
   - component: {fileID: 1200665814}
   m_Layer: 0
-  m_Name: A*Graph
+  m_Name: A*Graph(All Areas)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1120,7 +1165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAACAn+vSMsvwPAIAAIoEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGVU01z2jAQ/SuMz00HQwhJj4U0PeSjA8w0k04Pi7zYGmSJrmQIMPz37Mo2caa99CT57b7Vvt3nY6IKIFABaQaZrnzypdf/fPmplyhng6voAV5viRwxPhAUjZnrA8Y0AXZg1rA0+B11XoQmqwUnRpfLmDpitITXuXEb4Q779fdtluM92jwUwoygtjPMtbPNK0PGMNPB0UIbbMB0cM1waIDnv5CXM1J5FJ7IClQhIxuke9gjPbhMr7SCwG9J+NdvDma6ROsZ4ag8lExbYDhNOL4Etc7JVTZbEGyRPCy10WEvqT8b0ZJHaHALNtwRbIp5RStQeC7pHl2Y4Z9KU8xVzhhU0sYcQ9A2l26OHbglxra9UEwUAH4tmb1kC6aSjIu0d5IpQN7EoiYCz9vlqUy4os6kxHkY59gD+iJOaQXGf4gskAi0/QdnQdgdbKgTayOUsJm6nfVQbgxL+sYOix4aNoKlj1lbaIoBtJGdcdTZSa383JKtjBFd5ELcVi36VXzF6L45D3JG/StHCrOvsiU/Qctv/A+jsViTP+i3jPp2qG+R5Qu3kyafqsAa8X0SEnjkpU2ctfUKu5NtaY0t3mkWgdCHOR+qeLJm//zSoaEVcz3CtmTupIpOeefmlc4+miFJ+4Pr1fimP05H4+XVTXox7t+keDWG4UgNLwfjNIkqtNVBg/nB9U1oR8N/aWfjFspYcYaKV9aLphYbZgS7O30oXccF2q7cXLEz7FNd4yybVw2Gh5vdxt+5Y/bkeEpOb1BLAwQUAAAICAAAgJ/rR7mUoW4AAAB5AAAACQAkAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAatWKkstKs7Mz1OyUjDVM9Yz1lFQSi9KLMgoBgoYgjilmSkgdrSSoYGRRZq5pYG5oal5kpmloa65gaVhqpl5orFpsrGJkbmhUixQfUllQapfYm4qRE9AYklGWmZeSmZeul5QanJicYk7yHCl2FoAUEsBAi0AFAAACAgAAICf69Iyy/A8AgAAigQAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAICf60e5lKFuAAAAeQAAAAkAJAAAAAAAAAAAAAAAiQIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAABCAwAAAAA=
+    dataString: UEsDBBQAAAgIAACAn+ubnstbOwIAAIYEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGVU8Fy2kAM/RXG56aDIYSkxwJNDoF0gJlm0ulB2MLeYb1LtWsIMPx7pbUNzrSXntZ+0tPqSW9PUZIDQeKR5pCq0kVfOt3Pt586UWKNtyVN4X1CZInxnqCo9UIdMaQJsAe9gZXGJ1RZ7uusBhxpVaxC6oDRAt4X2m6F2+9W/5M0w2c0mc+FGUBl5pgpa+pb+oxhqrylpdJYg3HvnmFfA69/IW8XpHQoPJHlqURGtkjPcECa2lStVQKe75Lwz18cTFWBxjHCUbkoGjdAfxxxfAXJJiNbmnRJsENysFJa+YOk/qhFSx6hxh0Y/0iwzRclrSHBS0k7s36Ov0tFITexWmMibSzQe2Uy6ebUghtiaNsJRQcB4DaS2Yl2oEvJuIk7Z5kCZHUsaCJwvF2eyogrqlRKXIZxiU3R5WFKa9DuQ2SJRKDMPzhLwvZgfZVYGaGA7djujYNiq1nSN3ZY8FC/Fix9zJtCY/SgtOyMo9aMKuWXlkyptegi68O2KtHv4itGD/V5lDPoX1tKMP0qW3IjNHzH/zBqi9X5vW7DqL6O1VdgudzupcmX0rNGvE5CAjNe2sgaU62wPdmGVtviSjMIhM4v+EjyF6MPr28tGhox1wx2BXNHZXDKlZuVKv1ohiju9u7Xw4fuMB4MV3cP8c2w+xDj3RD6g6R/2xvGUVChjPIK9Heur30zGn6lrY0bKELFJ8vPaQpbsWBKsH9Ux8K2HKDM2i4SdoV5qfgXybxm0DzYdBKecsvo0ekcnf8AUEsDBBQAAAgIAACAn+tHuZShbgAAAHkAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz1jPWUVBKL0osyCgGChiCOKWZKSB2tJKhgZFFmrmlgbmhqXmSmaWhrrmBpWGqmXmisWmysYmRuaFSLFB9SWVBql9ibipET0BiSUZaZl5KZl66XlBqcmJxiTvIcKXYWgBQSwECLQAUAAAICAAAgJ/rm57LWzsCAACGBAAACwAkAAAAAAAAAAAAAAAAAAAAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwECLQAUAAAICAAAgJ/rR7mUoW4AAAB5AAAACQAkAAAAAAAAAAAAAACIAgAAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsFBgAAAAACAAIAuAAAAEEDAAAAAA==
     file_cachedStartup: {fileID: 0}
     cacheStartup: 0
   showNavGraphs: 1
@@ -1131,7 +1176,7 @@ MonoBehaviour:
   manualDebugFloorRoof: 0
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
-  logPathResults: 1
+  logPathResults: 0
   maxNearestNodeDistance: 100
   scanOnStartup: 1
   fullGetNearestSearch: 0
@@ -1145,7 +1190,39 @@ MonoBehaviour:
     _ConnectionHighLerp: {r: 1, g: 0, b: 0, a: 0.5}
     _MeshEdgeColor: {r: 0, g: 0, b: 0, a: 0.5}
     _AreaColors: []
-  tagNames: []
+  tagNames:
+  - All Areas
+  - Room
+  - Hallway
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 23
+  - 24
+  - 25
+  - 26
+  - 27
+  - 28
+  - 29
+  - 30
+  - 31
   heuristic: 2
   heuristicScale: 1
   threadCount: 1
@@ -1186,6 +1263,79 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19760aad257e1384fbbb65cae4476ce5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1560232113
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1560232116}
+  - component: {fileID: 1560232114}
+  - component: {fileID: 1560232115}
+  m_Layer: 0
+  m_Name: PlayerSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1560232114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560232113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2450965502
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &1560232115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560232113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4efa9948c19e5024095c17e8b6224930, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  Player: {fileID: 7062762779246524609, guid: c58e4e7fde9f52b4e82288982ef50fd6, type: 3}
+  playerTransforms: []
+--- !u!4 &1560232116
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560232113}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.737777, y: -15.711692, z: 30.096512}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1574811060
 GameObject:
   m_ObjectHideFlags: 0
@@ -1274,7 +1424,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1947135504
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1310,7 +1460,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startHostButton: {fileID: 300655583}
   startClientButton: {fileID: 594713909}
-  levelGenerator: {fileID: 0}
 --- !u!20 &105161419381307061
 Camera:
   m_ObjectHideFlags: 0
@@ -1350,7 +1499,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 191
+    m_Bits: 1983
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1391,6 +1540,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   levelGenerator: {fileID: 1397590965}
+  unitManager: {fileID: 554177578}
 --- !u!114 &1278054305978565187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1793,6 +1943,14 @@ PrefabInstance:
       value: LevelGenerator
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: mapSize.x
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: mapSize.z
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: aStarComponent
       value: 
       objectReference: {fileID: 1200665814}
@@ -1819,3 +1977,5 @@ SceneRoots:
   - {fileID: 491019230634669627}
   - {fileID: 206103249}
   - {fileID: 1200665815}
+  - {fileID: 554177579}
+  - {fileID: 1560232116}

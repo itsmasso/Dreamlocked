@@ -259,8 +259,11 @@ MonoBehaviour:
   agent: {fileID: 1152110687237858059}
   minSpawnDistFromPlayers: 30
   maxSpawnDistFromPlayers: 40
-  chanceToStalkPlayer: 50
+  chanceToStalkPlayer: 100
   playerStalkRange: 8
+  stalkTimer: 0
+  maxStalkTime: 20
+  canStalk: 0
   stalkCooldown: 25
   defaultStoppingDistance: 0.5
   chasingStoppingDistance: 1.5

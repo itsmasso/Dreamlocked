@@ -1,12 +1,13 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class TestingNetcodeUI : MonoBehaviour
 {
 	[SerializeField] private Button startHostButton;
 	[SerializeField] private Button startClientButton;
-
+	[SerializeField] private Button startGame;
 
 	private void Awake()
 	{
@@ -15,13 +16,22 @@ public class TestingNetcodeUI : MonoBehaviour
 		{
 			NetworkManager.Singleton.StartHost();
 			
-			Hide();
+			
 		});
 		
 		startClientButton.onClick.AddListener(() => 
 		{
 			NetworkManager.Singleton.StartClient();
-			Hide();
+			
+		});
+		
+		startGame.onClick.AddListener(()=>
+		{
+			if(NetworkManager.Singleton.IsHost)
+			{
+				NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+				
+			}
 		});
 
 		

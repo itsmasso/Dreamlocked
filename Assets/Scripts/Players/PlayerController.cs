@@ -2,8 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
-using System;
-using System.Collections;
+using Unity.Netcode.Components;
 
 public enum PlayerState
 {
@@ -54,13 +53,11 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
-	
+
 	public override void OnNetworkSpawn()
 	{
-		
-	}
-	
 
+	}
 	
 	void Start()
 	{
@@ -139,6 +136,7 @@ public class PlayerController : NetworkBehaviour
 	{
 		if(IsOwner)
 		{
+
 			//checking to see if sphere collider is touching the ground to determine if player is grounded or not
 			isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
 			

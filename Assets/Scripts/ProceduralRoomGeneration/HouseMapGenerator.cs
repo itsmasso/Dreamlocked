@@ -15,7 +15,7 @@ public enum CellType
 	Door,
 }
 
-public class HouseMapGenerator : NetworkBehaviour
+public class HouseMapGenerator : MonoBehaviour
 {	
 	private enum RoomEdgeDirections
 	{
@@ -25,8 +25,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		Left
 	
 	}
-	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-	
+
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
 	[SerializeField] private int floorHeight;
@@ -44,6 +43,7 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private GameObject roomFloorPrefab;
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
+	[SerializeField] private GameObject mainRoomPrefab;
 	
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
 	
@@ -51,6 +51,7 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private int roomsPerFloor;
 	
 	[Header("Spawn Room Algorithm")]
+	private bool spawnedMainRoom;
 	[SerializeField] private int spaceBetweenRooms;
 	public List<GameObject> rooms {get; private set;}
 	
@@ -87,25 +88,19 @@ public class HouseMapGenerator : NetworkBehaviour
 		
 	}
 
-	public override void OnNetworkSpawn()
+	void Start()
 	{
-		if (IsClient)
-		{
-			spawnIndex.OnValueChanged += (oldValue, newValue) =>
-			{
-				UnityEngine.Debug.Log($"spawn index changed from {oldValue} to {newValue}");
-			};
-		}
+		Generate();
 	}
 
-
-	public void Generate(int seed)
+	public void Generate()
 	{
 		
-		UnityEngine.Random.InitState(seed);
+		UnityEngine.Random.InitState(GameManager.Instance.seed.Value);
 		
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
+		spawnedMainRoom = false;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
@@ -125,40 +120,27 @@ public class HouseMapGenerator : NetworkBehaviour
 		}
 		
 		aStarComponent.Scan();
-		
+	
 		sw.Stop();
+		GameManager.Instance.SpawnPlayers(GetPlayerSpawnPosition());
+		GameManager.Instance.ChangeGameState(GameState.GameStart);
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){
-		
-		List<Vector2> directions = new List<Vector2>
+		Vector3[] offsets = new Vector3[]
 		{
-			Vector2.up * 2,    // (0, 2)
-			Vector2.down * 2,  // (0, -2)
-			Vector2.left * 2,  // (-2, 0)
-			Vector2.right * 2  // (2, 0)
+			new Vector3(2, 0, 0),
+			new Vector3(-2, 0, 0),
+			new Vector3(0, 0, 2),
+			new Vector3(0, 0, -2)
 		};
-		
-		GameObject room = rooms.FirstOrDefault(r => r.GetComponent<Room>().isStairs == false);
-		Vector3 spawnPos = new Vector3(room.transform.position.x + directions[spawnIndex.Value].x, room.transform.position.y + room.GetComponent<Room>().size.y/2, room.transform.position.z + directions[spawnIndex.Value].y);
-		if(IsOwner)
-		{
-			IncrementSpawnIndexServerRpc();
-		}
+		GameObject room = rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true);
+		Vector3 spawnPos = new Vector3(room.transform.position.x + offsets[GameManager.Instance.spawnIndex.Value].x, 
+										room.transform.position.y + room.GetComponent<Room>().size.y/2, 
+										room.transform.position.z+ offsets[GameManager.Instance.spawnIndex.Value].z);
 		return spawnPos;
-	}
-	
-	[ServerRpc(RequireOwnership = false)]
-	public void IncrementSpawnIndexServerRpc()
-	{
-		if(spawnIndex.Value >= 4)
-		{
-			spawnIndex.Value = 0;
-		}
-		spawnIndex.Value++;
-	
 	}
 	
 	public Vector3 GetRandomHallwayPosition()
@@ -217,7 +199,13 @@ public class HouseMapGenerator : NetworkBehaviour
 				else
 				{
 					//spawn normal room
-					newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
+					if(!spawnedMainRoom) 
+					{
+						newRoom = mainRoomPrefab;
+						spawnedMainRoom = true;
+					}else{
+						newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
+					}
 				}
 				
 				
@@ -225,7 +213,6 @@ public class HouseMapGenerator : NetworkBehaviour
 				int randomIndex = UnityEngine.Random.Range(0, angles.Length);
 				int chosenAngle = angles[randomIndex];
 			
-
 				GameObject room = Instantiate(newRoom, transform.position, Quaternion.Euler(0, chosenAngle, 0));
 				room.transform.SetParent(gameObject.transform);
 				Room roomComponent = room.GetComponent<Room>();

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 714363266665642365}
   - component: {fileID: 4507854731335237695}
   m_Layer: 0
-  m_Name: LevelGenerator
+  m_Name: HouseLevelGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 999550067
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 462693179
+  InScenePlacedSourceGlobalObjectIdHash: 1224099820
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -76,8 +76,9 @@ MonoBehaviour:
   mapSize: {x: 200, y: 200, z: 200}
   floorHeight: 4
   floors: 1
+  aStarComponent: {fileID: 0}
   nodeRadius: 2
-  roomCeilingPrefab: {fileID: 1305380972374618748, guid: 18b26fb7e90dc0b42a436f1971c74e53, type: 3}
+  roomCeilingPrefab: {fileID: 1305380972374618748, guid: 0824f0031f2f76a4da38dddaa6f51081, type: 3}
   roomFloorPrefab: {fileID: 1305380972374618748, guid: 18b26fb7e90dc0b42a436f1971c74e53, type: 3}
   wallPrefab: {fileID: 2110378738996425676, guid: 5a006b0d355b1014aba049ef661aca41, type: 3}
   wallThickness: 0.1

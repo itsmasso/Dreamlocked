@@ -157,7 +157,7 @@ public class PlayerCamera : NetworkBehaviour
 				if(reactableMonster != null)
 				{
 					//Debug.Log("Enemy Seen ");
-					reactableMonster.ReactToPlayerGaze(transform);
+					reactableMonster.ReactToPlayerGaze(GetComponent<NetworkObject>());
 
 				}
 			}		

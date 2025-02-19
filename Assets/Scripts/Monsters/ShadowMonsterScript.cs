@@ -19,8 +19,6 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 	
 	[Header("Initialize")]
 	[SerializeField] private FollowerEntity agent;
-	[SerializeField] private float minSpawnDistFromPlayers;
-	[SerializeField] private float maxSpawnDistFromPlayers;
 	private MonsterStates currentState;
 	
 	[Header("Stalking Properties")]
@@ -46,58 +44,19 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 	
 
 	private void Start() {
-		currentState = MonsterStates.Roaming;
-		canStalk = true;
+		if(IsServer)
+		{
+			currentState = MonsterStates.Roaming;
+			canStalk = true;
+		}
 
 	}
 	
 	public override void OnNetworkSpawn()
 	{
-		
-		transform.position = SpawnAwayFromPlayers();
+
 	}
-	
-	private Vector3 SpawnAwayFromPlayers()
-	{
-		Vector3 bestPositionToSpawn = transform.position;
-		float maxMinDistance = 0f;
-		
-		foreach(Vector3 hallwayPos in LevelManager.Instance.levelGenerator.GetHallwayList().ToList()){
-			float minDistToPlayers = float.MaxValue;
-			
-			// Calculate the minimum distance from this hallway position to all players
-			foreach(Transform player in PlayerSpawner.Instance.playerTransforms)
-			{
-				float dist = Vector3.Distance(hallwayPos, player.transform.position);
-				if(dist < minDistToPlayers)
-				{
-					minDistToPlayers = dist;
-				}
-			}
-			
-			// If this position meets the minimum distance requirement, return it immediately
-			if(minDistToPlayers >= minSpawnDistFromPlayers && minDistToPlayers <= maxSpawnDistFromPlayers)
-			{
-				Debug.Log("found good position");
-				return hallwayPos;
-				
-			}
-				
-				
-			// Otherwise, track the position that is farthest from the nearest player
-			if(minDistToPlayers > maxMinDistance)
-			{
-				maxMinDistance = minDistToPlayers;
-				bestPositionToSpawn = hallwayPos;
-				
-			}
-		}
-		Debug.Log("No valid positions");
-		// If no valid position was found, return the farthest possible one
-		return bestPositionToSpawn;
-		
-	}
-	
+
 	private bool IsOnRestrictedNode()
 	{
 		// Get node agent is on
@@ -107,18 +66,26 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		return false;
 	}
 	
-	public void ReactToPlayerGaze(Transform playerTransform)
-	{
-		ChaseTarget(playerTransform);
-	}
-	
-	private void ChaseTarget(Transform playerTransform)
+	public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
 		if(currentState != MonsterStates.Chasing)
 		{
-			currentTarget = playerTransform;
-			currentState = MonsterStates.Chasing;
+			ChaseTargetServerRpc(playerObjectRef);
 		}
+	}
+	
+	[ServerRpc(RequireOwnership = false)]
+	private void ChaseTargetServerRpc(NetworkObjectReference playerObjectRef)
+	{
+		ChaseTargetClientRpc(playerObjectRef);
+	}
+	
+	[ClientRpc]
+	private void ChaseTargetClientRpc(NetworkObjectReference playerObjectRef)
+	{
+		playerObjectRef.TryGet(out NetworkObject playerObject);
+		currentTarget = playerObject.transform;
+		currentState = MonsterStates.Chasing;
 	}
 	
 	private bool IsPlayerVisible(Vector3 directionToPlayer, float playerDistance)
@@ -149,7 +116,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		{
 			case MonsterStates.Roaming:
 				//Debug.Log("roaming");
-
+				stalkTimer = 0;
 				chaseTimer = 0;
 				agent.stopDistance = defaultStoppingDistance;
 				agent.canMove = true;
@@ -165,7 +132,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 				float chance = Random.value;
 				if(chance*100 <= chanceToStalkPlayer * Time.deltaTime && canStalk)
 				{
-					currentTarget = PlayerSpawner.Instance.playerTransforms[Random.Range(0, PlayerSpawner.Instance.playerTransforms.Count)];
+					currentTarget = GameManager.Instance.playerTransforms[Random.Range(0, GameManager.Instance.playerTransforms.Count)];
 					currentState = MonsterStates.Stalking;
 				}
 				break;
@@ -197,7 +164,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 				break;
 			case MonsterStates.Chasing:
 				//Debug.Log("chasing");
-
+				stalkTimer = 0;
 				agent.stopDistance = chasingStoppingDistance;
 				agent.canMove = true;
 				constraint.constrainTags = false;
@@ -211,7 +178,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 				Vector3 directionToPlayer = (currentTarget.position - transform.position).normalized;
 				if(playerDistance >= stopChasingDistance && chaseTimer >= maxChaseTime && !IsPlayerVisible(directionToPlayer, playerDistance))
 				{
-					Debug.Log("de aggroed");
+					//Debug.Log("de aggroed");
 					if(stalkCooldownCoroutine != null)
 						StopCoroutine(stalkCooldownCoroutine);
 					stalkCooldownCoroutine = StartCoroutine(StartStalkCooldown());
@@ -219,7 +186,8 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 					currentState = MonsterStates.Roaming;
 				}
 				break;
-
+			default:
+				break;
 		}
 		
 	}

@@ -6,6 +6,7 @@ public class Room : MonoBehaviour
 	public Vector3Int position;
 	public Vector3Int size;
 	public bool isStairs;
+	public bool isMainRoom;
 	public List<Transform> doorNode;
 	
 	public GameObject roomPrefab;
@@ -14,11 +15,11 @@ public class Room : MonoBehaviour
 	public Vector3Int Max => position + size;
 	
 	public Vector3 Center
-    {
-        get
-        {
-            return position + size / 2;
-        }
-    }
+	{
+		get
+		{
+			return position + size / 2;
+		}
+	}
 	
 }

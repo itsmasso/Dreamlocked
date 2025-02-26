@@ -50,7 +50,7 @@ public class PlayerController : NetworkBehaviour
 	[SerializeField] private float jumpHeight;
 	[SerializeField] private float airResistanceMultiplier;
 	[Header("Ground Check")]
-	[SerializeField] private Transform groundCheckTransform;
+	public Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
 

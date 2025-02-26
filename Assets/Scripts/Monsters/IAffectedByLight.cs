@@ -2,5 +2,6 @@ using UnityEngine;
 
 public interface IAffectedByLight
 {
-    public void IsInLight();
+	public void EnteredLight();
+	public void ExitLight();
 }

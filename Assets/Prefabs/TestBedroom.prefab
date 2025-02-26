@@ -249,7 +249,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 3554
+  m_VersionIndex: 3581
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Shape:
     rid: 2128240567430676678
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 3554
+  m_UnmodifiedMeshVersion: 3581
   m_Size: {x: 12, y: 0.1, z: 16}
   m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
@@ -2321,6 +2321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5903727270582141412}
+  - component: {fileID: 3318190196396678893}
   m_Layer: 0
   m_Name: Lights
   m_TagString: Untagged
@@ -2345,6 +2346,29 @@ Transform:
   - {fileID: 7231611380101211586}
   m_Father: {fileID: 2034378400268218833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3318190196396678893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6659138481106082723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84d6898a6573515488ca12373636d609, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lightSource: {fileID: 4912790798895606427}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  enemyColliders: []
 --- !u!1 &6666605187825253286
 GameObject:
   m_ObjectHideFlags: 0
@@ -2372,7 +2396,7 @@ Transform:
   m_GameObject: {fileID: 6666605187825253286}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 4.34, z: 0}
+  m_LocalPosition: {x: 0, y: 3.87, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2510,8 +2534,8 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2.3
-  m_Range: 11.7
+  m_Intensity: 2
+  m_Range: 7
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10

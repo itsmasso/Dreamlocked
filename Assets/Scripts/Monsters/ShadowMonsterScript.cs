@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections;
 
 
-public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
+public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffectedByLight
 {
 	
 	private enum MonsterStates
@@ -17,9 +17,13 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 
 	}
 	
+	[SerializeField]private bool inLight;
 	[Header("Initialize")]
 	[SerializeField] private FollowerEntity agent;
 	private MonsterStates currentState;
+	[SerializeField] private float roamSpeed;
+	[SerializeField] private float inDarkSpeed;
+	[SerializeField] private float inLightSpeed;
 	
 	[Header("Stalking Properties")]
 	[SerializeField] private float chanceToStalkPlayer;
@@ -48,6 +52,8 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		{
 			currentState = MonsterStates.Roaming;
 			canStalk = true;
+			agent.maxSpeed = roamSpeed;
+			inLight = false;
 		}
 
 	}
@@ -102,6 +108,16 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		return true;
 	}
 	
+	public void EnteredLight()
+	{
+		inLight = true;
+	}
+
+	public void ExitLight()
+	{
+		inLight= false;
+	}
+	
 	private IEnumerator StartStalkCooldown()
 	{
 		canStalk = false;
@@ -115,7 +131,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		switch(currentState)
 		{
 			case MonsterStates.Roaming:
-				//Debug.Log("roaming");
+				Debug.Log("roaming");
 				stalkTimer = 0;
 				chaseTimer = 0;
 				agent.stopDistance = defaultStoppingDistance;
@@ -132,16 +148,18 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 				float chance = Random.value;
 				if(chance*100 <= chanceToStalkPlayer * Time.deltaTime && canStalk)
 				{
-					currentTarget = GameManager.Instance.playerTransforms[Random.Range(0, GameManager.Instance.playerTransforms.Count)];
+					if(IsServer) currentTarget = GameManager.Instance.playerTransforms[Random.Range(0, GameManager.Instance.playerTransforms.Count)];
 					currentState = MonsterStates.Stalking;
 				}
 				break;
 			case MonsterStates.Stalking:
-				//Debug.Log("stalking");
+				Debug.Log("stalking");
 
 				agent.stopDistance = defaultStoppingDistance;
 				float targetDistance = Vector2.Distance(new Vector2(currentTarget.position.x, currentTarget.position.z), new Vector2(transform.position.x, transform.position.z));
-				if(targetDistance > playerStalkRange && !IsOnRestrictedNode())
+				float verticalDistance = Mathf.Abs(transform.position.y-1 - currentTarget.GetComponent<PlayerController>().groundCheckTransform.position.y);
+				
+				if(targetDistance > playerStalkRange && !IsOnRestrictedNode() && verticalDistance > 1f)
 				{
 					agent.destination = currentTarget.position;
 					agent.SearchPath();
@@ -165,6 +183,7 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 			case MonsterStates.Chasing:
 				//Debug.Log("chasing");
 				stalkTimer = 0;
+				agent.maxSpeed = inLight ? inLightSpeed : inDarkSpeed;
 				agent.stopDistance = chasingStoppingDistance;
 				agent.canMove = true;
 				constraint.constrainTags = false;
@@ -191,4 +210,6 @@ public class ShadowMonsterScript : NetworkBehaviour, IReactToPlayerGaze
 		}
 		
 	}
+
+
 }

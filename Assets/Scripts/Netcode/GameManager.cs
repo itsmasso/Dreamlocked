@@ -43,12 +43,18 @@ public class GameManager : NetworkSingleton<GameManager>
 	void Start()
 	{	
 		//temporary start here for debugging
-		ChangeGameState(GameState.Lobby);
+		if(IsServer)
+		{
+			ChangeGameState(GameState.Lobby);
+		}
 	}
 
 	public override void OnNetworkSpawn()
 	{
-		NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneLoaded;
+		if(IsServer)
+		{
+			NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneLoaded;
+		}
 	}
 
 	public void ChangeGameState(GameState newState)
@@ -105,6 +111,7 @@ public class GameManager : NetworkSingleton<GameManager>
 		}
 	}
 	
+
 	
 	
 	

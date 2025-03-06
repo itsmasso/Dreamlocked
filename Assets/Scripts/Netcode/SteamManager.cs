@@ -58,6 +58,7 @@ public class SteamManager : MonoBehaviour
             lobby.SetPublic();
             lobby.SetJoinable(true);
             NetworkManager.Singleton.StartHost();
+            GameManager.Instance.ChangeGameState(GameState.Lobby);
         }
     }
 
@@ -123,8 +124,9 @@ public class SteamManager : MonoBehaviour
     public void StartGameServer()
     {
         if(NetworkManager.Singleton.IsHost)
-        {
+        {    
             NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+            
         }
     }
 

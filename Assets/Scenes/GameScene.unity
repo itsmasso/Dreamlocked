@@ -440,7 +440,7 @@ MonoBehaviour:
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
   logPathResults: 0
-  maxNearestNodeDistance: 100
+  maxNearestNodeDistance: 200
   scanOnStartup: 1
   fullGetNearestSearch: 0
   prioritizeGraphs: 0
@@ -1005,7 +1005,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: floors
-      value: 1
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: floorHeight
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: wallThickness
@@ -1023,6 +1027,10 @@ PrefabInstance:
       propertyPath: mainRoomPrefab
       value: 
       objectReference: {fileID: 5168412151322318950, guid: e2155211ce967e74cb355a602de102ee, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: roomLightPrefab
+      value: 
+      objectReference: {fileID: 6844388644389274886, guid: 77999163b7b8aaa479a78a7406593502, type: 3}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: ceilingThickness
       value: 0.2

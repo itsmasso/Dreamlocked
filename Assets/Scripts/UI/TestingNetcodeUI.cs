@@ -15,7 +15,7 @@ public class TestingNetcodeUI : MonoBehaviour
 		startHostButton.onClick.AddListener(() => 
 		{
 			NetworkManager.Singleton.StartHost();
-			
+			GameManager.Instance.ChangeGameState(GameState.Lobby);
 			
 		});
 		

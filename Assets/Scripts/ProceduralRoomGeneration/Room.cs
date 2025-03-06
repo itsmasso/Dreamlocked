@@ -8,6 +8,7 @@ public class Room : MonoBehaviour
 	public bool isStairs;
 	public bool isMainRoom;
 	public List<Transform> doorNode;
+	public Transform lightsTransform;
 	
 	public GameObject roomPrefab;
 	
@@ -20,6 +21,20 @@ public class Room : MonoBehaviour
 		{
 			return position + size / 2;
 		}
+	}
+	
+	public bool PositionInBounds(Vector3 pos)
+	{
+		int posFloor = Mathf.FloorToInt(pos.y / size.y);
+		int boxFloor = Mathf.FloorToInt(position.y / size.y);
+
+		// Only return true if they're on the same floor
+		if (posFloor != boxFloor) return false;
+    
+	    return pos.x >= position.x && pos.x <= position.x + size.x &&
+            pos.y >= position.y && pos.y <= position.y + size.y &&
+            pos.z >= position.z && pos.z <= position.z + size.z;
+
 	}
 	
 }

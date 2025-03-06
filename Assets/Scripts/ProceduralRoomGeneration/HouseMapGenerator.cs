@@ -15,7 +15,7 @@ public enum CellType
 	Door,
 }
 
-public class HouseMapGenerator : MonoBehaviour
+public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 {	
 	private enum RoomEdgeDirections
 	{
@@ -25,6 +25,8 @@ public class HouseMapGenerator : MonoBehaviour
 		Left
 	
 	}
+	
+	
 
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
@@ -44,6 +46,7 @@ public class HouseMapGenerator : MonoBehaviour
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
 	[SerializeField] private GameObject mainRoomPrefab;
+	[SerializeField] private GameObject roomLightPrefab;
 	
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
 	
@@ -79,8 +82,9 @@ public class HouseMapGenerator : MonoBehaviour
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] private bool drawAllNodes;
 	
-	private void Awake()
+	protected override void Awake()
 	{
+		base.Awake();
 		nodeDiameter = Mathf.RoundToInt(nodeRadius*2);
 		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
@@ -118,6 +122,8 @@ public class HouseMapGenerator : MonoBehaviour
 			if(n.cellType == CellType.Door)
 				SpawnDoorWay(n);
 		}
+		
+		SpawnRoomLights();
 		
 		aStarComponent.Scan();
 	
@@ -158,8 +164,41 @@ public class HouseMapGenerator : MonoBehaviour
 	{
 		List<Vector3> hallwayPosList = new List<Vector3>();
 		foreach(Node node in hallways)
-			hallwayPosList.Add(node.pos);
+			hallwayPosList.Add(new Vector3(node.pos.x, node.pos.y - nodeRadius, node.pos.z));
 		return hallwayPosList;
+	}
+	
+	public Room GetRoomFromPosition(Vector3 position)
+	{
+	    foreach(GameObject roomObj in rooms)
+	    {
+	        Room room = roomObj.GetComponent<Room>();
+	        if(room.PositionInBounds(position))
+	        {
+	            return room;
+	        }
+	    }
+	    return null;
+	}
+	
+	public Vector3 GetRandomDoorNeighbourPos(Vector3 position)
+	{
+	    Room room = GetRoomFromPosition(position);
+	    if(room != null)
+	    {
+	    	Vector3 doorNodePos = room.doorNode.Select(d => d.position).OrderBy(d => Vector3.Distance(d, position)).ThenBy(_ => UnityEngine.Random.value).FirstOrDefault(); 
+	    	Vector3[] doorNeighbours = new Vector3[]
+	    	{
+	    	   new Vector3(doorNodePos.x + nodeRadius, doorNodePos.y, doorNodePos.z),  
+	    	   new Vector3(doorNodePos.x - nodeRadius, doorNodePos.y, doorNodePos.z), 
+	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z + nodeRadius), 
+	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z- nodeRadius), 
+	    	   doorNodePos
+	    	};
+	    	
+	    	return doorNeighbours.Where(n => grid.GetNode(n).cellType == CellType.Hallway || grid.GetNode(n).cellType == CellType.Door).OrderBy(_ => UnityEngine.Random.value).FirstOrDefault();
+	    }
+	    return Vector3.zero;
 	}
 	
 	private Vector3Int GetRandomRoomSpawnPosition(int currentFloor, Vector3 size)
@@ -208,16 +247,19 @@ public class HouseMapGenerator : MonoBehaviour
 					}
 				}
 				
-				
+				//choosing random rotation for the room
 				int[] angles = { 0, 90, 180, 270 };
 				int randomIndex = UnityEngine.Random.Range(0, angles.Length);
 				int chosenAngle = angles[randomIndex];
-			
+
+				//creating room
 				GameObject room = Instantiate(newRoom, transform.position, Quaternion.Euler(0, chosenAngle, 0));
 				room.transform.SetParent(gameObject.transform);
 				Room roomComponent = room.GetComponent<Room>();
 				room.transform.position = GetRandomRoomSpawnPosition(floorCount, roomComponent.size);
-				roomComponent.position = Vector3Int.RoundToInt(room.transform.position);
+				roomComponent.position = Vector3Int.RoundToInt(room.transform.position);		
+				
+				//setting room rotation to random rotation
 				if(chosenAngle == 90 || chosenAngle == 270)
 				{
 					int temp = roomComponent.size.x;
@@ -476,58 +518,41 @@ public class HouseMapGenerator : MonoBehaviour
 		}
 	}
 	
+	private void SpawnRoomPart(GameObject prefab, Vector3 position, Vector3 scale)
+	{
+	    GameObject part = Instantiate(prefab, position, Quaternion.identity);
+    	part.transform.SetParent(transform);
+    	part.transform.localScale = scale;
+	}
+	
+	private void TrySpawnHallwayWall(Vector3 nodePos, Vector3 wallPosition, Vector3 wallScale)
+	{
+		CellType type = grid.GetNode(nodePos).cellType;
+		if (type == CellType.None || type == CellType.Room)
+		{
+			SpawnRoomPart(wallPrefab, wallPosition, wallScale);
+		}
+	}
 	
 	private void SpawnHallways(Node node)
 	{
-		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius, node.pos.z);
+		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius - 0.2f, node.pos.z);
 		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius, node.pos.z);
 		
-		GameObject ceiling = Instantiate(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
-		GameObject floor = Instantiate(roomFloorPrefab, floorPosition, Quaternion.identity);
+		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, new Vector3(nodeDiameter, ceilingThickness, nodeDiameter));
+    	SpawnRoomPart(roomFloorPrefab, floorPosition, new Vector3(nodeDiameter, floorThickness, nodeDiameter));
 		
-		floor.transform.SetParent(transform);
-		ceiling.transform.SetParent(transform);
-		
-		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
-		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
-		
-		if(grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.Room)
+		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
+    	TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
+    	TrySpawnHallwayWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
+    	TrySpawnHallwayWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
+	}
+	
+	private void TrySpawnDoorWall(Vector3 nodePos, Vector3 wallPosition, Vector3 wallScale)
+	{
+		if (grid.GetNode(nodePos).cellType == CellType.None)
 		{
-			//wall on the left
-			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-		}
-		
-		if(grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.Room)
-		{
-			//wall on the right
-			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-
-		}
-		
-		if(grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.Room)
-		{
-			//wall on the top
-			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-
-		}
-		
-		if(grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.None || grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.Room)
-		{
-			//wall on the bottom
-			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-
+			SpawnRoomPart(wallPrefab, wallPosition, wallScale);
 		}
 	}
 	
@@ -536,56 +561,31 @@ public class HouseMapGenerator : MonoBehaviour
 		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius, node.pos.z);
 		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius, node.pos.z);
 		
-		GameObject ceiling = Instantiate(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
-		GameObject floor = Instantiate(roomFloorPrefab, floorPosition, Quaternion.identity);
+		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, new Vector3(nodeDiameter, ceilingThickness, nodeDiameter));
+    	SpawnRoomPart(roomFloorPrefab, floorPosition, new Vector3(nodeDiameter, floorThickness, nodeDiameter));	
 		
-		floor.transform.SetParent(transform);
-		ceiling.transform.SetParent(transform);
-		
-		ceiling.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, ceilingThickness, nodeDiameter);
-		floor.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, floorThickness, nodeDiameter);
-		
-		
-		if(grid.GetNode(node.pos - Vector3.right * nodeDiameter).cellType == CellType.None)
-		{
-			//wall on the left
-			Vector3 wallPosition = new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-	
-		}
-		
-		if(grid.GetNode(node.pos + Vector3.right * nodeDiameter).cellType == CellType.None)
-		{
-			//wall on the right
-			Vector3 wallPosition = new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(wallThickness, nodeDiameter, nodeDiameter);
-		
-		}
-		
-		if(grid.GetNode(node.pos + Vector3.forward * nodeDiameter).cellType == CellType.None)
-		{
-			//wall on the top
-			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-		
-		}
-		
-		if(grid.GetNode(node.pos - Vector3.forward * nodeDiameter).cellType == CellType.None)
-		{
-			//wall on the bottom
-			Vector3 wallPosition = new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f);
-			GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-			wall.transform.SetParent(transform);
-			wall.GetComponent<Transform>().localScale = new Vector3(nodeDiameter, nodeDiameter, wallThickness);
-	
-		}
+		TrySpawnDoorWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
+    	TrySpawnDoorWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
+    	TrySpawnDoorWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
+    	TrySpawnDoorWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
 
+	}
+	
+	private void SpawnRoomLights()
+	{
+		//spawning lights inside room
+		if(IsServer)
+		{
+			foreach(GameObject roomObj in rooms)
+			{
+				Room room = roomObj.GetComponent<Room>();
+			    if(room.lightsTransform != null)
+			    {
+			        GameObject roomLightObject = Instantiate(roomLightPrefab, room.lightsTransform.position, Quaternion.identity);
+					roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+			    }
+			}
+		}
 	}
 	
 	private void OnDrawGizmos() {

@@ -261,6 +261,7 @@ MonoBehaviour:
   roamSpeed: 5
   inDarkSpeed: 10
   inLightSpeed: 2
+  searchRadius: 20
   chanceToStalkPlayer: 100
   playerStalkRange: 8
   maxStalkTime: 600
@@ -268,6 +269,7 @@ MonoBehaviour:
   defaultStoppingDistance: 0.5
   chasingStoppingDistance: 1.5
   stopChasingDistance: 10
+  pauseBeforeChasingDuration: 3.5
   maxChaseTime: 5
   groundLayer:
     serializedVersion: 2

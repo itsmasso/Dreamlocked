@@ -492,6 +492,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   isGrounded: 0
+  floorPosition: 0
 --- !u!114 &8281037400485576814
 MonoBehaviour:
   m_ObjectHideFlags: 0

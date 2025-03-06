@@ -53,6 +53,7 @@ public class PlayerController : NetworkBehaviour
 	public Transform groundCheckTransform;
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
+	public float floorPosition;
 
 	public override void OnNetworkSpawn()
 	{
@@ -202,5 +203,14 @@ public class PlayerController : NetworkBehaviour
 		}
 		
 	}
+
+    void FixedUpdate()
+    {
+    
+        if(Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, Mathf.Infinity, groundCheckLayer))
+        {
+            floorPosition = hit.collider.transform.position.y;
+        }
+    }
 
 }

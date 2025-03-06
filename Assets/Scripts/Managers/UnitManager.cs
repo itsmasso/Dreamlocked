@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class UnitManager : MonoBehaviour
 {
+	
 	[SerializeField] private GameObject monster;
 	private List<NetworkObject> spawnedEnemies = new List<NetworkObject>();
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
@@ -38,7 +39,6 @@ public class UnitManager : MonoBehaviour
 			// If this position meets the minimum distance requirement, return it immediately
 			if(minDistToPlayers >= minSpawnDistFromPlayers && minDistToPlayers <= maxSpawnDistFromPlayers)
 			{
-				//Debug.Log("found good position");
 				return hallwayPos;
 			}	
 			// Otherwise, track the position that is farthest from the nearest player
@@ -61,7 +61,9 @@ public class UnitManager : MonoBehaviour
 	public void SpawnMonster(Vector3 position)
 	{	
 		GameObject monsterObject = Instantiate(monster, new Vector3(position.x, position.y + monster.GetComponent<FollowerEntity>().height/2, position.z), Quaternion.identity);
+		
 		monsterObject.GetComponent<NetworkObject>().Spawn(true);
+		
 	}
 	
 	public void DespawnAllEnemies()

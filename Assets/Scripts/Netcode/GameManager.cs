@@ -32,21 +32,13 @@ public class GameManager : NetworkSingleton<GameManager>
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private GameState currentState;
+	
+	
 
 	protected override void Awake()
 	{
 		base.Awake();
 		DontDestroyOnLoad(this.gameObject);
-	}
-
-
-	void Start()
-	{	
-		//temporary start here for debugging
-		if(IsServer)
-		{
-			ChangeGameState(GameState.Lobby);
-		}
 	}
 
 	public override void OnNetworkSpawn()
@@ -63,13 +55,11 @@ public class GameManager : NetworkSingleton<GameManager>
 		{
 			onGameStateChanged?.Invoke();
 			currentState = newState;
-			switch(newState)
+			switch(currentState)
 			{
 				case GameState.Lobby:
-					if(IsServer)
-					{
-						seed.Value = UnityEngine.Random.Range(1, 999999);
-					}
+					seed.Value = UnityEngine.Random.Range(1, 999999);
+					Debug.Log("Current seed:" + seed.Value);
 					break;
 				case GameState.GeneratingLevel:
 					

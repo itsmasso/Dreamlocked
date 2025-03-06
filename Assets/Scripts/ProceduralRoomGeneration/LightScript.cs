@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using Pathfinding;
+using Unity.Netcode;
 using UnityEngine;
 
-public class LightScript : MonoBehaviour
+public class LightScript : NetworkBehaviour
 {
 	[SerializeField] private Light lightSource;
 	[SerializeField] private LayerMask enemyLayer;
 	[SerializeField] private LayerMask obstacleLayer;
 	[SerializeField] private LayerMask groundLayer;
 	private int obstacleLayers;
-	[SerializeField] private HashSet<Transform> enemiesInLight = new HashSet<Transform>();
+	[SerializeField] private HashSet<NetworkObject> enemiesInLight = new HashSet<NetworkObject>();
 	[SerializeField] private Collider[] enemyColliders;
 	void Start()
 	{
@@ -19,9 +19,34 @@ public class LightScript : MonoBehaviour
 	
 	void Update()
 	{
+		if(!IsServer) return;
 		DetectEnemiesInLight();
 		CheckIfEnemyExitLight();
 		
+	}
+	
+	[ServerRpc]
+	private void EnemyEnteredLightServerRpc(NetworkObjectReference enemyNetObjRef)
+	{
+	    if(enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
+	    {
+	        if(enemyNetObj.TryGetComponent(out IAffectedByLight enemy))
+	        {
+	            enemy.EnteredLight();
+	        }
+	    }
+	}
+	
+	[ServerRpc]
+	private void EnemyExitLightServerRpc(NetworkObjectReference enemyNetObjRef)
+	{
+	    if(enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
+	    {
+	        if(enemyNetObj.TryGetComponent(out IAffectedByLight enemy))
+	        {
+	            enemy.ExitLight();
+	        }
+	    }
 	}
 	
 	private void DetectEnemiesInLight()
@@ -29,31 +54,33 @@ public class LightScript : MonoBehaviour
 		enemyColliders = Physics.OverlapSphere(lightSource.transform.position, lightSource.range, enemyLayer);
 		foreach(Collider enemyCollider in enemyColliders)
 		{
-			IAffectedByLight monsterAffectedByLight = enemyCollider.GetComponent<IAffectedByLight>();
-			if(monsterAffectedByLight != null)
+			NetworkObject enemyNetObj = enemyCollider.GetComponent<NetworkObject>();
+			if(enemyNetObj != null && enemyNetObj.IsSpawned)
 			{
-				if(IsDirectlyLit(enemyCollider.transform))
+			    IAffectedByLight monsterAffectedByLight = enemyCollider.GetComponent<IAffectedByLight>();
+				if(monsterAffectedByLight != null)
 				{
-					//Debug.Log("monster in direct light");
-					if(!enemiesInLight.Contains(enemyCollider.transform))
-					{
-						enemiesInLight.Add(enemyCollider.transform);
-						monsterAffectedByLight.EnteredLight();
-					}
+					if(!IsDirectlyLit(enemyCollider.transform)) continue;
+					if(enemiesInLight.Contains(NetworkObject)) continue;
+					
+					enemiesInLight.Add(enemyNetObj);
+					monsterAffectedByLight.EnteredLight();
+					EnemyEnteredLightServerRpc(enemyNetObj);
 				}
 			}
+			
 			
 		}
 	}
 	
 	private void CheckIfEnemyExitLight()
 	{
-		List<Transform> enemiesToRemove = new List<Transform>();
-		foreach(Transform enemy in enemiesInLight)
+		List<NetworkObject> enemiesToRemove = new List<NetworkObject>();
+		foreach(NetworkObject enemy in enemiesInLight)
 		{
 			if(enemy != null)
 			{
-				if(!IsDirectlyLit(enemy) || Vector3.Distance(enemy.position, lightSource.transform.position) >= lightSource.range)
+				if(!IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
 				{
 					enemiesToRemove.Add(enemy);
 				}
@@ -61,11 +88,11 @@ public class LightScript : MonoBehaviour
 			}
 		}
 		
-		foreach (Transform enemy in enemiesToRemove)
+		foreach (NetworkObject enemy in enemiesToRemove)
 		{
 			enemy.GetComponent<IAffectedByLight>().ExitLight();
 			enemiesInLight.Remove(enemy);
-			//Debug.Log("enemy exit light");
+			EnemyExitLightServerRpc(enemy);
 			
 		}
 	}

@@ -476,6 +476,7 @@ MonoBehaviour:
   characterController: {fileID: 4619842117627133740}
   playerScriptableObj: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
   camFollowPivot: {fileID: 2601825304741367845}
+  cameraOffset: 0.66
   moveSpeed: 0
   inputDir: {x: 0, y: 0}
   moveSmoothTime: 0.1

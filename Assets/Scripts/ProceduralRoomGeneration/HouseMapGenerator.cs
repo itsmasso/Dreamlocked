@@ -181,18 +181,18 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	    return null;
 	}
 	
-	public Vector3 GetRandomDoorNeighbourPos(Vector3 position)
+	public Vector3 GetDoorClosestToTarget(Vector3 targetPosition)
 	{
-	    Room room = GetRoomFromPosition(position);
+	    Room room = GetRoomFromPosition(targetPosition);
 	    if(room != null)
 	    {
-	    	Vector3 doorNodePos = room.doorNode.Select(d => d.position).OrderBy(d => Vector3.Distance(d, position)).ThenBy(_ => UnityEngine.Random.value).FirstOrDefault(); 
+	    	Vector3 doorNodePos = room.doorNode.Select(d => d.position).OrderBy(d => Vector3.Distance(d, targetPosition)).ThenBy(_ => UnityEngine.Random.value).FirstOrDefault(); 
 	    	Vector3[] doorNeighbours = new Vector3[]
 	    	{
-	    	   new Vector3(doorNodePos.x + nodeRadius, doorNodePos.y, doorNodePos.z),  
-	    	   new Vector3(doorNodePos.x - nodeRadius, doorNodePos.y, doorNodePos.z), 
-	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z + nodeRadius), 
-	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z- nodeRadius), 
+	    	   new Vector3(doorNodePos.x + nodeRadius/2, doorNodePos.y, doorNodePos.z),  
+	    	   new Vector3(doorNodePos.x - nodeRadius/2, doorNodePos.y, doorNodePos.z), 
+	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z + nodeRadius/2), 
+	    	   new Vector3(doorNodePos.x, doorNodePos.y, doorNodePos.z - nodeRadius/2), 
 	    	   doorNodePos
 	    	};
 	    	

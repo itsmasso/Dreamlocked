@@ -133,6 +133,17 @@ public class PlayerController : NetworkBehaviour
 		camFollowPivot.localPosition = newCamPosition;
 	}
 	
+	public Vector3 GetPlayerGroundedPosition()
+	{
+	    //adjusted player position to account for player jumping
+		return new Vector3(transform.position.x, floorPosition, transform.position.z);
+	}
+	
+	public Vector3 GetPlayerCameraPosition()
+	{
+	    return camFollowPivot.position;
+	}
+	
 	void Update()
 	{
 		if(IsOwner)

@@ -29,7 +29,7 @@ public class Room : MonoBehaviour
 		int boxFloor = Mathf.FloorToInt(position.y / size.y);
 
 		// Only return true if they're on the same floor
-		if (posFloor != boxFloor) return false;
+		if (Mathf.Abs(posFloor - boxFloor) > 1) return false;
     
 	    return pos.x >= position.x && pos.x <= position.x + size.x &&
             pos.y >= position.y && pos.y <= position.y + size.y &&

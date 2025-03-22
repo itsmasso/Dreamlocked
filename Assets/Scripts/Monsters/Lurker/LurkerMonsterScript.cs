@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Pathfinding;
 using System.Linq;
 using System.Collections;
+using System.Diagnostics;
 
 public enum LurkerState
 {
@@ -13,6 +14,9 @@ public enum LurkerState
 }
 public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffectedByLight
 {
+	[Header("Scriptable Object")]
+	public MonsterScriptableObject lurkerScriptableObj;
+	
 	[Header("Pathfinder")]
 	public FollowerEntity agent;
 	
@@ -48,47 +52,31 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public float chasingStoppingDistance;
 	public float stopChasingDistance; //monster stops chasing after a certain distance
 	public float minimumChaseTime; 
-	[SerializeField] private LayerMask groundLayer;
-	[SerializeField] private LayerMask playerLayer;
-	[SerializeField] private LayerMask obstacleLayer;
+	public LayerMask groundLayer;
+	public LayerMask playerLayer;
+	public LayerMask obstacleLayer;
+	[Header("Attack Properties")]
+	public float attackRange;
+	public float attackCooldown;
 	
 	[Header("Light Properties")]
-	[SerializeField] private NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
+	public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
 	[SerializeField] private float inDarkSpeed;
 	[SerializeField] private float inLightSpeed;
 
 	[Header("Animation Properties")]
 	public Animator anim;
-	public NetworkVariable<float> currentAnimSpeed = new NetworkVariable<float>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 	public LurkerAnimationManager animationManager;
-	[SerializeField] private float rotationSpeed;
 
 	private void Start() {
 		if(IsServer)
 		{
+			roamSpeed = lurkerScriptableObj.baseSpeed;
 			canStalk = true;
 			SwitchState(LurkerState.Roaming);
 		}
 	}
 
-    void OnEnable()
-    {
-        currentAnimSpeed.OnValueChanged += OnAnimSpeedChange;
-    }
-
-    void OnDisable()
-    {
-        currentAnimSpeed.OnValueChanged -= OnAnimSpeedChange;
-    }
-    
-    private void OnAnimSpeedChange(float previousSpeed, float newSpeed)
-    {
-        if(!IsServer)
-        {
-            anim.speed = newSpeed;
-            //Debug.Log("changed speed: "  + newSpeed);
-        }
-    }
 
     public void SwitchState(LurkerState newState)
 	{
@@ -113,38 +101,21 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	    currentState.EnterState(this);
 	    
 	}
+	//add a check to see if mosnter spawns in stuck arena/unstuck function
 	
 	private void Update() {
 		if(!IsServer) return;
 		currentState.UpdateState(this);
-		SetAnimationSpeed();
-		anim.speed = currentAnimSpeed.Value;
 		
 		if(currentTarget != null)
 			targetPosition = currentTarget.GetComponent<PlayerController>().GetPlayerGroundedPosition();
-		//RotateTowardsTarget();
-	}
 	
-	private void RotateTowardsTarget()
-	{
-	    if(currentTarget != null)
-	    {
-	    	Vector3 direction = currentTarget.position - transform.position;
-			if(IsTargetVisible(direction, GetTargetDistance()))
-			{	    
-				direction.y = 0; // Lock Y-axis rotation
-				Quaternion targetRotation = Quaternion.LookRotation(direction);
-				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-			}
-	    }
-	}
-	
-	public float GetTargetDistance()
-	{
-	    return Vector2.Distance(
-			new Vector2(targetPosition.x, targetPosition.z), 
-			new Vector2(transform.position.x, transform.position.z)
-			);
+		if ((agent.velocity.magnitude < 0.1f || !agent.canMove || agent.reachedEndOfPath || !agent.hasPath) && networkState.Value != LurkerState.Prechase)
+		{
+			// Freeze animation if not moving
+			animationManager.PlayIdleAnimation();
+		}
+		
 	}
 	
     public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
@@ -164,10 +135,17 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		}
 	}
 	
-	public void SetRandomPlayerAsTarget()
+	public bool SetRandomPlayerAsTarget()
 	{
-	    currentTarget = GameManager.Instance.playerTransforms[Random.Range(0, GameManager.Instance.playerTransforms.Count)];
-	    SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
+	    if(GameManager.Instance.alivePlayers.Count != 0)
+	    {
+	        currentTarget = GameManager.Instance.alivePlayers[Random.Range(0, GameManager.Instance.alivePlayers.Count)];
+	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
+	    	return true;
+	    }else
+	    {
+	        return false;
+	    }
 	}
 	
 	[ClientRpc]
@@ -177,42 +155,13 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	    currentTarget = playerObject.transform;
 	}
 	
-	public bool IsTargetVisible(Vector3 directionToTarget, float targetDistance)
-	{
-		int obstacleLayers = obstacleLayer.value | groundLayer.value;
-		if(Physics.Raycast(Camera.main.transform.position, directionToTarget, out RaycastHit hit, targetDistance + 1))
-		{
-			//if ray is hitting an obstacle layer and not hitting the player layer
-			if(((1 << hit.collider.gameObject.layer) & playerLayer) == 0 && ((1 << hit.collider.gameObject.layer) & obstacleLayers) != 0)
-			{
-				return false;
-			}		
-		}
-		return true;
-	}
+	
 	
 	public float GetSpeed()
 	{
 	    return inLight.Value ? inLightSpeed : inDarkSpeed;
 	}
 	
-	private void SetAnimationSpeed()
-	{
-	    if ((agent.velocity.magnitude < 0.1f || !agent.canMove || agent.reachedEndOfPath || !agent.hasPath) && networkState.Value != LurkerState.Prechase)
-		{
-			// Freeze animation if not moving
-			animationManager.PlayIdleAnimation();
-		}else if (networkState.Value == LurkerState.Chasing)
-		{
-			currentAnimSpeed.Value = inLight.Value ? 0.75f : 2;
-		}else
-		{
-		    // Default animation speed
-			currentAnimSpeed.Value = 1;
-		}
-
-		
-	}
 	
 	private IEnumerator StalkCooldown()
 	{

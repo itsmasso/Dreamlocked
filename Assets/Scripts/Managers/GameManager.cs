@@ -29,6 +29,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	[SerializeField]
 	private GameObject playerPrefab;
 	public List<Transform> playerTransforms = new List<Transform>();
+	public List<Transform> alivePlayers = new List<Transform>();
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private GameState currentState;
@@ -95,10 +96,19 @@ public class GameManager : NetworkSingleton<GameManager>
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);	
 				playerTransforms.Add(playerNetworkObject.transform);
+				alivePlayers.Add(playerNetworkObject.transform);
 				spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
 			}
 		}
+	}
+	
+	public void RemovePlayerFromAliveList(Transform player)
+	{
+	    if(IsServer)
+	    {
+	        alivePlayers.RemoveAll(p => p == player);
+	    }
 	}
 	
 

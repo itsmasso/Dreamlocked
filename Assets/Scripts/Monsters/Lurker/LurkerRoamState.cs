@@ -11,6 +11,8 @@ public class LurkerRoamState : LurkerBaseState
         agent = lurker.agent;
         anim = lurker.animationManager;
         agent.maxSpeed = lurker.roamSpeed;
+        lurker.currentTarget = null;
+   
     }
 
     public override void UpdateState(LurkerMonsterScript lurker)
@@ -36,10 +38,13 @@ public class LurkerRoamState : LurkerBaseState
     
     private void SetPathfindingConstraints(bool constrainTags, int tagMask)
     {
-        NNConstraint constraint = NNConstraint.Walkable;
-    	constraint.constrainTags = constrainTags;
-   	 	constraint.tags = tagMask; //only allow constraint to pick nodes with this tag
-    	agent.pathfindingSettings.traversableTags = tagMask; //only allow agent to move through nodes with this tag
+        if(AstarPath.active.GetNearest(agent.position).node.Tag != 1)
+        {
+            NNConstraint constraint = NNConstraint.Walkable;
+			constraint.constrainTags = constrainTags;
+			constraint.tags = tagMask; //only allow constraint to pick nodes with this tag
+			agent.pathfindingSettings.traversableTags = tagMask; //only allow agent to move through nodes with this tag
+        }
     }
     
     private void TrySwitchToStalkState(LurkerMonsterScript lurker)
@@ -48,8 +53,11 @@ public class LurkerRoamState : LurkerBaseState
 		float chance = Random.value;
 		if(chance*100 <= lurker.chanceToStalkPlayer * Time.deltaTime && lurker.canStalk)
 		{
-			lurker.SetRandomPlayerAsTarget();
-			lurker.SwitchState(LurkerState.Stalking);
+			if(lurker.SetRandomPlayerAsTarget())
+			{
+			    lurker.SwitchState(LurkerState.Stalking);
+			}
+			
 		}
     }
     

@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.Rendering.Universal;
+using System.Linq;
 
 public class PlayerCamera : NetworkBehaviour
 {
@@ -12,12 +13,17 @@ public class PlayerCamera : NetworkBehaviour
 	[SerializeField] private MeshRenderer playerMesh;
 	[Header("Camera Properties")]
 	private Transform mainCameraPosition;
-	[SerializeField] private CinemachineCamera cmCam;
+	[SerializeField] private CinemachineCamera playerCam;
 	[SerializeField] private CinemachinePanTilt cmCamPanTilt;
+	
 	[SerializeField] private Camera itemCamera;
 	[SerializeField] private Transform camFollowPivot;
 	
 	[SerializeField] private Transform itemPivot;
+	private bool isDead;
+	[Header("Spectator Properties")]
+	[SerializeField] private CinemachineCamera spectatorCam;
+	private Transform currentPlayerToSpectate;
 	
 	[Header("Head Sway")]
 	private CinemachineBasicMultiChannelPerlin camNoiseChannel;
@@ -48,10 +54,11 @@ public class PlayerCamera : NetworkBehaviour
 			this.enabled = false;
 		}else
 		{
-			cmCam = FindFirstObjectByType<CinemachineCamera>();
-			cmCamPanTilt = cmCam.gameObject.GetComponent<CinemachinePanTilt>();
-			cmCam.Follow = camFollowPivot;
-			camNoiseChannel = cmCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+			playerCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineCamera>();
+			
+			cmCamPanTilt = playerCam.gameObject.GetComponent<CinemachinePanTilt>();
+			playerCam.Follow = camFollowPivot;
+			camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
 			playerMesh.enabled = false;
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.visible = false;
@@ -59,13 +66,41 @@ public class PlayerCamera : NetworkBehaviour
 			originalCamPos = camFollowPivot.localPosition;
 			mainCameraPosition = Camera.main.transform;
 			Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
+			
+			spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera").GetComponent<CinemachineCamera>();
+			GetComponent<PlayerHealth>().onDeath += DisablePlayerCamera;
+			spectatorCam.enabled = false;
+			playerCam.enabled = true;
+        	itemCamera.enabled = true;
+			isDead = false;
 		}
 		
 
 	}
 
+    private void DisablePlayerCamera()
+    {
+		playerCam.enabled = false;
+        itemCamera.enabled = false;
+        spectatorCam.enabled = true;
+        PickRandomPlayerToSpectate();
+        spectatorCam.Follow = camFollowPivot;
+        isDead = true;
+    }
+    
+    private void PickRandomPlayerToSpectate()
+    {
+        if(GameManager.Instance.alivePlayers.Count != 0)
+        {
+            currentPlayerToSpectate = GameManager.Instance.alivePlayers[Random.Range(0, GameManager.Instance.alivePlayers.Count)];
+        }else
+        {
+            currentPlayerToSpectate = transform;
+        }
+        
+    }
 
-	private void StartHeadBob()
+    private void StartHeadBob()
 	{
 		bobbingTimer += Time.deltaTime * (playerController.currentState == PlayerState.Crouching ? crouchBobSpeed : playerController.currentState == PlayerState.Running ? sprintBobSpeed : walkBobSpeed);
 	
@@ -166,7 +201,7 @@ public class PlayerCamera : NetworkBehaviour
 	
 	void LateUpdate()
 	{	
-		if(cmCam != null)
+		if(playerCam != null && !isDead)
 		{
 			Quaternion targetRotation = Quaternion.Euler(0, cmCamPanTilt.PanAxis.Value, 0);
 			transform.rotation =  targetRotation;
@@ -179,7 +214,20 @@ public class PlayerCamera : NetworkBehaviour
 
 	void Update()
 	{
-		CheckForEnemyVisibility();
+		if(playerCam != null && !isDead)
+		{
+		    CheckForEnemyVisibility();
+		}
+		if(spectatorCam != null && isDead)
+		{
+		    camFollowPivot.transform.position = currentPlayerToSpectate.transform.position;
+		}
 	}
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        GetComponent<PlayerHealth>().onDeath -= DisablePlayerCamera;
+    }
 
 }

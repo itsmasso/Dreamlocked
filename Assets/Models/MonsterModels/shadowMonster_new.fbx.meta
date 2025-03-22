@@ -29,9 +29,8 @@ ModelImporter:
       Activate translation DOF on avatar to improve retargeting quality.\n\t'Spine_6'
       is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Neck_2'
       is inbetween humanoid transforms and has rotation animation that will be discarded.\n\nClip
-      'Twitch' has import animation warnings that might lower retargeting quality:\nNote:
-      Activate translation DOF on avatar to improve retargeting quality.\n\t'Spine_6'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\t'Neck_2'
+      'AggressiveTwitch' has import animation warnings that might lower retargeting
+      quality:\nNote: Activate translation DOF on avatar to improve retargeting quality.\n\t'Neck_2'
       is inbetween humanoid transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
@@ -162,11 +161,40 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Twitch
-      takeName: Twitch
-      internalID: 3563451975986243595
+      name: AggressiveTwitch
+      takeName: AggressiveTwitch
+      internalID: 4381156576326117968
       firstFrame: 0
-      lastFrame: 17
+      lastFrame: 11
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: SlightTwitch
+      takeName: SlightTwitch
+      internalID: 6822984376574103357
+      firstFrame: 0
+      lastFrame: 12
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

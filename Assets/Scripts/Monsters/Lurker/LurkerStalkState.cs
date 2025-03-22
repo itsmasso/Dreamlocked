@@ -4,22 +4,36 @@ using UnityEngine;
 using System.Collections;
 public class LurkerStalkState : LurkerBaseState
 {
+	//lurker component variables
     private FollowerEntity agent;
     private LurkerAnimationManager anim;
+    
+    //lurker position variables
     private Vector3 targetPosition;
+    private Transform lurkerTransform;
+    //stalk variables
+    private float stalkTimer;
     private float playerStalkRange;
+    //stalking outside of room variables
     private bool chosenDoorToHover;
     private Vector3 doorToHoverPosition;
     private int chosenDoorTries;
-    private int maxTries = 30;
-    private float stalkTimer;
+    private int maxTries;
+    
     public override void EnterState(LurkerMonsterScript lurker)
     {
+		//initialize variables
+		lurkerTransform = lurker.transform;
         playerStalkRange = lurker.targetStalkRange;
         targetPosition = lurker.targetPosition;
         agent = lurker.agent;
         anim = lurker.animationManager;
+        chosenDoorToHover = false;
+   
+        //reset variables
         stalkTimer = 0;
+        maxTries = 30;
+        chosenDoorTries = 0;
     }
 
     public override void UpdateState(LurkerMonsterScript lurker)
@@ -39,7 +53,7 @@ public class LurkerStalkState : LurkerBaseState
 		}
 		else 
 		{
-			FollowPlayerIfFarEnough(lurker.GetTargetDistance());
+			FollowPlayerIfFarEnough(GetTargetDistance());
 		}
 
 		stalkTimer += Time.deltaTime;
@@ -49,6 +63,14 @@ public class LurkerStalkState : LurkerBaseState
 			lurker.SwitchState(LurkerState.Roaming);
 		}
     }
+    
+    private float GetTargetDistance()
+	{
+	    return Vector2.Distance(
+			new Vector2(targetPosition.x, targetPosition.z), 
+			new Vector2(lurkerTransform.position.x, lurkerTransform.position.z)
+			);
+	}
     
     private bool IsPlayerInRoom()
 	{

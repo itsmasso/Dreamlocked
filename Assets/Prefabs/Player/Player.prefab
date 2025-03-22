@@ -273,6 +273,7 @@ GameObject:
   - component: {fileID: 8281037400485576814}
   - component: {fileID: 5310495392972413353}
   - component: {fileID: 2376784028857367506}
+  - component: {fileID: 5858055776748554268}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -476,7 +477,6 @@ MonoBehaviour:
   characterController: {fileID: 4619842117627133740}
   playerScriptableObj: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
   camFollowPivot: {fileID: 2601825304741367845}
-  cameraOffset: 0.66
   moveSpeed: 0
   inputDir: {x: 0, y: 0}
   moveSmoothTime: 0.1
@@ -737,3 +737,20 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &5858055776748554268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7062762779246524609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b6a7c3fa39271e4e90134579246a784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerScriptable: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
+  currentHealth:
+    m_InternalValue: 100
+  healthBar: {fileID: 0}

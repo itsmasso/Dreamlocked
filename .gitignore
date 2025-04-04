@@ -26,6 +26,9 @@
 # Visual Studio cache directory
 .vs/
 
+# VSCode History
+.history/
+
 # Gradle cache directory
 .gradle/
 

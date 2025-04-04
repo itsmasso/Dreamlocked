@@ -7,8 +7,6 @@ public class LurkerChaseState : LurkerBaseState
     //lurker component variables
     private FollowerEntity agent;
     private LurkerAnimationManager anim;
-    private LurkerMonsterScript lurkerScript;
-    private MonsterScriptableObject lurkerScriptable;
     //Lurker position
     private Transform lurkerTransform;
     private Vector3 targetPosition;
@@ -17,10 +15,8 @@ public class LurkerChaseState : LurkerBaseState
     private float nextChangeTime;
     private float stopChasingDistance;
     //Attack Variables
-    private bool canAttack;
-    private float attackCooldown;
     private float attackRange;
-    private Coroutine attackCooldownCoroutine;
+
     //Layers
     private LayerMask groundLayer;
 	private LayerMask playerLayer;
@@ -31,11 +27,8 @@ public class LurkerChaseState : LurkerBaseState
     public override void EnterState(LurkerMonsterScript lurker)
     {
         //initialize variables
-        lurkerScript = lurker;
-        lurkerScriptable = lurker.lurkerScriptableObj;
         targetPosition = lurker.targetPosition;
         lurkerTransform = lurker.transform;
-        attackCooldown = lurker.attackCooldown;
         attackRange = lurker.attackRange;
         stopChasingDistance = lurker.stopChasingDistance;
         groundLayer = lurker.groundLayer;
@@ -45,7 +38,6 @@ public class LurkerChaseState : LurkerBaseState
         anim = lurker.animationManager;
         
         //reset variables
-        canAttack = true;
         nextChangeTime = 0f;
         chaseTimer = 0;
         currentCheckTime = 0f;
@@ -116,20 +108,7 @@ public class LurkerChaseState : LurkerBaseState
 		Vector3 directionToTarget = (targetPosition - lurkerTransform.position).normalized;
 		return targetDistance >= stopChasingDistance && !IsTargetVisible(directionToTarget, targetDistance);
 	}
-	private IEnumerator AttackCooldown()
-	{
-	    canAttack = false;
-	    yield return new WaitForSeconds(attackCooldown);
-	    canAttack = true;
-	}
-	
-	private void StartAttackCooldown()
-	{
-	    if(attackCooldownCoroutine != null)
-            lurkerScript.StopCoroutine(attackCooldownCoroutine);
-        attackCooldownCoroutine = lurkerScript.StartCoroutine(AttackCooldown());
-	}
-	
+
 	private void HandleAttackingPlayer(LurkerMonsterScript lurker)
 	{
 	    if(lurker.currentTarget != null)
@@ -137,16 +116,9 @@ public class LurkerChaseState : LurkerBaseState
 	        currentCheckTime += Time.deltaTime;
 	        if(currentCheckTime >= interval)
 	        {
-                if(GetTargetDistance() <= attackRange && canAttack)
+                if(GetTargetDistance() <= attackRange)
                 {
-                    PlayerHealth playerHealth = lurker.currentTarget.GetComponent<PlayerHealth>();
-                    playerHealth.TakeDamageServerRpc(lurkerScriptable.damage);
-                    if(playerHealth.currentHealth.Value <= 0)
-                    {
-                        lurker.StartStalkCooldown();
-                        lurker.SwitchState(LurkerState.Roaming);
-                    }
-                    StartAttackCooldown();
+                   lurker.SwitchState(LurkerState.Attacking);
                 }
 	            currentCheckTime = 0f;
 	        }

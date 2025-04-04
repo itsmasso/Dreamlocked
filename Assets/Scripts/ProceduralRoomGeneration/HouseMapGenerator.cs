@@ -45,16 +45,24 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[SerializeField] private GameObject roomFloorPrefab;
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
-	[SerializeField] private GameObject mainRoomPrefab;
 	[SerializeField] private GameObject roomLightPrefab;
-	
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
+	
+	// We can possibly remove these since they will be stored in the specialRooms list
+	[Header("Special Room Prefab Components")]
+	[SerializeField] private GameObject mainRoomPrefab;
+	[SerializeField] private GameObject GFClockRoomPrefab;
+	
+	[Header("Special Room Properties")]
+	[SerializeField] private List<GameObject> specialRooms;
+	private int specialRoomIndex = 0;
+	private bool spawnedMainRoom;
+	private bool spawnedGFClockRoom;
 	
 	[Header("Room Properties")]
 	[SerializeField] private int roomsPerFloor;
 	
 	[Header("Spawn Room Algorithm")]
-	private bool spawnedMainRoom;
 	[SerializeField] private int spaceBetweenRooms;
 	public List<GameObject> rooms {get; private set;}
 	
@@ -105,6 +113,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 		spawnedMainRoom = false;
+		spawnedGFClockRoom = false;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
@@ -132,6 +141,29 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		GameManager.Instance.ChangeGameState(GameState.GameStart);
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		
+	}
+	
+	/*****************************************************************
+	* GetRoomsList
+	*****************************************************************
+	* Author: Dylan Werelius
+	*****************************************************************
+	* Description:
+		This function will return a list of the positions of all the
+		rooms that have been spawned. I use it in the UnitManager
+		script to spawn the mannequin monsters in each room.
+	*****************************************************************/
+	public List<Vector3> GetRoomsList()
+	{
+		List<Vector3> roomPositions = new List<Vector3>();
+		UnityEngine.Debug.Log("Getting Room Positions");
+		foreach(GameObject room in rooms) {
+			if (!room.GetComponent<Room>().isMainRoom && !room.GetComponent<Room>().isStairs)
+			{
+				roomPositions.Add(room.transform.position);
+			}
+		}
+		return roomPositions;
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){
@@ -238,10 +270,14 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 				else
 				{
 					//spawn normal room
-					if(!spawnedMainRoom) 
-					{
-						newRoom = mainRoomPrefab;
-						spawnedMainRoom = true;
+					// Old Working Code (Uncomment if you break something)
+					// if(!spawnedMainRoom) 
+					// {
+					// 	newRoom = mainRoomPrefab;
+					// 	spawnedMainRoom = true;
+					if (specialRoomIndex < specialRooms.Count) {
+						newRoom = specialRooms[specialRoomIndex];
+						specialRoomIndex++;
 					}else{
 						newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
 					}
@@ -518,56 +554,56 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		}
 	}
 	
-	private void SpawnRoomPart(GameObject prefab, Vector3 position, Vector3 scale)
+	private void SpawnRoomPart(GameObject prefab, Vector3 position, Quaternion rotation)
 	{
 	    GameObject part = Instantiate(prefab, position, Quaternion.identity);
     	part.transform.SetParent(transform);
-    	part.transform.localScale = scale;
+    	part.transform.rotation = rotation;
 	}
 	
-	private void TrySpawnHallwayWall(Vector3 nodePos, Vector3 wallPosition, Vector3 wallScale)
+	private void TrySpawnHallwayWall(Vector3 nodePos, Vector3 wallPosition, Quaternion wallRotation)
 	{
 		CellType type = grid.GetNode(nodePos).cellType;
-		if (type == CellType.None || type == CellType.Room)
+		if (type == CellType.None)
 		{
-			SpawnRoomPart(wallPrefab, wallPosition, wallScale);
+			SpawnRoomPart(wallPrefab, wallPosition, wallRotation);
 		}
 	}
 	
 	private void SpawnHallways(Node node)
 	{
 		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius - 0.2f, node.pos.z);
-		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius, node.pos.z);
+		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius + 0.05f, node.pos.z);
 		
-		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, new Vector3(nodeDiameter, ceilingThickness, nodeDiameter));
-    	SpawnRoomPart(roomFloorPrefab, floorPosition, new Vector3(nodeDiameter, floorThickness, nodeDiameter));
+		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
+    	SpawnRoomPart(roomFloorPrefab, floorPosition, Quaternion.identity);
 		
-		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
-    	TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
-    	TrySpawnHallwayWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
-    	TrySpawnHallwayWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
+		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - 0.05f, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, -180, 0));
+    	TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius, node.pos.y+ 0.05f, node.pos.z), Quaternion.identity);
+    	TrySpawnHallwayWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z + nodeRadius), Quaternion.Euler(0, -90, 0));
+    	TrySpawnHallwayWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z - nodeRadius - 0.05f), Quaternion.Euler(0, 90, 0));
 	}
 	
-	private void TrySpawnDoorWall(Vector3 nodePos, Vector3 wallPosition, Vector3 wallScale)
+	private void TrySpawnDoorWall(Vector3 nodePos, Vector3 wallPosition, Quaternion wallRotation)
 	{
 		if (grid.GetNode(nodePos).cellType == CellType.None)
 		{
-			SpawnRoomPart(wallPrefab, wallPosition, wallScale);
+			SpawnRoomPart(wallPrefab, wallPosition, wallRotation);
 		}
 	}
 	
 	private void SpawnDoorWay(Node node)
 	{
-		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius, node.pos.z);
-		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius, node.pos.z);
+		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius - 0.2f, node.pos.z);
+		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius+ 0.05f, node.pos.z);
 		
-		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, new Vector3(nodeDiameter, ceilingThickness, nodeDiameter));
-    	SpawnRoomPart(roomFloorPrefab, floorPosition, new Vector3(nodeDiameter, floorThickness, nodeDiameter));	
+		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
+    	SpawnRoomPart(roomFloorPrefab, floorPosition, Quaternion.identity);	
 		
-		TrySpawnDoorWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
-    	TrySpawnDoorWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius + wallThickness / 2f, node.pos.y, node.pos.z), new Vector3(wallThickness, nodeDiameter, nodeDiameter));
-    	TrySpawnDoorWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z + nodeRadius + wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
-    	TrySpawnDoorWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y, node.pos.z - nodeRadius - wallThickness / 2f), new Vector3(nodeDiameter, nodeDiameter, wallThickness));
+		TrySpawnDoorWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - 0.05f, node.pos.y+ 0.05f, node.pos.z), Quaternion.Euler(0, -180, 0));
+    	TrySpawnDoorWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius, node.pos.y+ 0.05f, node.pos.z), Quaternion.identity);
+    	TrySpawnDoorWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z + nodeRadius), Quaternion.Euler(0, -90, 0));
+    	TrySpawnDoorWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z - nodeRadius - 0.05f), Quaternion.Euler(0, 90, 0));
 
 	}
 	

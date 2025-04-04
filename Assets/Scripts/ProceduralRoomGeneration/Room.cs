@@ -9,7 +9,7 @@ public class Room : MonoBehaviour
 	public bool isMainRoom;
 	public List<Transform> doorNode;
 	public Transform lightsTransform;
-	
+	public bool isSpecialRoom;
 	public GameObject roomPrefab;
 	
 	public Vector3Int Min => position;

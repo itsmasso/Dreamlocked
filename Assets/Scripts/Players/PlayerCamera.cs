@@ -5,22 +5,31 @@ using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.Rendering.Universal;
 using System.Linq;
+using System.Collections;
 
-public class PlayerCamera : NetworkBehaviour
+public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 {
 	
 	private PlayerController playerController;
 	[SerializeField] private MeshRenderer playerMesh;
+	private bool canMove;
 	[Header("Camera Properties")]
-	private Transform mainCameraPosition;
-	[SerializeField] private CinemachineCamera playerCam;
-	[SerializeField] private CinemachinePanTilt cmCamPanTilt;
 	
+	[SerializeField] private CinemachineCamera playerCam;
+
+	[SerializeField] private CinemachinePanTilt cmCamPanTilt;
+	[SerializeField] private CinemachineInputAxisController inputAxisController;
 	[SerializeField] private Camera itemCamera;
 	[SerializeField] private Transform camFollowPivot;
-	
+	private Transform mainCameraPosition;
 	[SerializeField] private Transform itemPivot;
 	private bool isDead;
+	[Header("Zoom Settings")]
+	[SerializeField] private Vector2 jumpScareFOV;
+	[SerializeField] private Vector2 defaultFOV;
+	[SerializeField] private float zoomSmoothTime;
+	private CinemachineFollowZoom followZoom;
+	
 	[Header("Spectator Properties")]
 	[SerializeField] private CinemachineCamera spectatorCam;
 	private Transform currentPlayerToSpectate;
@@ -55,10 +64,12 @@ public class PlayerCamera : NetworkBehaviour
 		}else
 		{
 			playerCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineCamera>();
-			
+	
 			cmCamPanTilt = playerCam.gameObject.GetComponent<CinemachinePanTilt>();
 			playerCam.Follow = camFollowPivot;
 			camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+			inputAxisController = playerCam.GetComponentInChildren<CinemachineInputAxisController>();
+			followZoom = playerCam.GetComponentInChildren<CinemachineFollowZoom>();
 			playerMesh.enabled = false;
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.visible = false;
@@ -73,6 +84,8 @@ public class PlayerCamera : NetworkBehaviour
 			playerCam.enabled = true;
         	itemCamera.enabled = true;
 			isDead = false;
+			canMove = true;
+			defaultFOV = followZoom.FovRange;
 		}
 		
 
@@ -86,6 +99,14 @@ public class PlayerCamera : NetworkBehaviour
         PickRandomPlayerToSpectate();
         spectatorCam.Follow = camFollowPivot;
         isDead = true;
+    }
+    
+    public CinemachinePanTilt GetPlayerCamRotation()
+    {
+        if(cmCamPanTilt != null)
+			return cmCamPanTilt;
+		else
+			return null;
     }
     
     private void PickRandomPlayerToSpectate()
@@ -201,7 +222,7 @@ public class PlayerCamera : NetworkBehaviour
 	
 	void LateUpdate()
 	{	
-		if(playerCam != null && !isDead)
+		if(playerCam != null && !isDead && canMove)
 		{
 			Quaternion targetRotation = Quaternion.Euler(0, cmCamPanTilt.PanAxis.Value, 0);
 			transform.rotation =  targetRotation;
@@ -222,6 +243,10 @@ public class PlayerCamera : NetworkBehaviour
 		{
 		    camFollowPivot.transform.position = currentPlayerToSpectate.transform.position;
 		}
+		
+		inputAxisController.enabled = canMove;
+		followZoom.FovRange = canMove ? Vector2.Lerp(followZoom.FovRange, defaultFOV, zoomSmoothTime * Time.deltaTime) : Vector2.Lerp(followZoom.FovRange, jumpScareFOV, zoomSmoothTime * Time.deltaTime);
+	
 	}
 
     public override void OnDestroy()
@@ -230,4 +255,15 @@ public class PlayerCamera : NetworkBehaviour
         GetComponent<PlayerHealth>().onDeath -= DisablePlayerCamera;
     }
 
+    public void ApplyAnimationLock(float animationTime)
+    {
+        StartCoroutine(AnimationLocked(animationTime));
+    }
+    
+    private IEnumerator AnimationLocked(float lockTime)
+    {
+        canMove = false;
+        yield return new WaitForSeconds(lockTime);
+        canMove = true;
+    }
 }

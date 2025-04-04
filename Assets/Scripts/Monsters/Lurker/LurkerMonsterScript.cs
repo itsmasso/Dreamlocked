@@ -10,7 +10,8 @@ public enum LurkerState
     Roaming,
     Stalking,
     Prechase,
-    Chasing
+    Chasing,
+    Attacking
 }
 public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffectedByLight
 {
@@ -27,10 +28,11 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public LurkerStalkState stalkState = new LurkerStalkState();
 	public LurkerPrechaseState preChaseState = new LurkerPrechaseState();
 	public LurkerChaseState chaseState = new LurkerChaseState();
-	
+	public LurkerAttackState attackState = new LurkerAttackState();
 	[Header("Target Properties")]
 	public Transform currentTarget;
 	public Vector3 targetPosition;
+	public Transform headTransform;
 	
 	[Header("Roam Properties")]
 	public float defaultStoppingDistance;
@@ -55,9 +57,12 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public LayerMask groundLayer;
 	public LayerMask playerLayer;
 	public LayerMask obstacleLayer;
+	
 	[Header("Attack Properties")]
 	public float attackRange;
 	public float attackCooldown;
+	public bool canAttack;
+	private Coroutine attackCooldownCoroutine;
 	
 	[Header("Light Properties")]
 	public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
@@ -73,6 +78,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		{
 			roamSpeed = lurkerScriptableObj.baseSpeed;
 			canStalk = true;
+			canAttack = true;
 			SwitchState(LurkerState.Roaming);
 		}
 	}
@@ -95,6 +101,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	        	break;
 	        case LurkerState.Chasing:
 	        	currentState = chaseState;
+	        	break;
+	        case LurkerState.Attacking:
+	        	currentState = attackState;
 	        	break;   
 	    }
 
@@ -120,7 +129,10 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	
     public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
-		ChaseTargetServerRpc(playerObjectRef);
+		if(canAttack)
+		{
+		    ChaseTargetServerRpc(playerObjectRef);
+		}
 	}
 	
 	[ServerRpc(RequireOwnership = false)]
@@ -175,6 +187,20 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	     if(stalkCooldownCoroutine != null)
 				StopCoroutine(stalkCooldownCoroutine);
 		stalkCooldownCoroutine = StartCoroutine(StalkCooldown());
+	}
+	
+	private IEnumerator AttackCooldown()
+	{
+	    canAttack = false;	
+		yield return new WaitForSeconds(attackCooldown);
+		canAttack = true;
+	}
+	
+	public void StartAttackCooldown()
+	{
+	    if(attackCooldownCoroutine != null)
+				StopCoroutine(attackCooldownCoroutine);
+		attackCooldownCoroutine = StartCoroutine(AttackCooldown());
 	}
 	
 	public void EnteredLight()

@@ -3,15 +3,17 @@ using Unity.Netcode;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using Unity.Netcode.Components;
+using System.Collections;
 
 public enum PlayerState
 {
 	Walking,
 	Running,
 	Crouching,
-	Hiding
+	Hiding,
+	MovementLocked
 }
-public class PlayerController : NetworkBehaviour
+public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 {
  	public PlayerState currentState {get; private set;}
 
@@ -35,6 +37,7 @@ public class PlayerController : NetworkBehaviour
 	private Vector3 smoothDampVelocity = Vector3.zero;
 	[SerializeField] private float moveSmoothTime;
 	[SerializeField] private float gravity = -15f;
+	private bool canMove;
 
 	[Header("Sprinting")]
 	[SerializeField] private float addedSprintSpeed;
@@ -69,7 +72,7 @@ public class PlayerController : NetworkBehaviour
 			
 		}else
 		{
-			
+			canMove = true;
 			baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
 			moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
 			targetCamHeight = standHeight;
@@ -89,13 +92,14 @@ public class PlayerController : NetworkBehaviour
 
 	public void OnMove(InputAction.CallbackContext ctx)
 	{
+		if(!canMove) return;
 		inputDir = ctx.ReadValue<Vector2>(); //getting the player's input values. example: input A returns (-1, 0)
 	}
 	
 	public void OnCrouch(InputAction.CallbackContext ctx)
 	{
 		//later probably add a way to switch between toggle to crouch and hold to crouch (for now its toggle to crouch)
-		if(ctx.performed && !enabledCrouching && isGrounded)
+		if(ctx.performed && !enabledCrouching && isGrounded && canMove)
 		{
 			targetCamHeight = crouchHeight;
 			enabledCrouching = true;
@@ -119,7 +123,7 @@ public class PlayerController : NetworkBehaviour
 
 	public void OnJump(InputAction.CallbackContext ctx)
 	{
-		if(isGrounded && ctx.performed)
+		if(isGrounded && ctx.performed && canMove)
 		{
 			playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 		}
@@ -148,12 +152,15 @@ public class PlayerController : NetworkBehaviour
 	{
 		if(IsOwner)
 		{
-
+			if(!canMove)
+			{
+			    currentState = PlayerState.MovementLocked;
+			}
+			
 			//checking to see if sphere collider is touching the ground to determine if player is grounded or not
 			isGrounded = Physics.CheckSphere(groundCheckTransform.position, 0.25f, groundCheckLayer); 
 			
 			Vector3 moveDir = Camera.main.transform.right * inputDir.x + Camera.main.transform.forward * inputDir.y; 
-			
 			moveDir.y = 0;
 			Vector3 targetDirection = moveDir.normalized; //normalizing movement direction to prevent diagonal direction from moving faster	
 			smoothedDirection = Vector3.SmoothDamp(smoothedDirection, targetDirection, ref smoothDampVelocity, moveSmoothTime);
@@ -206,6 +213,20 @@ public class PlayerController : NetworkBehaviour
 					break;
 				case PlayerState.Hiding:
 					break;
+				case PlayerState.MovementLocked:
+					moveSpeed = 0;
+					inputDir = Vector3.zero;
+					targetCamHeight = standHeight;
+					enabledCrouching = false;  
+					if(canMove)
+					{
+					    if(enabledSprinting)
+							currentState = PlayerState.Running;
+						else
+						    currentState = PlayerState.Walking;
+					}
+						
+					break;
 				default:
 					break;
 			}
@@ -224,4 +245,15 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    public void ApplyAnimationLock(float animationTime)
+    {
+        StartCoroutine(AnimationLocked(animationTime));
+    }
+    
+    private IEnumerator AnimationLocked(float lockTime)
+    {
+        canMove = false;
+        yield return new WaitForSeconds(lockTime);
+        canMove = true;
+    }
 }

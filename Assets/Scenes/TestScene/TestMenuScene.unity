@@ -513,6 +513,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   playerPrefab: {fileID: 7062762779246524609, guid: c58e4e7fde9f52b4e82288982ef50fd6, type: 3}
   playerTransforms: []
+  alivePlayers: []
   seed:
     m_InternalValue: 0
   spawnIndex:

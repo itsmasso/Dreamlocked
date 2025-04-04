@@ -72,6 +72,7 @@ public class GameManager : NetworkSingleton<GameManager>
 					
 					break;
 				case GameState.GameOver:
+					Debug.Log("Game over");
 					break;
 				default:
 					break;
@@ -108,6 +109,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	    if(IsServer)
 	    {
 	        alivePlayers.RemoveAll(p => p == player);
+	        if(alivePlayers.Count <= 0) ChangeGameState(GameState.GameOver);
 	    }
 	}
 	

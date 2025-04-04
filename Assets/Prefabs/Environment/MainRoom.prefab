@@ -364,6 +364,7 @@ MonoBehaviour:
   isMainRoom: 1
   doorNode:
   - {fileID: 510931179846448132}
+  lightsTransform: {fileID: 0}
   roomPrefab: {fileID: 5168412151322318950}
 --- !u!1 &5207317734042210599
 GameObject:

@@ -10,6 +10,7 @@ public class UnitManager : MonoBehaviour
 	
 	[SerializeField] private GameObject monster;
 	private List<NetworkObject> spawnedEnemies = new List<NetworkObject>();
+	[SerializeField] private GameObject MQMonsterPrefab;
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
 	[SerializeField] private float minSpawnDistFromPlayers;
 	[SerializeField] private float maxSpawnDistFromPlayers;
@@ -56,6 +57,7 @@ public class UnitManager : MonoBehaviour
 	private void SpawnStartEnemies()
 	{
 		SpawnMonster(GetPositionInRangeOfPlayers());
+		SpawnMannequinMonsters();
 	}
 
 	public void SpawnMonster(Vector3 position)
@@ -64,6 +66,31 @@ public class UnitManager : MonoBehaviour
 		
 		monsterObject.GetComponent<NetworkObject>().Spawn(true);
 		
+	}
+	/*****************************************************************
+	* SpawnMannequinMonsters
+	*****************************************************************
+	* Author: Dylan Werelius
+	*****************************************************************
+	* Description:
+		This function will spawn a mannequin monster in each of the
+		rooms. It uses functions from the HouseMapGenerator to get
+		the positions of all the rooms and then it creates instances
+		of the MQMonster objects in each room.
+	*****************************************************************/
+	
+	private void SpawnMannequinMonsters()
+	{
+		foreach(Vector3 roomPos in houseMapGenerator.GetRoomsList().ToList())
+		{
+			// Spawn the monster on the first floor
+			if (roomPos.y == -8.00)
+			{
+				GameObject mannequinObject = Instantiate(MQMonsterPrefab, new Vector3(roomPos.x, roomPos.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/16, roomPos.z), Quaternion.identity);
+				mannequinObject.GetComponent<NetworkObject>().Spawn(true);
+				//Debug.Log("Mannequin Spawned at: " + roomPos);
+			}
+		}
 	}
 	
 	public void DespawnAllEnemies()

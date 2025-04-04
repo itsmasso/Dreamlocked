@@ -8,7 +8,7 @@ public class LurkerAnimationManager : NetworkBehaviour
     [SerializeField] private LurkerMonsterScript lurkerScript;
     [SerializeField] private MultiAimConstraint multiAimConstraint;
     [SerializeField] private Transform sourceTarget;
-    private int baseLayer, headLayer, rightArmLayer, leftArmLayer;
+    public int baseLayer, headLayer, rightArmLayer, leftArmLayer, attackLayer;
     public NetworkVariable<float> currentAnimSpeed = new NetworkVariable<float>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private int emptyStateHash;
 
@@ -23,6 +23,7 @@ public class LurkerAnimationManager : NetworkBehaviour
         headLayer = animator.GetLayerIndex("Head");
         rightArmLayer = animator.GetLayerIndex("Right Arm");
         leftArmLayer = animator.GetLayerIndex("Left Arm");
+        attackLayer = animator.GetLayerIndex("Attack");
         emptyStateHash = Animator.StringToHash("Empty");
     }
     
@@ -113,7 +114,11 @@ public class LurkerAnimationManager : NetworkBehaviour
         animator.SetLayerWeight(leftArmLayer, 1);
         PlayRandomTwitch();
     }
-    
+    public void PlayAttackAnimation()
+	{
+	    animator.SetLayerWeight(attackLayer, 1);
+	    animator.SetTrigger("Attack");
+	}
     
     public void PlayIdleAnimation()
     {
@@ -146,4 +151,6 @@ public class LurkerAnimationManager : NetworkBehaviour
         animator.SetBool("Running", true);
         animator.SetBool("Prechase", false);
 	}
+	
+
 }

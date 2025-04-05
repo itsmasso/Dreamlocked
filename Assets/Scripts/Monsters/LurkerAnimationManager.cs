@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.Animations.Rigging;
-using UnityEditor.Animations;
+
 public class LurkerAnimationManager : NetworkBehaviour
 {
     [SerializeField] private Animator animator;

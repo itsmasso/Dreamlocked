@@ -24,7 +24,7 @@ Material:
     RenderType: Opaque
   disabledShaderPasses:
   - MOTIONVECTORS
-  m_LockedProperties: 
+  m_LockedProperties: _BumpMap _BumpScale
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -109,7 +109,7 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.47
+    - _Smoothness: 0.328
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -118,8 +118,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.8773585, g: 0.85684603, b: 0.64146495, a: 1}
-    - _Color: {r: 0.8773585, g: 0.85684603, b: 0.64146495, a: 1}
+    - _BaseColor: {r: 0.8773585, g: 0.8510536, b: 0.75734246, a: 1}
+    - _Color: {r: 0.8773585, g: 0.8510536, b: 0.75734246, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

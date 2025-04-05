@@ -7,8 +7,10 @@ public class Room : MonoBehaviour
 	public Vector3Int size;
 	public bool isStairs;
 	public bool isMainRoom;
+	public float yRotation;
 	public List<Transform> doorNode;
-	public Transform lightsTransform;
+	public List<Transform> lightsTransforms;
+	public List<Transform> doorTransforms;
 	public bool isSpecialRoom;
 	public GameObject roomPrefab;
 	

@@ -2,7 +2,7 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public abstract class InteractableItemBase : NetworkBehaviour
+public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 {
 	[SerializeField] private Rigidbody objectRb;
 	public ItemScriptableObject itemScriptableObject;

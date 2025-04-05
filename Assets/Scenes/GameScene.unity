@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+  m_AmbientSkyColor: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -689,7 +689,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAACAn+ubnstbOwIAAIYEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGVU8Fy2kAM/RXG56aDIYSkxwJNDoF0gJlm0ulB2MLeYb1LtWsIMPx7pbUNzrSXntZ+0tPqSW9PUZIDQeKR5pCq0kVfOt3Pt586UWKNtyVN4X1CZInxnqCo9UIdMaQJsAe9gZXGJ1RZ7uusBhxpVaxC6oDRAt4X2m6F2+9W/5M0w2c0mc+FGUBl5pgpa+pb+oxhqrylpdJYg3HvnmFfA69/IW8XpHQoPJHlqURGtkjPcECa2lStVQKe75Lwz18cTFWBxjHCUbkoGjdAfxxxfAXJJiNbmnRJsENysFJa+YOk/qhFSx6hxh0Y/0iwzRclrSHBS0k7s36Ov0tFITexWmMibSzQe2Uy6ebUghtiaNsJRQcB4DaS2Yl2oEvJuIk7Z5kCZHUsaCJwvF2eyogrqlRKXIZxiU3R5WFKa9DuQ2SJRKDMPzhLwvZgfZVYGaGA7djujYNiq1nSN3ZY8FC/Fix9zJtCY/SgtOyMo9aMKuWXlkyptegi68O2KtHv4itGD/V5lDPoX1tKMP0qW3IjNHzH/zBqi9X5vW7DqL6O1VdgudzupcmX0rNGvE5CAjNe2sgaU62wPdmGVtviSjMIhM4v+EjyF6MPr28tGhox1wx2BXNHZXDKlZuVKv1ohiju9u7Xw4fuMB4MV3cP8c2w+xDj3RD6g6R/2xvGUVChjPIK9Heur30zGn6lrY0bKELFJ8vPaQpbsWBKsH9Ux8K2HKDM2i4SdoV5qfgXybxm0DzYdBKecsvo0ekcnf8AUEsDBBQAAAgIAACAn+tHuZShbgAAAHkAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz1jPWUVBKL0osyCgGChiCOKWZKSB2tJKhgZFFmrmlgbmhqXmSmaWhrrmBpWGqmXmisWmysYmRuaFSLFB9SWVBql9ibipET0BiSUZaZl5KZl66XlBqcmJxiTvIcKXYWgBQSwECLQAUAAAICAAAgJ/rm57LWzsCAACGBAAACwAkAAAAAAAAAAAAAAAAAAAAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwECLQAUAAAICAAAgJ/rR7mUoW4AAAB5AAAACQAkAAAAAAAAAAAAAACIAgAAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsFBgAAAAACAAIAuAAAAEEDAAAAAA==
+    dataString: UEsDBBQAAAgIAACAn+txT/YUOwIAAIgEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGVU01v2zAM/SuBz9uQr9bNjkuy9tC0QxJgRYcdGJuxhcpSRsn5RP57SdlOXGyXnWQ/8lF85NMpSnIgSDzSHFJVuuhrp/tl+KkTJdZ4W9IM9lMiS4z3BUWtF+qIIU2AHeg3WGl8QJXlvs5qwLFWxSqk3jBawH6h7Ua4g271P00zfEST+VyYAVRmjpmypr5lwBimyltaKo012OvfMexr4OUv5PWClA6FJ7I8lcjIBukRDkgzm6q1SsDzXRL+9ZuDqSrQOEY4KhdFkwYYTCKOryB5y8iWJl0SbJEcrJRW/iCpP2vRkkeocQvG3xNs8kVJa0jwUtI+WT/HP6WikJtYrTGRNhbovTKZdHNqwQ0xtO2EooMAcG+S2Ym2oEsMAxzGnbPMAbI6GlQRON4vz2XMNVUqRS7juMRm6PIwpzVo9yGyRCJQ5h+cJWF7tL5KrKxQwGZid8ZBsdEs6jt7LLhoUEuWPuZNoQl6UFq2xlFrxpX2S0um1Fp0kfVhX5XsvTiL0UN9HuUM+teWEky/yZ7cGA3f8T+M2mR1fr/bMKqvY/UVWC63O2nyufSsEa+TkMATr21sjamW2J5sQ6uNcaUZBELnF3wk+bPRh5fXFg2N2OsJtgVzx2XwypWblSr9aIeo1+3freNRN+7dxKvbUe9z3B318DaGwU0yGPbjXhRUKKO8Av2D62vfjIbfaWvjBopQ8cHyg5rBRkyYEuzu1bGwLQcos7aLhF1hniv+RTKvGTQPNp2Gx9yyenQ6R+d3UEsDBBQAAAgIAACAn+tHuZShbgAAAHkAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz1jPWUVBKL0osyCgGChiCOKWZKSB2tJKhgZFFmrmlgbmhqXmSmaWhrrmBpWGqmXmisWmysYmRuaFSLFB9SWVBql9ibipET0BiSUZaZl5KZl66XlBqcmJxiTvIcKXYWgBQSwECLQAUAAAICAAAgJ/rcU/2FDsCAACIBAAACwAkAAAAAAAAAAAAAAAAAAAAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwECLQAUAAAICAAAgJ/rR7mUoW4AAAB5AAAACQAkAAAAAAAAAAAAAACIAgAAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsFBgAAAAACAAIAuAAAAEEDAAAAAA==
     file_cachedStartup: {fileID: 0}
     cacheStartup: 0
   showNavGraphs: 1
@@ -781,7 +781,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
   m_PrefabInstance: {fileID: 8318279396195491504}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 8318279396195491505}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 19760aad257e1384fbbb65cae4476ce5, type: 3}
@@ -1293,6 +1293,10 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: roomGenerator
+      value: 
+      objectReference: {fileID: 8318279396195491506}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: wallThickness
       value: 0.2
       objectReference: {fileID: 0}
@@ -1343,8 +1347,32 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4395893181215863329, guid: 3454158d00f260444947423f4176c895, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8318279396195491506}
   m_SourcePrefab: {fileID: 100100000, guid: 3454158d00f260444947423f4176c895, type: 3}
+--- !u!1 &8318279396195491505 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4395893181215863329, guid: 3454158d00f260444947423f4176c895, type: 3}
+  m_PrefabInstance: {fileID: 8318279396195491504}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8318279396195491506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8318279396195491505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abad2f7842ce1c48915b3e3b70f32b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  houseMapGenerator: {fileID: 1397590965}
+  roomLightPrefab: {fileID: 6844388644389274886, guid: 77999163b7b8aaa479a78a7406593502, type: 3}
+  doorPrefab: {fileID: 2849634166944264067, guid: aca939422fa890c4ea5036ca81183373, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

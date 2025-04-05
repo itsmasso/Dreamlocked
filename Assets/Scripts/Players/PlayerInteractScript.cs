@@ -21,7 +21,8 @@ public class PlayerInteractScript : NetworkBehaviour
 	[Header("Interact Properties")]
 	[SerializeField] private float interactRange;
 	[SerializeField] private float sphereRadius;
-	[SerializeField] private LayerMask interactableLayer;
+	[SerializeField] private LayerMask interactableLayer, interactableMoveableLayer;
+	private int interactableLayers;
 	[SerializeField] private bool pressedInteract;
 	
 	[Header("Drop Item Properties")]
@@ -37,6 +38,7 @@ public class PlayerInteractScript : NetworkBehaviour
 		}
 		pressedInteract = false;
 		mainCameraPosition = Camera.main.transform;
+		interactableLayers = interactableLayer.value | interactableMoveableLayer.value;
 	}
 	
 	public void OnInteract(InputAction.CallbackContext ctx)
@@ -69,19 +71,17 @@ public class PlayerInteractScript : NetworkBehaviour
 		RaycastHit hit;
 		if(Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange))
 		{
-			Collider[] hits = Physics.OverlapSphere(hit.point, sphereRadius, interactableLayer);
+			Collider[] hits = Physics.OverlapSphere(hit.point, sphereRadius, interactableLayers);
 			foreach(Collider obj in hits)
 			{	
 				NetworkObject networkObj = obj.gameObject.GetComponent<NetworkObject>();
-				InteractableItemBase item = networkObj.GetComponent<InteractableItemBase>();
-				if(item != null && pressedInteract)
+				IInteractable interactable = networkObj.GetComponent<IInteractable>();
+				if(interactable != null && pressedInteract)
 				{
-					item.Interact(gameObject.GetComponent<NetworkObject>());
+					interactable.Interact(gameObject.GetComponent<NetworkObject>());
 					pressedInteract = false;
 				}
 			}
-			
-			
 			
 		}
 		//Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);

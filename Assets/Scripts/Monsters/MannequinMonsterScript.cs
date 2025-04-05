@@ -79,7 +79,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
 
         // Select a target if there is no target already
         callTimer += Time.deltaTime;
-        if(callTimer > 0.5f)
+        if(callTimer > 1f)
         {
             SetClosestPlayerAsTarget();
             callTimer = 0;
@@ -139,8 +139,6 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
                 Debug.Log("no target on same floor");
                 
 	    	    currentTarget = GameManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault();
-	    	    Debug.Log("current target y pos: " + currentTarget.GetComponent<PlayerController>().GetPlayerGroundedPosition().y);
-	    	    Debug.Log("mannequin y pos: " + transform.position.y);
 	    	}
 	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
         }
@@ -164,7 +162,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     {
         if(currentTarget != null)
         {
-            if(Vector3.Distance(currentTarget.position, transform.position) <= attackRange && canAttack)
+            if(canAttack && Vector3.Distance(currentTarget.position, transform.position) <= attackRange)
             {
                 PlayerHealth playerHealth = currentTarget.GetComponent<PlayerHealth>();
                 playerHealth.TakeDamageServerRpc(mannequinScriptable.damage);

@@ -45,7 +45,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[SerializeField] private GameObject roomFloorPrefab;
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
-	[SerializeField] private GameObject roomLightPrefab;
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
 	
 	// We can possibly remove these since they will be stored in the specialRooms list
@@ -65,7 +64,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[Header("Spawn Room Algorithm")]
 	[SerializeField] private int spaceBetweenRooms;
 	public List<GameObject> rooms {get; private set;}
-	
+	[SerializeField] private HouseMapRoomGenerator roomGenerator;
 	[SerializeField] private int maxIteration = 30;
 
 	//Delaunay Triangulation
@@ -132,7 +131,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 				SpawnDoorWay(n);
 		}
 		
-		SpawnRoomLights();
+		roomGenerator.SpawnRoomObjects();
 		
 		aStarComponent.Scan();
 	
@@ -292,6 +291,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 				GameObject room = Instantiate(newRoom, transform.position, Quaternion.Euler(0, chosenAngle, 0));
 				room.transform.SetParent(gameObject.transform);
 				Room roomComponent = room.GetComponent<Room>();
+				roomComponent.yRotation = chosenAngle;
 				room.transform.position = GetRandomRoomSpawnPosition(floorCount, roomComponent.size);
 				roomComponent.position = Vector3Int.RoundToInt(room.transform.position);		
 				
@@ -607,22 +607,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 
 	}
 	
-	private void SpawnRoomLights()
-	{
-		//spawning lights inside room
-		if(IsServer)
-		{
-			foreach(GameObject roomObj in rooms)
-			{
-				Room room = roomObj.GetComponent<Room>();
-			    if(room.lightsTransform != null)
-			    {
-			        GameObject roomLightObject = Instantiate(roomLightPrefab, room.lightsTransform.position, Quaternion.identity);
-					roomLightObject.GetComponent<NetworkObject>().Spawn(true);
-			    }
-			}
-		}
-	}
 	
 	private void OnDrawGizmos() {
 		

@@ -85,6 +85,13 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             callTimer = 0;
         }
 
+        // if (inLight.Value)
+        // {
+        //     Debug.Log("In Light");
+        // } else {
+        //     Debug.Log("Out of Light");
+        // }
+
         // Basics of Movement
         switch(threatLevelNetworkState.Value)
         {
@@ -197,7 +204,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             inLight.Value = false;
             agent.canMove = true;
         }
-        
+
     }
 
 }

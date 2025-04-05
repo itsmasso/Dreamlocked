@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public class LightScript : NetworkBehaviour
 	const float MAX_FLICKER_TIME = 1f;
 	private GFClockManager manager;
 	[SerializeField] private Light lightSource;
+	[SerializeField] private Light secondaryLightSource;
 	[SerializeField] private LayerMask enemyLayer;
 	[SerializeField] private LayerMask obstacleLayer;
 	[SerializeField] private LayerMask groundLayer;
@@ -64,6 +66,10 @@ public class LightScript : NetworkBehaviour
 		if (Timer <= 0)
 		{
 			lightSource.enabled = !lightSource.enabled;
+			if (secondaryLightSource)
+			{
+				secondaryLightSource.enabled = !secondaryLightSource.enabled;
+			}
 			// The comment out line would make the flickering all different and random
 			//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 			Timer = MIN_FLICKER_TIME;
@@ -73,11 +79,19 @@ public class LightScript : NetworkBehaviour
 	private void TurnLightsOff()
 	{
 		lightSource.enabled = false;
+		if (secondaryLightSource)
+		{
+			secondaryLightSource.enabled = false;
+		}
 	}
 
 	private void TurnLightsOn()
 	{
 		lightSource.enabled = true;
+		if (secondaryLightSource)
+		{
+			secondaryLightSource.enabled = true;
+		}
 	}
 	
 	//add clientrpc later maybe
@@ -108,7 +122,12 @@ public class LightScript : NetworkBehaviour
 	
 	private void DetectEnemiesInLight()
 	{
+		if (!lightSource.enabled)
+		{
+			return;
+		}
 		enemyColliders = Physics.OverlapSphere(lightSource.transform.position, lightSource.range, enemyLayer);
+		// possibly need to add pointLightSource as a second collider
 		foreach(Collider enemyCollider in enemyColliders)
 		{
 			NetworkObject enemyNetObj = enemyCollider.GetComponent<NetworkObject>();
@@ -118,7 +137,10 @@ public class LightScript : NetworkBehaviour
 				if(monsterAffectedByLight != null)
 				{
 					if(!IsDirectlyLit(enemyCollider.transform)) continue;
-					if(enemiesInLight.Contains(NetworkObject)) continue;
+
+					// This check could possibly lead to bugs
+					// I think it check enemyNetObj not NetworkObject
+					if(enemiesInLight.Contains(enemyNetObj)) continue;
 					
 					enemiesInLight.Add(enemyNetObj);
 					monsterAffectedByLight.EnteredLight();
@@ -132,30 +154,23 @@ public class LightScript : NetworkBehaviour
 	
 	private void CheckIfEnemyExitLight()
 	{
-		List<NetworkObject> enemiesToRemove = new List<NetworkObject>();
-		foreach(NetworkObject enemy in enemiesInLight)
+		foreach(NetworkObject enemy in enemiesInLight.ToList())
 		{
-			if(enemy != null)
+			if(enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
 			{
-				if(!IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
-				{
-					enemiesToRemove.Add(enemy);
-				}
-
+				enemy.GetComponent<IAffectedByLight>().ExitLight();
+				enemiesInLight.Remove(enemy);
+				EnemyExitLightServerRpc(enemy);
 			}
-		}
-		
-		foreach (NetworkObject enemy in enemiesToRemove)
-		{
-			enemy.GetComponent<IAffectedByLight>().ExitLight();
-			enemiesInLight.Remove(enemy);
-			EnemyExitLightServerRpc(enemy);
-			
 		}
 	}
 	
 	private bool IsDirectlyLit(Transform enemy)
 	{
+		if (!lightSource.enabled)
+		{
+			return false;
+		}
 		Vector3 dirToEnemy = (enemy.position - lightSource.transform.position).normalized;
 		float distance = Vector3.Distance(lightSource.transform.position, enemy.position);
 		//Debug.DrawRay(lightSource.transform.position, dirToEnemy*distance, Color.yellow);

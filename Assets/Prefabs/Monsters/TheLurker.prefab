@@ -330,7 +330,7 @@ MonoBehaviour:
   headTransform: {fileID: 4239448946594036270}
   defaultStoppingDistance: 0.5
   roamSpeed: 3
-  chanceToStalkPlayer: 0
+  chanceToStalkPlayer: 100
   targetStalkRange: 8
   maxStalkTime: 600
   stalkCooldown: 5

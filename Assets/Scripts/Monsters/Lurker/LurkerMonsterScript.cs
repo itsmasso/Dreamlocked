@@ -114,6 +114,12 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	
 	private void Update() {
 		if(!IsServer) return;
+		// if (inLight.Value)
+		// {
+		// 	UnityEngine.Debug.Log("Lurker is in Light");
+		// } else {
+		// 	UnityEngine.Debug.Log("Lurker is NOT in Light");
+		// }
 		currentState.UpdateState(this);
 		
 		if(currentTarget != null)

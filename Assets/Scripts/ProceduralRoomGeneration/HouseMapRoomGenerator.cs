@@ -1,10 +1,12 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 public class HouseMapRoomGenerator : NetworkBehaviour
 {
     [SerializeField] private HouseMapGenerator houseMapGenerator;
     [SerializeField] private GameObject roomLightPrefab;
     [SerializeField] private GameObject doorPrefab;
+    private List<GameObject> objectsInRoom = new List<GameObject>();
     void Start()
     {
         
@@ -31,6 +33,7 @@ public class HouseMapRoomGenerator : NetworkBehaviour
             foreach(Transform lights in room.lightsTransforms)
             {
                 GameObject roomLightObject = Instantiate(roomLightPrefab, lights.position, Quaternion.identity);
+                objectsInRoom.Add(roomLightObject);
                 roomLightObject.transform.rotation *= Quaternion.Euler(0, room.yRotation, 0);
                 roomLightObject.GetComponent<NetworkObject>().Spawn(true);
             }
@@ -43,10 +46,17 @@ public class HouseMapRoomGenerator : NetworkBehaviour
         {
             foreach(Transform doors in room.doorTransforms)
             {
-                GameObject doorObject = Instantiate(doorPrefab, doors.position, Quaternion.identity);
-                doorObject.transform.rotation *= Quaternion.Euler(0, room.yRotation, 0);
+                GameObject doorObject = Instantiate(doorPrefab, doors.position, doors.transform.rotation);
+                objectsInRoom.Add(doorObject);
                 doorObject.GetComponent<NetworkObject>().Spawn(true);
             }
+        }
+	}
+	
+	public void ClearObjects()
+	{
+	    foreach(GameObject roomObject in objectsInRoom){
+            Destroy(roomObject);
         }
 	}
 	

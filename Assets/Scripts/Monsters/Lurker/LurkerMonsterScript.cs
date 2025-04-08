@@ -57,6 +57,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public LayerMask groundLayer;
 	public LayerMask playerLayer;
 	public LayerMask obstacleLayer;
+	public LayerMask doorLayer;
 	
 	[Header("Attack Properties")]
 	public float attackRange;
@@ -82,6 +83,17 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			SwitchState(LurkerState.Roaming);
 		}
 	}
+
+    void OnEnable()
+    {
+        if(IsServer)
+		{
+			roamSpeed = lurkerScriptableObj.baseSpeed;
+			canStalk = true;
+			canAttack = true;
+			SwitchState(LurkerState.Roaming);
+		}
+    }
 
 
     public void SwitchState(LurkerState newState)
@@ -155,9 +167,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	
 	public bool SetRandomPlayerAsTarget()
 	{
-	    if(GameManager.Instance.alivePlayers.Count != 0)
+	    if(PlayerNetwork.alivePlayers.Count != 0)
 	    {
-	        currentTarget = GameManager.Instance.alivePlayers[Random.Range(0, GameManager.Instance.alivePlayers.Count)];
+	        currentTarget = PlayerNetwork.alivePlayers[Random.Range(0, PlayerNetwork.alivePlayers.Count)].transform;
 	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
 	    	return true;
 	    }else
@@ -220,5 +232,11 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		if(IsServer)
 			inLight.Value = false;
 	}
+
+    void OnDisable()
+    {
+		SwitchState(LurkerState.Roaming);
+        currentTarget = null;
+    }
 
 }

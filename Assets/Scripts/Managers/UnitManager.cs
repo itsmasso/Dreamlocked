@@ -8,7 +8,7 @@ using UnityEngine;
 public class UnitManager : MonoBehaviour
 {
 	
-	[SerializeField] private GameObject monster;
+	[SerializeField] private GameObject lurkerPrefab;
 	private List<NetworkObject> spawnedEnemies = new List<NetworkObject>();
 	[SerializeField] private GameObject MQMonsterPrefab;
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
@@ -29,7 +29,7 @@ public class UnitManager : MonoBehaviour
 			float minDistToPlayers = float.MaxValue;
 			
 			// Calculate the minimum distance from this hallway position to all players
-			foreach(Transform player in GameManager.Instance.playerTransforms)
+			foreach(Transform player in PlayerNetwork.playerTransforms)
 			{
 				float dist = Vector3.Distance(hallwayPos, player.transform.position);
 				if(dist < minDistToPlayers)
@@ -56,13 +56,19 @@ public class UnitManager : MonoBehaviour
 	
 	private void SpawnStartEnemies()
 	{
-		SpawnMonster(GetPositionInRangeOfPlayers());
-		SpawnMannequinMonsters();
+		SpawnLurker();
+		//SpawnMannequinMonsters();
+	}
+	
+	private void SpawnLurker()
+	{
+		Vector3 spawnPosition = GetPositionInRangeOfPlayers();
+	    SpawnMonster(lurkerPrefab, new Vector3(spawnPosition.x, spawnPosition.y + lurkerPrefab.GetComponent<FollowerEntity>().height/2, spawnPosition.z), Quaternion.identity);
 	}
 
-	public void SpawnMonster(Vector3 position)
+	public void SpawnMonster(GameObject monsterPrefab, Vector3 position, Quaternion rotation)
 	{	
-		GameObject monsterObject = Instantiate(monster, new Vector3(position.x, position.y + monster.GetComponent<FollowerEntity>().height/2, position.z), Quaternion.identity);
+		GameObject monsterObject = Instantiate(monsterPrefab, position, rotation);
 		
 		monsterObject.GetComponent<NetworkObject>().Spawn(true);
 		
@@ -86,8 +92,7 @@ public class UnitManager : MonoBehaviour
 			// Spawn the monster on the first floor
 			if (roomPos.y == -8.00)
 			{
-				GameObject mannequinObject = Instantiate(MQMonsterPrefab, new Vector3(roomPos.x, roomPos.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/16, roomPos.z), Quaternion.identity);
-				mannequinObject.GetComponent<NetworkObject>().Spawn(true);
+				SpawnMonster(MQMonsterPrefab, new Vector3(roomPos.x, roomPos.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/16, roomPos.z), Quaternion.identity);
 				//Debug.Log("Mannequin Spawned at: " + roomPos);
 			}
 		}

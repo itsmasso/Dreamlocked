@@ -14,6 +14,7 @@ public class LurkerChaseState : LurkerBaseState
     private float chaseTimer;
     private float nextChangeTime;
     private float stopChasingDistance;
+    private float openingDoorRange = 1f;
     //Attack Variables
     private float attackRange;
 
@@ -21,6 +22,7 @@ public class LurkerChaseState : LurkerBaseState
     private LayerMask groundLayer;
 	private LayerMask playerLayer;
 	private LayerMask obstacleLayer;
+	private LayerMask doorLayer;
 	//optimization variables
 	private float currentCheckTime;
 	private float interval;
@@ -34,6 +36,7 @@ public class LurkerChaseState : LurkerBaseState
         groundLayer = lurker.groundLayer;
         playerLayer = lurker.playerLayer;
         obstacleLayer = lurker.obstacleLayer;
+        doorLayer = lurker.doorLayer;
         agent = lurker.agent;
         anim = lurker.animationManager;
         
@@ -52,6 +55,9 @@ public class LurkerChaseState : LurkerBaseState
 		agent.stopDistance = lurker.chasingStoppingDistance;
     	agent.maxSpeed = lurker.GetSpeed();
     	agent.canMove = true;
+    	
+    	//open doors
+    	CheckForDoor();
 		
 		//Set animations
 		anim.PlayRunningAnimation();
@@ -74,6 +80,20 @@ public class LurkerChaseState : LurkerBaseState
 		}
 		
 		HandleAttackingPlayer(lurker);
+    }
+    
+    private void CheckForDoor()
+    {
+        Collider[] colliders = Physics.OverlapSphere(lurkerTransform.position, openingDoorRange, doorLayer);
+        foreach(Collider collider in colliders)
+        {
+            Door door = collider.GetComponent<Door>();
+            if(door != null)
+            {
+                door.OpenDoor(lurkerTransform.position);
+            }
+        }
+        
     }
     
     private void HandleTwitchAnimations()
@@ -146,21 +166,4 @@ public class LurkerChaseState : LurkerBaseState
 			new Vector2(lurkerTransform.position.x, lurkerTransform.position.z)
 			);
 	}
-
-
-    /*
-    private void RotateTowardsTarget()
-    {
-        if(currentTarget != null)
-        {
-            Vector3 direction = currentTarget.position - lurkerTransform.position;
-            if(IsTargetVisible(direction, GetTargetDistance()))
-            {	    
-                direction.y = 0; // Lock Y-axis rotation
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                lurkerTransform.rotation = Quaternion.Slerp(lurkerTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-        }
-    }
-    */
 }

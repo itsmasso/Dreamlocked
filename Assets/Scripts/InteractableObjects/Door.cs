@@ -5,7 +5,7 @@ public class Door : NetworkBehaviour, IInteractable
 {
     private float targetYRotation;
     [SerializeField] private float smoothTime;
-    private float defaultYRotation = 0f;
+    public float defaultYRotation;
     [SerializeField] private Transform pivot;
     [SerializeField] private float maxDoorAngle;
     [SerializeField] private NavmeshCut navmeshCut;
@@ -13,7 +13,7 @@ public class Door : NetworkBehaviour, IInteractable
     
     void Start()
     {
-        defaultYRotation = transform.eulerAngles.y;
+       defaultYRotation = pivot.eulerAngles.y;
     }
 
     void Update()
@@ -21,7 +21,7 @@ public class Door : NetworkBehaviour, IInteractable
         pivot.rotation = Quaternion.Lerp(pivot.rotation, Quaternion.Euler(0f, defaultYRotation + targetYRotation, 0f), smoothTime * Time.deltaTime);
     }
     
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void ToggleDoorServerRpc(Vector3 pos)
     {
         ToggleDoorClientRpc(pos);
@@ -39,10 +39,10 @@ public class Door : NetworkBehaviour, IInteractable
         {
             Vector3 dir = pos - transform.position;
             targetYRotation = -Mathf.Sign(Vector3.Dot(transform.right, dir)) * maxDoorAngle;
-            navmeshCut.enabled = false;
+            //navmeshCut.enabled = false;
         }else
         {
-            navmeshCut.enabled = true;
+            //navmeshCut.enabled = true;
             targetYRotation = 0f;
         }
     }

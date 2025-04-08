@@ -111,9 +111,9 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
     
     private void PickRandomPlayerToSpectate()
     {
-        if(GameManager.Instance.alivePlayers.Count != 0)
+        if(PlayerNetwork.alivePlayers.Count != 0)
         {
-            currentPlayerToSpectate = GameManager.Instance.alivePlayers[Random.Range(0, GameManager.Instance.alivePlayers.Count)];
+            currentPlayerToSpectate = PlayerNetwork.alivePlayers[Random.Range(0, PlayerNetwork.alivePlayers.Count)].transform;
         }else
         {
             currentPlayerToSpectate = transform;
@@ -200,6 +200,33 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 				}
 			}
 		}
+	}
+	
+	public bool CheckForLightVisibility(Light light)
+	{
+	    // Get the camera's frustum planes
+		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+
+		// For point lights, treat it as a small sphere or a box for testing
+		if (light.type == LightType.Point)
+		{
+			// Define the point light's bounding volume (a small sphere for the light)
+			Bounds bounds = new Bounds(light.transform.position, Vector3.one * light.range); 
+			
+			return GeometryUtility.TestPlanesAABB(planes, bounds);
+		}
+		else if (light.type == LightType.Spot)
+		{
+			// For a spotlight, you need a more complex bounding box representing the cone
+			float spotAngle = light.spotAngle;
+			float coneRadius = Mathf.Tan(Mathf.Deg2Rad * spotAngle / 2) * light.range;
+			
+			Vector3 boxSize = new Vector3(coneRadius * 2, coneRadius * 2, light.range);
+			Bounds bounds = new Bounds(light.transform.position, boxSize); 
+			return GeometryUtility.TestPlanesAABB(planes, bounds);
+		}
+
+		return false;
 	}
 	
 	private void CheckForObstaclesBetweenEnemy(Vector3 directionToEnemy, float enemyDistance)

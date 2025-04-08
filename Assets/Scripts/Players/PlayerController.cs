@@ -20,6 +20,8 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	[Header("Initialize")]
 	[SerializeField] private CharacterController characterController;
 	[SerializeField] private PlayerScriptable playerScriptableObj;
+	[SerializeField] private GameObject meshRenderer;
+	[SerializeField] private CapsuleCollider playereCollder;
 	
 	[Header("Camera")]
 	[SerializeField] private Transform camFollowPivot;
@@ -60,7 +62,10 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 
 	public override void OnNetworkSpawn()
 	{
-
+		if(IsOwner)
+		{
+		    PlayerLoadedServerRpc();
+		}
 	}
 	
 	void Start()
@@ -89,6 +94,19 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		
 	}
 	
+	[ServerRpc]
+	public void PlayerLoadedServerRpc()
+	{
+	    PlayerLoadedClientRpc();
+	}
+	
+	[ClientRpc]
+	public void PlayerLoadedClientRpc()
+	{
+	   // Debug.Log("player loaded");
+	   meshRenderer.SetActive(true);
+	   playereCollder.enabled = true;
+	}
 
 	public void OnMove(InputAction.CallbackContext ctx)
 	{

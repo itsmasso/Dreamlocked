@@ -34,7 +34,9 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	private Vector3 worldBottomLeft;
 	[SerializeField] private int floors;
 	[SerializeField] private AstarPath aStarComponent;
-	
+	private List<Vector3> playerSpawnPositions = new List<Vector3>();
+	[SerializeField] private PlayerNetwork playerNetwork;
+	private bool firstGeneration;
 	[Header("Grid Properties")]
 	[SerializeField] private float nodeRadius;
 	private int nodeDiameter;
@@ -42,10 +44,12 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	
 	[Header("Prefab Components")]
 	[SerializeField] private GameObject roomCeilingPrefab;
+	[SerializeField]private GameObject roomCeilingWithLightPrefab;
 	[SerializeField] private GameObject roomFloorPrefab;
+	[SerializeField] private GameObject roomLightPrefab;
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
-	[SerializeField] private List<GameObject> bedRoomPrefabList;
+	[SerializeField] private List<GameObject> roomPrefabList;
 	
 	// We can possibly remove these since they will be stored in the specialRooms list
 	[Header("Special Room Prefab Components")]
@@ -76,8 +80,11 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[SerializeField] private float spawnCycleChance = 0.125f;
 	
 	[Header("Create Hallways (A*)")]
+	[SerializeField] private float hallwayLightSpawnInterval;
 	private List<Node> hallways;
 	private AStarPathfinder hallwayPathFinder;
+	private float currentHallwaySpawnIndex;
+	
 	
 	[Header("Stairs")]
 	[SerializeField] private List<GameObject> stairRooms;
@@ -96,12 +103,15 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
-		
+		GameManager.Instance.onLevelGenerate += Generate;
 	}
 
 	void Start()
 	{
+		firstGeneration = true;
+		
 		Generate();
+		
 	}
 
 	public void Generate()
@@ -118,6 +128,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		rooms = new List<GameObject>();
 		hallwayPathFinder = new AStarPathfinder(grid);
 		hallways  = new List<Node>();
+		currentHallwaySpawnIndex = 0;
 		
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
@@ -131,13 +142,24 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 				SpawnDoorWay(n);
 		}
 		
-		roomGenerator.SpawnRoomObjects();
+		roomGenerator.SpawnRoomObjects();	
 		
 		aStarComponent.Scan();
-	
 		sw.Stop();
-		GameManager.Instance.SpawnPlayers(GetPlayerSpawnPosition());
+		if(firstGeneration)
+			playerNetwork.SpawnPlayers(GetPlayerSpawnPosition());
+		else
+		{
+		    if(IsServer)
+		    {
+		        foreach(NetworkObject player in PlayerNetwork.alivePlayers){
+					player.transform.position = GetPlayerSpawnPosition();
+					//todo: coroutine to fade then TP
+				}
+		    }
+		}
 		GameManager.Instance.ChangeGameState(GameState.GameStart);
+		firstGeneration = false;
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		
 	}
@@ -166,18 +188,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){
-		Vector3[] offsets = new Vector3[]
-		{
-			new Vector3(2, 0, 0),
-			new Vector3(-2, 0, 0),
-			new Vector3(0, 0, 2),
-			new Vector3(0, 0, -2)
-		};
-		GameObject room = rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true);
-		Vector3 spawnPos = new Vector3(room.transform.position.x + offsets[GameManager.Instance.spawnIndex.Value].x, 
-										room.transform.position.y + room.GetComponent<Room>().size.y/2, 
-										room.transform.position.z+ offsets[GameManager.Instance.spawnIndex.Value].z);
-		return spawnPos;
+		return rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true).transform.position;
 	}
 	
 	public Vector3 GetRandomHallwayPosition()
@@ -278,7 +289,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 						newRoom = specialRooms[specialRoomIndex];
 						specialRoomIndex++;
 					}else{
-						newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
+						newRoom = roomPrefabList[UnityEngine.Random.Range(0, roomPrefabList.Count)];
 					}
 				}
 				
@@ -523,12 +534,15 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		//Debug
 		foreach (Prims_MST.Edge edge in selectedEdges)
 		{
-			UnityEngine.Debug.DrawLine(
+			if(drawGizmos)
+			{
+			    UnityEngine.Debug.DrawLine(
 				new Vector3(edge.vertexU.x, (int)worldBottomLeft.y + currentFloor * floorHeight, edge.vertexU.y),
 				new Vector3(edge.vertexV.x, (int)worldBottomLeft.y + currentFloor * floorHeight, edge.vertexV.y),
 				Color.blue,
 				10f
 			);
+			}
 		}
 		
 	}
@@ -575,13 +589,31 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		Vector3 ceilingPosition = new Vector3(node.pos.x, node.pos.y + nodeRadius - 0.2f, node.pos.z);
 		Vector3 floorPosition = new Vector3(node.pos.x, node.pos.y - nodeRadius + 0.05f, node.pos.z);
 		
-		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
+		SpawnRandomCeiling(ceilingPosition);
     	SpawnRoomPart(roomFloorPrefab, floorPosition, Quaternion.identity);
 		
 		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - 0.05f, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, -180, 0));
     	TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius, node.pos.y+ 0.05f, node.pos.z), Quaternion.identity);
     	TrySpawnHallwayWall(node.pos + Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z + nodeRadius), Quaternion.Euler(0, -90, 0));
     	TrySpawnHallwayWall(node.pos - Vector3.forward * nodeDiameter, new Vector3(node.pos.x, node.pos.y+ 0.05f, node.pos.z - nodeRadius - 0.05f), Quaternion.Euler(0, 90, 0));
+    	currentHallwaySpawnIndex++;
+	}
+	
+	private void SpawnRandomCeiling(Vector3 pos)
+	{
+	    if(currentHallwaySpawnIndex % hallwayLightSpawnInterval == 0)
+	    {
+	        GameObject ceiling = Instantiate(roomCeilingWithLightPrefab, pos, Quaternion.identity);
+    		ceiling.transform.SetParent(transform);
+    		if(IsServer)
+    		{
+    		    GameObject roomLightObject = Instantiate(roomLightPrefab, ceiling.GetComponent<CeilingPiece>().lightsTransform.position, Quaternion.identity);
+            	roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+    		}
+	    }else
+	    {
+	        SpawnRoomPart(roomCeilingPrefab, pos, Quaternion.identity);
+	    }
 	}
 	
 	private void TrySpawnDoorWall(Vector3 nodePos, Vector3 wallPosition, Quaternion wallRotation)
@@ -607,10 +639,16 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 
 	}
 	
-	
+	public void ClearMap()
+	{
+	    foreach(Transform child in transform){
+			Destroy(child);
+		}
+		roomGenerator.ClearObjects();
+	}
 	private void OnDrawGizmos() {
 		
-
+		
 		if(Application.isPlaying && drawGizmos)
 		{
 			if(grid != null)

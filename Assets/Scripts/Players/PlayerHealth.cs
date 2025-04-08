@@ -41,12 +41,26 @@ public class PlayerHealth : NetworkBehaviour
             onTakeDamage?.Invoke(currentHealth);
         }
     }
+    [ServerRpc]
+    private void RemovePlayerFromAliveListServerRpc(NetworkObjectReference playerNetObjRef)
+	{
+	    RemovePlayerFromAliveListClientRpc(playerNetObjRef);
+	}
+	[ClientRpc]
+	private void RemovePlayerFromAliveListClientRpc(NetworkObjectReference playerNetObjRef)
+	{
+        if(playerNetObjRef.TryGet(out NetworkObject playerNetObject))
+        {
+            PlayerNetwork.alivePlayers.RemoveAll(p => p == playerNetObject);
+	        if(PlayerNetwork.alivePlayers.Count <= 0) GameManager.Instance.ChangeGameState(GameState.GameOver);
+        }
+	    
+	}
     
     private void Die()
     {
         Debug.Log($"{gameObject.name} | NetworkObjectId: {NetworkObjectId} has died.");
-        
-        GameManager.Instance.RemovePlayerFromAliveList(transform);
+        RemovePlayerFromAliveListServerRpc(GetComponent<NetworkObject>());
         gameObject.GetComponent<PlayerController>().enabled = false;
         HidePlayerFromPlayersClientRpc(GetComponent<NetworkObject>());
         DieClientRpc();
@@ -65,7 +79,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         if(playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj))
         {
-            playerNetworkObj.GetComponent<MeshRenderer>().enabled = false;
+            playerNetworkObj.GetComponentInChildren<MeshRenderer>().enabled = false;
             playerNetworkObj.GetComponent<CapsuleCollider>().enabled = false;
         }
     }

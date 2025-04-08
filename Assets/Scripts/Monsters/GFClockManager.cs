@@ -26,8 +26,8 @@ public enum MQThreatLevel
 
 public class GFClockManager : NetworkSingleton<GFClockManager>
 {
-    private const float TOTAL_TIME = 30;
-    private const float TIME_TO_DANGER = 10;
+    private const float TOTAL_TIME = 300;
+    private const float TIME_TO_DANGER = 100;
     private float currentTime;
     private bool timeRunning;
     private MQThreatLevel currentThreatLevel = MQThreatLevel.PASSIVE;
@@ -50,6 +50,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>
     // Update is called once per frame
     void Update()
     {
+        if(!IsServer) return;
         // Decrement the timer by one second if the clock is running and the currentTime > -1
         currentTime = (timeRunning && currentTime > -1) ? currentTime -= Time.deltaTime : currentTime;
 

@@ -76,8 +76,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   smoothTime: 10
+  defaultYRotation: 0
   pivot: {fileID: 5352197759227034436}
-  maxDoorAngle: 85
+  maxDoorAngle: 90
   navmeshCut: {fileID: 4841633251380932712}
 --- !u!114 &2384058059443450814
 MonoBehaviour:
@@ -143,7 +144,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2849634166944264067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6bee0a6fa1f5d4f4db481219040523c4, type: 3}
   m_Name: 
@@ -229,7 +230,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 4233867318044896720, guid: 22b029bee60a836498bcfebd8d3ece69, type: 3}
+  - {fileID: 2100000, guid: 709c02e6164465048a4de0176b991b71, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -327,6 +328,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4826146442342741345, guid: 22b029bee60a836498bcfebd8d3ece69, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 709c02e6164465048a4de0176b991b71, type: 2}
     - target: {fileID: 557255715940210754, guid: 22b029bee60a836498bcfebd8d3ece69, type: 3}
       propertyPath: m_Layer
       value: 7

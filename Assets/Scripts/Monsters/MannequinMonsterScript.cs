@@ -129,16 +129,16 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     
     private void SetClosestPlayerAsTarget()
 	{
-	    if(GameManager.Instance.alivePlayers.Count != 0)
+	    if(PlayerNetwork.alivePlayers.Count != 0)
 	    {
-	        currentTarget = GameManager.Instance.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
-	        .OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault();
+	        currentTarget = PlayerNetwork.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
+	        .OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
 	    
 	    	if(currentTarget == null)
 	    	{
                 Debug.Log("no target on same floor");
                 
-	    	    currentTarget = GameManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault();
+	    	    currentTarget = PlayerNetwork.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
 	    	}
 	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
         }

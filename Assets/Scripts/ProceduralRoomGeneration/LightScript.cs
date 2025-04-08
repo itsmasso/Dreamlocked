@@ -10,31 +10,93 @@ public class LightScript : NetworkBehaviour
 	const float MAX_FLICKER_TIME = 1f;
 	private GFClockManager manager;
 	[SerializeField] private Light lightSource;
-	[SerializeField] private Light secondaryLightSource;
 	[SerializeField] private LayerMask enemyLayer;
+	[SerializeField] private LayerMask playerLayer;
 	[SerializeField] private LayerMask obstacleLayer;
 	[SerializeField] private LayerMask groundLayer;
+	[SerializeField] private LayerMask interactableMoveables;
+	private float lightRange;
+	private bool isLightOn;
+	private bool playerSeesLight;
 	private int obstacleLayers;
 	[SerializeField] private HashSet<NetworkObject> enemiesInLight = new HashSet<NetworkObject>();
 	[SerializeField] private Collider[] enemyColliders;
 	private float Timer;
-	void Start()
+
+    void Awake()
+    {
+        lightRange = lightSource.range;
+    }
+    void Start()
 	{
 		manager = GFClockManager.Instance;
 		// The comment out line would make the flickering all different and random
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 		Timer = MIN_FLICKER_TIME;
-		obstacleLayers = obstacleLayer.value | groundLayer.value;
+		obstacleLayers = obstacleLayer.value | groundLayer.value | interactableMoveables;
 	}
 
 	
 	void Update()
 	{
-		if(!IsServer) return;
-		DetectEnemiesInLight();
-		CheckIfEnemyExitLight();
-		CheckLightStatus();
+		if(IsServer)
+		{
+		    DetectEnemiesInLight();
+			CheckIfEnemyExitLight();
+			CheckLightStatus();
+		}
+		
+		if(IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
+		{
+		    playerSeesLight = true;
+		    lightSource.enabled = true;
+		}else
+		{
+		    playerSeesLight = false;
+		    lightSource.enabled = false;
+		}
+		
 	}
+	
+	private bool IsPlayerNear(Light light)
+	{
+	    Collider[] colliders = Physics.OverlapSphere(transform.position, light.range, playerLayer);
+	    foreach(Collider collider in colliders)
+	    {
+	        if(collider != null)
+	        {
+				return true;
+	            
+	        }
+	    }
+	    return false;
+	}
+	
+	private bool CanPlayerSeeLight(Light light)
+	{
+	    foreach(NetworkObject player in PlayerNetwork.alivePlayers)
+	    {
+	        PlayerCamera playerCamera = player.GetComponent<PlayerCamera>();
+			if(playerCamera != null)
+			{
+				
+				if(playerCamera.CheckForLightVisibility(light)){
+					if(Vector3.Distance(transform.position, player.transform.position) >= Camera.main.farClipPlane/2f)
+					{
+					    light.shadows = LightShadows.None;
+					}else
+					{
+					    light.shadows = LightShadows.Hard;
+					}
+					return true;
+				}
+				
+				
+			}
+	    }
+	    return false;
+	}
+	
 	
 	private void CheckLightStatus()
 	{
@@ -65,10 +127,9 @@ public class LightScript : NetworkBehaviour
 
 		if (Timer <= 0)
 		{
-			lightSource.enabled = !lightSource.enabled;
-			if (secondaryLightSource)
+			if(playerSeesLight)
 			{
-				secondaryLightSource.enabled = !secondaryLightSource.enabled;
+			    lightSource.enabled = !lightSource.enabled;
 			}
 			// The comment out line would make the flickering all different and random
 			//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
@@ -78,19 +139,16 @@ public class LightScript : NetworkBehaviour
 	
 	private void TurnLightsOff()
 	{
+		isLightOn = false;
 		lightSource.enabled = false;
-		if (secondaryLightSource)
-		{
-			secondaryLightSource.enabled = false;
-		}
 	}
 
 	private void TurnLightsOn()
 	{
-		lightSource.enabled = true;
-		if (secondaryLightSource)
+		isLightOn = true;
+		if(!playerSeesLight)
 		{
-			secondaryLightSource.enabled = true;
+		    lightSource.enabled = true;
 		}
 	}
 	
@@ -122,7 +180,7 @@ public class LightScript : NetworkBehaviour
 	
 	private void DetectEnemiesInLight()
 	{
-		if (!lightSource.enabled)
+		if (!isLightOn)
 		{
 			return;
 		}
@@ -167,7 +225,7 @@ public class LightScript : NetworkBehaviour
 	
 	private bool IsDirectlyLit(Transform enemy)
 	{
-		if (!lightSource.enabled)
+		if (!isLightOn)
 		{
 			return false;
 		}

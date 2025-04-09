@@ -47,16 +47,9 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
 	[SerializeField] private List<GameObject> bedRoomPrefabList;
 	
-	// We can possibly remove these since they will be stored in the specialRooms list
-	[Header("Special Room Prefab Components")]
-	[SerializeField] private GameObject mainRoomPrefab;
-	[SerializeField] private GameObject GFClockRoomPrefab;
-	
 	[Header("Special Room Properties")]
 	[SerializeField] private List<GameObject> specialRooms;
 	private int specialRoomIndex = 0;
-	private bool spawnedMainRoom;
-	private bool spawnedGFClockRoom;
 	
 	[Header("Room Properties")]
 	[SerializeField] private int roomsPerFloor;
@@ -111,8 +104,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
-		spawnedMainRoom = false;
-		spawnedGFClockRoom = false;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
@@ -152,12 +143,12 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		rooms that have been spawned. I use it in the UnitManager
 		script to spawn the mannequin monsters in each room.
 	*****************************************************************/
-	public List<Vector3> GetRoomsList()
+	public List<Vector3> GetNormalRoomsList()
 	{
 		List<Vector3> roomPositions = new List<Vector3>();
 		UnityEngine.Debug.Log("Getting Room Positions");
 		foreach(GameObject room in rooms) {
-			if (!room.GetComponent<Room>().isMainRoom && !room.GetComponent<Room>().isStairs)
+			if (!room.GetComponent<Room>().isSpecialRoom && !room.GetComponent<Room>().isStairs)
 			{
 				roomPositions.Add(room.transform.position);
 			}
@@ -277,6 +268,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 					if (specialRoomIndex < specialRooms.Count) {
 						newRoom = specialRooms[specialRoomIndex];
 						specialRoomIndex++;
+						UnityEngine.Debug.Log("Special Rooms Index: " + specialRoomIndex + " < Special Rooms Count: " + specialRooms.Count);
 					}else{
 						newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
 					}

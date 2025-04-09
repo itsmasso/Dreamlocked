@@ -362,9 +362,12 @@ MonoBehaviour:
   size: {x: 12, y: 4, z: 16}
   isStairs: 0
   isMainRoom: 1
+  yRotation: 0
   doorNode:
   - {fileID: 510931179846448132}
-  lightsTransform: {fileID: 0}
+  lightsTransforms: []
+  doorTransforms: []
+  isSpecialRoom: 1
   roomPrefab: {fileID: 5168412151322318950}
 --- !u!1 &5207317734042210599
 GameObject:

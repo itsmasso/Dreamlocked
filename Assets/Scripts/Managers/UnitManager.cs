@@ -81,7 +81,7 @@ public class UnitManager : MonoBehaviour
 	
 	private void SpawnMannequinMonsters()
 	{
-		foreach(Vector3 roomPos in houseMapGenerator.GetRoomsList().ToList())
+		foreach(Vector3 roomPos in houseMapGenerator.GetNormalRoomsList().ToList())
 		{
 			// Spawn the monster on the first floor
 			if (roomPos.y == -8.00)

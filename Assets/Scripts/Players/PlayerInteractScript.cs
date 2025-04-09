@@ -80,6 +80,7 @@ public class PlayerInteractScript : NetworkBehaviour
 				{
 					interactable.Interact(gameObject.GetComponent<NetworkObject>());
 					pressedInteract = false;
+					Debug.Log("Interact called from PlayerInteractScript.cs");
 				}
 			}
 			

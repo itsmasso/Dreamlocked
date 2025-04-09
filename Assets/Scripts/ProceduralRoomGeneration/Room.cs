@@ -13,11 +13,16 @@ public class Room : MonoBehaviour
 	public List<Transform> doorTransforms;
 	public bool isSpecialRoom;
 	public GameObject roomPrefab;
+
+	[Header("Interactable Items")]
+	// This will hold the positions where interactable objects will be spawned in rooms
+	[SerializeField] public List<Transform> interactableObjectTransforms;
+    [SerializeField] public List<GameObject> interactableObjectPrefabs;
 	
 	public Vector3Int Min => position;
 	public Vector3Int Max => position + size;
-	
-	public Vector3 Center
+
+    public Vector3 Center
 	{
 		get
 		{

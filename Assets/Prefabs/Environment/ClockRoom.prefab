@@ -868,7 +868,7 @@ MonoBehaviour:
   - {fileID: 4815802873290786128}
   doorTransforms:
   - {fileID: 6147777340388181422}
-  isSpecialRoom: 0
+  isSpecialRoom: 1
   roomPrefab: {fileID: 4367447932712270340}
 --- !u!1 &7178340743922955529
 GameObject:

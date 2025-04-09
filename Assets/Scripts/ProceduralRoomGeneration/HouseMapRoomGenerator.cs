@@ -70,7 +70,7 @@ public class HouseMapRoomGenerator : NetworkBehaviour
     private void TrySpawnInteractableObjectInRoom(Room room)
     {
         //Debug.Log("Trying to Spawn Items");
-        if((room.interactableObjectPrefabs.Count > 0) && (room.interactableObjectTransforms.Count > 0) && (room.interactableObjectTransforms.Count == room.interactableObjectPrefabs.Count))
+        if((room.interactableObjectPrefabs.Count > 0) && (room.interactableObjectTransforms.Count == room.interactableObjectPrefabs.Count))
         {
             Debug.Log("Detected Items to Spawn");
             for (int i = 0; i < room.interactableObjectTransforms.Count; i++)

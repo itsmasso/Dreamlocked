@@ -86,7 +86,7 @@ public class LurkerStalkState : LurkerBaseState
 			doorToHoverPosition = HouseMapGenerator.Instance.GetDoorClosestToTarget(targetPosition);
 			if(doorToHoverPosition != Vector3.zero)
 			{
-				Debug.Log(doorToHoverPosition);
+				//Debug.Log(doorToHoverPosition);
 				agent.canMove = true;
 				agent.destination = doorToHoverPosition;
 				agent.SearchPath();

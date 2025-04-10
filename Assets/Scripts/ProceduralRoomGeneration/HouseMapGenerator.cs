@@ -146,7 +146,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	public List<Vector3> GetNormalRoomsList()
 	{
 		List<Vector3> roomPositions = new List<Vector3>();
-		UnityEngine.Debug.Log("Getting Room Positions");
+		//UnityEngine.Debug.Log("Getting Room Positions");
 		foreach(GameObject room in rooms) {
 			if (!room.GetComponent<Room>().isSpecialRoom && !room.GetComponent<Room>().isStairs)
 			{
@@ -268,7 +268,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 					if (specialRoomIndex < specialRooms.Count) {
 						newRoom = specialRooms[specialRoomIndex];
 						specialRoomIndex++;
-						UnityEngine.Debug.Log("Special Rooms Index: " + specialRoomIndex + " < Special Rooms Count: " + specialRooms.Count);
+						//UnityEngine.Debug.Log("Special Rooms Index: " + specialRoomIndex + " < Special Rooms Count: " + specialRooms.Count);
 					}else{
 						newRoom = bedRoomPrefabList[UnityEngine.Random.Range(0, bedRoomPrefabList.Count)];
 					}

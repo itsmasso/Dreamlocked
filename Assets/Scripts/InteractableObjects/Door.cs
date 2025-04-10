@@ -90,7 +90,7 @@ public class Door : NetworkBehaviour, IInteractable
     //for players
     public void Interact(NetworkObjectReference playerObjectRef)
     {
-        Debug.Log("Interact Called From Door.cs");
+        //Debug.Log("Interact Called From Door.cs");
         if(playerObjectRef.TryGet(out NetworkObject playerObject))
         {
             ToggleDoorServerRpc(playerObject.transform.position);

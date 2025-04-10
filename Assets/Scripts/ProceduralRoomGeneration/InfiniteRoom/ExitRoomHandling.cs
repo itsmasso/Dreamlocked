@@ -20,7 +20,7 @@ public class ExitRoomHandling : MonoBehaviour
      ***********************************************************/
     public void OnTriggerEnter(Collider other) 
     {
-        GenerationManager gm = FindObjectOfType<GenerationManager>();
+        GenerationManager gm = FindFirstObjectByType<GenerationManager>();
 
         gm.WinGame();
     }

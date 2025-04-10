@@ -33,7 +33,8 @@ public class GameManager : NetworkSingleton<GameManager>
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private GameState currentState;
-	
+	private const int MAX_DREAM_LAYERS = 2;
+	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	
 
 	protected override void Awake()
@@ -63,13 +64,14 @@ public class GameManager : NetworkSingleton<GameManager>
 					Debug.Log("Current seed:" + seed.Value);
 					break;
 				case GameState.GeneratingLevel:
-					
+					//Debug.Log("Generating Level");
 					break;
 				case GameState.GameStart:
+					//Debug.Log("Game Starting");
 					onGameStart?.Invoke();
 					break;
 				case GameState.GamePlaying:
-					
+					//Debug.Log("Game Playing");
 					break;
 				case GameState.GameOver:
 					Debug.Log("Game over");
@@ -84,13 +86,22 @@ public class GameManager : NetworkSingleton<GameManager>
 
 	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 	{
-		ChangeGameState(GameState.GeneratingLevel);
+		if (IsServer)
+		{
+			//Debug.Log("Scene Loaded: " + sceneName);
+			FindManagers();
+			ChangeGameState(GameState.GeneratingLevel);
+		}
 	}
 	
 	public void SpawnPlayers(Vector3 position)
 	{
 		if(IsServer)
 		{
+			// This prevents dead references to old transforms on scene reloads
+			playerTransforms.Clear();
+			alivePlayers.Clear();
+
 			foreach(ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
 				GameObject player = Instantiate(playerPrefab, position, Quaternion.identity);
@@ -113,12 +124,38 @@ public class GameManager : NetworkSingleton<GameManager>
 	    }
 	}
 	
-
+	// This function will help re-link managers from the new scene
+	private void FindManagers()
+	{
+		UnitManager unitManager = FindFirstObjectByType<UnitManager>();
+		if (unitManager == null)
+		{
+			Debug.Log("ERROR: UnitManager not found after scene reload");
+		} 
+		else
+		{
+			unitManager.enabled = true;
+		}
+	}
 	
+	public int GetMaxDreamLayer()
+	{
+		return MAX_DREAM_LAYERS;
+	}
 	
-	
+	public int GetCurretnDreamLayer()
+	{
+		return currentDreamLayer.Value;
+	}
 
+	public bool IsFinalDreamLayer()
+	{
+		return currentDreamLayer.Value >= MAX_DREAM_LAYERS;
+	}
 
-
+	public void DescendToNextDreamLayer()
+	{
+		currentDreamLayer.Value++;
+	}
 
 }

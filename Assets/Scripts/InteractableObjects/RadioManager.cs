@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using Unity.VisualScripting;
 
 /*****************************************************************
  * RadioManager Script
@@ -19,7 +21,7 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
 {
     void Start()
     {
-        Debug.Log("Start Radio Manger");
+        Debug.Log("Current Dream Layer: " + GameManager.Instance.GetCurretnDreamLayer());
     }
     void Update()
     {
@@ -53,8 +55,19 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
  *****************************************************************/
     public void Interact(NetworkObjectReference playerObjectRef)
     {
-        Debug.Log("Interact called from RadioManager.cs");
-        DescendDreamLevel();
+        //Debug.Log("Interact called from RadioManager.cs");
+        if (!GameManager.Instance.IsFinalDreamLayer())
+        {
+            // This function only changes the numerical dream level index
+            GameManager.Instance.DescendToNextDreamLayer();
+
+            // This function actually controls what happens
+            DescendDreamLevel();
+        }
+        else
+        {
+            StartExtractionProtocol();
+        }
     }
 
 /*****************************************************************
@@ -86,6 +99,11 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
     private void DescendDreamLevel()
     {
         Debug.Log("Descending Dream Level...");
+        if (NetworkManager.Singleton.IsHost)
+        {
+            GameManager.Instance.seed.Value = UnityEngine.Random.Range(1, 999999);
+            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+        }
     }
 
 /*****************************************************************

@@ -17,10 +17,30 @@ public class UnitManager : MonoBehaviour
 
 	void Start()
 	{
-		GameManager.Instance.onGameStart += SpawnStartEnemies;
+		//Debug.Log("UnitManager Start");
+		// if (GameManager.Instance != null)
+		// {
+		// 	GameManager.Instance.onGameStart += SpawnStartEnemies;
+		// }
 	}
-		
-	private Vector3 GetPositionInRangeOfPlayers()
+
+    void OnEnable()
+    {
+        if (GameManager.Instance != null)
+		{
+			GameManager.Instance.onGameStart += SpawnStartEnemies;
+		}
+    }
+
+    void OnDisable()
+    {
+        if (GameManager.Instance != null)
+		{
+			GameManager.Instance.onGameStart -= SpawnStartEnemies;
+		}
+    }
+
+    private Vector3 GetPositionInRangeOfPlayers()
 	{
 		Vector3 bestPositionToSpawn = transform.position;
 		float maxMinDistance = 0f;

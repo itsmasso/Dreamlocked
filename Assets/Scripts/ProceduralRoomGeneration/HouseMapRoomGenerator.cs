@@ -72,14 +72,14 @@ public class HouseMapRoomGenerator : NetworkBehaviour
         //Debug.Log("Trying to Spawn Items");
         if((room.interactableObjectPrefabs.Count > 0) && (room.interactableObjectTransforms.Count == room.interactableObjectPrefabs.Count))
         {
-            Debug.Log("Detected Items to Spawn");
+            //Debug.Log("Detected Items to Spawn");
             for (int i = 0; i < room.interactableObjectTransforms.Count; i++)
             {
                 Transform spawnTransform = room.interactableObjectTransforms[i];
                 GameObject prefab = room.interactableObjectPrefabs[i];
                 GameObject interactableObject = Instantiate(prefab, spawnTransform.position, spawnTransform.rotation);
                 interactableObject.GetComponent<NetworkObject>().Spawn(true);
-                Debug.Log("Item Spawned");
+                //Debug.Log("Item Spawned");
             }
         }
     }

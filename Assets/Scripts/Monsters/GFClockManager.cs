@@ -26,12 +26,12 @@ public enum MQThreatLevel
 
 public class GFClockManager : NetworkSingleton<GFClockManager>
 {
-    private const float TOTAL_TIME = 120;
-    private const float TIME_TO_DANGER = 30;
+    private const float TOTAL_TIME = 60;
+    private const float TIME_TO_DANGER = 15;
     private float currentTime;
     private bool timeRunning;
     private MQThreatLevel currentThreatLevel = MQThreatLevel.PASSIVE;
-    private bool canBeWound = false;
+    //private bool canBeWound = false;
 
     // Developer Variables
     private bool printedActivating = false;

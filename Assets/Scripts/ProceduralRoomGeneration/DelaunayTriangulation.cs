@@ -18,6 +18,7 @@ public class DelaunayTriangulation
 	}
 	
 	
+	
 	public void Triangulation()
 	{
 		//Step 1: Create supertriangle big enough to surround all points
@@ -234,7 +235,11 @@ public class DelaunayTriangulation
 			return vertexA.GetHashCode() ^ vertexB.GetHashCode() ^ vertexC.GetHashCode();
 		}
 		
+		
 	}
+	
+	
+	
 	public class Edge
 	{
 		public Vector2 vertexU, vertexV;
@@ -286,6 +291,12 @@ public class DelaunayTriangulation
 			return vertexU.GetHashCode() ^ vertexV.GetHashCode();
 		}
 	}
+	
+		public void Clear()
+		{
+		    points.Clear();
+		    triangles.Clear();
+		}
 
 }
 

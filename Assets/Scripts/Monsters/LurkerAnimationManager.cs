@@ -60,8 +60,8 @@ public class LurkerAnimationManager : NetworkBehaviour
     {
         if(lurkerScript.currentTarget != null)
         {
-            
             sourceTarget.position = lurkerScript.currentTarget.GetComponent<PlayerController>().GetPlayerCameraPosition();
+            
             multiAimConstraint.weight = 1;
             
             

@@ -6,7 +6,8 @@ public class HouseMapRoomGenerator : NetworkBehaviour
     [SerializeField] private HouseMapGenerator houseMapGenerator;
     [SerializeField] private GameObject roomLightPrefab;
     [SerializeField] private GameObject doorPrefab;
-    private List<GameObject> objectsInRoom = new List<GameObject>();
+    [SerializeField]private List<NetworkObject> doorsInRoom = new List<NetworkObject>();
+    [SerializeField]private List<NetworkObject> lightsInRoom = new List<NetworkObject>();
     void Start()
     {
         
@@ -33,9 +34,10 @@ public class HouseMapRoomGenerator : NetworkBehaviour
             foreach(Transform lights in room.lightsTransforms)
             {
                 GameObject roomLightObject = Instantiate(roomLightPrefab, lights.position, Quaternion.identity);
-                objectsInRoom.Add(roomLightObject);
+                
                 roomLightObject.transform.rotation *= Quaternion.Euler(0, room.yRotation, 0);
                 roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+                lightsInRoom.Add(roomLightObject.GetComponent<NetworkObject>());
             }
         }
 	}
@@ -47,17 +49,43 @@ public class HouseMapRoomGenerator : NetworkBehaviour
             foreach(Transform doors in room.doorTransforms)
             {
                 GameObject doorObject = Instantiate(doorPrefab, doors.position, doors.transform.rotation);
-                objectsInRoom.Add(doorObject);
+                
                 doorObject.GetComponent<NetworkObject>().Spawn(true);
+                doorsInRoom.Add(doorObject.GetComponent<NetworkObject>());
             }
         }
 	}
 	
-	public void ClearObjects()
-	{
-	    foreach(GameObject roomObject in objectsInRoom){
-            Destroy(roomObject);
+public void ClearObjects()
+{
+    // Despawn doors and lights before reloading the scene
+    foreach (NetworkObject door in doorsInRoom)
+    {
+        if (door.IsSpawned)
+        {
+            // Despawn the networked object
+            door.Despawn();
+            
+            // Destroy the local game object
+            Destroy(door.gameObject);
         }
-	}
+    }
+
+    foreach (NetworkObject light in lightsInRoom)
+    {
+        if (light.IsSpawned)
+        {
+            // Despawn the networked object
+            light.Despawn();
+            
+            // Destroy the local game object
+            Destroy(light.gameObject);
+        }
+    }
+
+    // Clear the lists of networked objects
+    //doorsInRoom.Clear();
+    //lightsInRoom.Clear();
+}
 	
 }

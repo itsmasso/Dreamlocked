@@ -53,8 +53,10 @@ public class LurkerRoamState : LurkerBaseState
 		float chance = Random.value;
 		if(chance*100 <= lurker.chanceToStalkPlayer * Time.deltaTime && lurker.canStalk)
 		{
-			if(lurker.SetRandomPlayerAsTarget())
+			lurker.SetRandomPlayerAsTargetClientRpc();
+			if(lurker.currentTarget != null)
 			{
+				
 			    lurker.SwitchState(LurkerState.Stalking);
 			}
 			

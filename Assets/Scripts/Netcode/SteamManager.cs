@@ -24,11 +24,14 @@ public class SteamManager : MonoBehaviour
 
     [SerializeField]
     private GameObject LobbyMenu;
+    
+   
     void OnEnable()
     {
         SteamMatchmaking.OnLobbyCreated += LobbyCreated;
         SteamMatchmaking.OnLobbyEntered += LobbyEntered;
         SteamFriends.OnGameLobbyJoinRequested += GameLobbyJoinRequested;
+
     }
 
     void OnDisable()
@@ -125,8 +128,10 @@ public class SteamManager : MonoBehaviour
     {
         if(NetworkManager.Singleton.IsHost)
         {    
-            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
-            
+            Scene scene = SceneManager.GetSceneByName("MenuScene");
+            NetworkManager.Singleton.SceneManager.UnloadScene(scene);
+            GameManager.Instance.ChangeGameState(GameState.GeneratingLevel);
+
         }
     }
 

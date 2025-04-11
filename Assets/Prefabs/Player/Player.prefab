@@ -401,7 +401,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.45
   m_Height: 2
@@ -508,8 +508,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   characterController: {fileID: 4619842117627133740}
   playerScriptableObj: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
-  meshRenderer: {fileID: 6939045297753111219}
-  playereCollder: {fileID: 2565760027855897461}
+  meshRenderer: {fileID: 8447934892153456540}
+  playerCollider: {fileID: 2565760027855897461}
   camFollowPivot: {fileID: 2601825304741367845}
   moveSpeed: 0
   inputDir: {x: 0, y: 0}
@@ -541,7 +541,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerMesh: {fileID: 8447934892153456540}
   playerCam: {fileID: 0}
   cmCamPanTilt: {fileID: 0}
   inputAxisController: {fileID: 0}
@@ -570,6 +569,9 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 1024
+  interactableMoveablesLayer:
+    serializedVersion: 2
+    m_Bits: 2048
   peripheralAngle: 60
 --- !u!114 &5310495392972413353
 MonoBehaviour:

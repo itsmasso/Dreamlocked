@@ -26,15 +26,18 @@ public class GameManager : NetworkSingleton<GameManager>
 	public event Action onGameStateChanged;
 	public event Action onGamePlaying;
 	public event Action onLevelGenerate;
-	
+	public event Action onNextLevel;
+	public NetworkVariable<int> currentLevel = new NetworkVariable<int>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-	private GameState currentState;
-	private bool firstGeneration;
-
+	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.Lobby, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	[SerializeField] private LoadingScreenManager loadingScreenManager;
+	[SerializeField] private LevelLoader levelLoader;
 	protected override void Awake()
 	{
 		base.Awake();
-		DontDestroyOnLoad(this.gameObject);
+		//DontDestroyOnLoad(this.gameObject);
+		
+		
 	}
 
 	public override void OnNetworkSpawn()
@@ -42,37 +45,64 @@ public class GameManager : NetworkSingleton<GameManager>
 		if(IsServer)
 		{
 			NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneLoaded;
+			
+			currentLevel.OnValueChanged += (oldValue, newValue) =>
+            {
+                Debug.Log($"Current Level changed from {oldValue} to {newValue}");
+            };
+     
 		}
+		
+		
 	}
-	
+
+    void Start()
+    {
+        
+    }
+
+    
+	public void OnNextLevel()
+    {
+        if(!IsServer) return;
+        StartCoroutine(TransitionToNextLevel());
+        //add respawn here
+    }
+    
+    private IEnumerator TransitionToNextLevel()
+    {
+        onNextLevel?.Invoke();
+        currentLevel.Value++;
+        yield return new WaitForSeconds(0.1f);
+        ChangeGameState(GameState.GeneratingLevel);
+    }
 
 	public void ChangeGameState(GameState newState)
 	{
 		if(IsServer)
 		{
 			onGameStateChanged?.Invoke();
-			currentState = newState;
-			switch(currentState)
+			netGameState.Value = newState;
+			switch(netGameState.Value)
 			{
 				case GameState.Lobby:
-					firstGeneration = true;
+					HandleLobbyClientRpc();
 					break;
 				case GameState.GeneratingLevel:
 
 					seed.Value = UnityEngine.Random.Range(1, 999999);
 					Debug.Log("Current seed:" + seed.Value);
-					if(!firstGeneration)
-					{
-					    onLevelGenerate?.Invoke();
-					    firstGeneration = false;
-					}
-						
+					ShowSleepLoadingScreenClientRpc();
+					HandleGenerateLevelClientRpc();
+					levelLoader.LoadHouseMap();
+					
 					break;
 				case GameState.GameStart:
-					onGameStart?.Invoke();
+					HandleGameStartClientRpc();
+					ChangeGameState(GameState.GamePlaying);
 					break;
 				case GameState.GamePlaying:
-					onGamePlaying?.Invoke();
+					HandleGamePlayingClientRpc();
 					break;
 				case GameState.GameOver:
 					Debug.Log("Game over");
@@ -83,11 +113,57 @@ public class GameManager : NetworkSingleton<GameManager>
 		}
 	}
 	
-	
-
-	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+	[ClientRpc]
+	private void HandleLobbyClientRpc()
 	{
-		ChangeGameState(GameState.GeneratingLevel);
+	   
+	    	
 	}
 	
+	[ClientRpc]
+	private void HandleGenerateLevelClientRpc()
+	{
+		onLevelGenerate?.Invoke();
+	   
+	}
+	
+	[ClientRpc]
+	private void HandleGameStartClientRpc()
+	{
+	    onGameStart?.Invoke();
+	
+	}
+	
+	[ClientRpc]
+	private void HandleGamePlayingClientRpc()
+	{
+	    onGamePlaying?.Invoke();
+	
+	}
+	
+	[ClientRpc]
+	public void ShowSleepLoadingScreenClientRpc()
+	{
+	    loadingScreenManager.ShowSleepingLoadingScreen();
+	}
+	[ClientRpc]
+	public void HideSleepLoadingScreenClientRpc()
+	{
+	    loadingScreenManager.HideSleepingLoadingScreen();
+	}
+	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+	{
+		//do something here if needed after scene loads
+	}
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            OnNextLevel();
+           
+        }
+    }
+
+
 }

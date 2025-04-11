@@ -14,10 +14,15 @@ public class UnitManager : MonoBehaviour
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
 	[SerializeField] private float minSpawnDistFromPlayers;
 	[SerializeField] private float maxSpawnDistFromPlayers;
+	private float timer;
+	[SerializeField] private float whenToSpawnEnemies = 5f;
+	private bool alreadySpawnedEnemies= false;
+	private bool canSpawnEnemies = false;
 
 	void Start()
 	{
-		GameManager.Instance.onGameStart += SpawnStartEnemies;
+		GameManager.Instance.onGamePlaying += CanSpawnEnemies;
+		GameManager.Instance.onNextLevel += DespawnAllEnemies;
 	}
 		
 	private Vector3 GetPositionInRangeOfPlayers()
@@ -29,7 +34,7 @@ public class UnitManager : MonoBehaviour
 			float minDistToPlayers = float.MaxValue;
 			
 			// Calculate the minimum distance from this hallway position to all players
-			foreach(Transform player in PlayerNetwork.playerTransforms)
+			foreach(NetworkObject player in PlayerNetworkManager.Instance.alivePlayers)
 			{
 				float dist = Vector3.Distance(hallwayPos, player.transform.position);
 				if(dist < minDistToPlayers)
@@ -54,7 +59,25 @@ public class UnitManager : MonoBehaviour
 		return bestPositionToSpawn;
 	}
 	
-	private void SpawnStartEnemies()
+	private void CanSpawnEnemies()
+	{
+	    canSpawnEnemies = true;
+	}
+    void Update()
+    {
+        if(!alreadySpawnedEnemies && canSpawnEnemies)
+        {
+            timer += Time.deltaTime;
+			if(timer >= whenToSpawnEnemies)
+			{
+				SpawnStartEnemies();
+				timer = 0f;
+				alreadySpawnedEnemies = true;
+			}
+        }
+    }
+
+    private void SpawnStartEnemies()
 	{
 		SpawnLurker();
 		//SpawnMannequinMonsters();
@@ -69,7 +92,7 @@ public class UnitManager : MonoBehaviour
 	public void SpawnMonster(GameObject monsterPrefab, Vector3 position, Quaternion rotation)
 	{	
 		GameObject monsterObject = Instantiate(monsterPrefab, position, rotation);
-		
+		spawnedEnemies.Add(monsterObject.GetComponent<NetworkObject>());
 		monsterObject.GetComponent<NetworkObject>().Spawn(true);
 		
 	}
@@ -105,10 +128,19 @@ public class UnitManager : MonoBehaviour
 			if (enemy != null && enemy.IsSpawned)
 			{
 				enemy.Despawn(true);
+				//Destroy(enemy.gameObject);
 			}
 		}
 		spawnedEnemies.Clear();
+		alreadySpawnedEnemies = false;
+		canSpawnEnemies = false;
 		Debug.Log("All enemies despawned.");
 	}
+
+    void OnDestroy()
+    {
+        GameManager.Instance.onGamePlaying -= SpawnStartEnemies;
+		GameManager.Instance.onNextLevel -= DespawnAllEnemies;
+    }
 
 }

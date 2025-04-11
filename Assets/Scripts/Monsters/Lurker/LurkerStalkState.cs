@@ -95,6 +95,7 @@ public class LurkerStalkState : LurkerBaseState
 			else if(++chosenDoorTries >= maxTries)
 			{
 				Debug.LogWarning("Lurker can't get to the player!");
+				//consider making it switch targets instead too as an altnerative
 				lurker.StartStalkCooldown();
 			    lurker.SwitchState(LurkerState.Roaming);
 			}

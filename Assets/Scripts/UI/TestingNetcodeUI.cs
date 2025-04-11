@@ -15,7 +15,7 @@ public class TestingNetcodeUI : MonoBehaviour
 		startHostButton.onClick.AddListener(() => 
 		{
 			NetworkManager.Singleton.StartHost();
-			GameManager.Instance.ChangeGameState(GameState.Lobby);
+	
 			
 		});
 		
@@ -29,7 +29,7 @@ public class TestingNetcodeUI : MonoBehaviour
 		{
 			if(NetworkManager.Singleton.IsHost)
 			{
-				NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+				NetworkManager.Singleton.SceneManager.LoadScene("PersistScene", LoadSceneMode.Single);
 				
 			}
 		});

@@ -381,7 +381,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 249609452694020903}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: DoorPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -954,7 +954,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3729854914233530905}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: DoorPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1267,6 +1267,10 @@ PrefabInstance:
       value: Door_Frame (1)
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -1276,13 +1280,43 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3729854914233530905}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 693662324099758028}
   m_SourcePrefab: {fileID: 100100000, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
 --- !u!4 &2831187358344814383 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
   m_PrefabInstance: {fileID: 2360128765369350340}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3171014943823119765 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+  m_PrefabInstance: {fileID: 2360128765369350340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &693662324099758028
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3171014943823119765}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 7367654480258618190, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
 --- !u!1001 &2899114567623859432
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1348,6 +1382,10 @@ PrefabInstance:
       value: Door_Frame
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -1357,8 +1395,38 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 249609452694020903}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6597776664525632173}
   m_SourcePrefab: {fileID: 100100000, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+--- !u!1 &2664671408493978041 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
+  m_PrefabInstance: {fileID: 2899114567623859432}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &6597776664525632173
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2664671408493978041}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 7367654480258618190, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
 --- !u!4 &3436528178311215875 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e13218a454fba2d4abae9d77559542b6, type: 3}
@@ -1569,6 +1637,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 83018c26a91aa914fa37ea83432c0496, type: 2}
     - target: {fileID: -7172139080472401369, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -7172139080472401369, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -1581,12 +1653,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 836f177e963f8ff429b6f8710e80d3c9, type: 2}
     - target: {fileID: -5086992230917628453, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -5086992230917628453, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
       propertyPath: m_Name
       value: Medium_Room_2_doors
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 03161a9c39a9fe346848d01581f9d57d, type: 3}
       propertyPath: m_StaticEditorFlags

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LightScript : NetworkBehaviour
 {
@@ -21,6 +22,7 @@ public class LightScript : NetworkBehaviour
 	private int obstacleLayers;
 	[SerializeField] private HashSet<NetworkObject> enemiesInLight = new HashSet<NetworkObject>();
 	[SerializeField] private Collider[] enemyColliders;
+	private PlayerNetworkManager playerNetworkManager;
 	private float Timer;
 
     void Awake()
@@ -34,9 +36,22 @@ public class LightScript : NetworkBehaviour
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 		Timer = MIN_FLICKER_TIME;
 		obstacleLayers = obstacleLayer.value | groundLayer.value | interactableMoveables;
+		GetPlayerNetworkManager();
 	}
 
-	
+	private void GetPlayerNetworkManager()
+	{
+	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
+			if (persistScene.isLoaded)
+			{
+				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
+				{
+					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
+					if (playerNetworkManager != null)
+						break;
+				}
+			}
+	}
 	void Update()
 	{
 		if(IsServer)
@@ -74,12 +89,14 @@ public class LightScript : NetworkBehaviour
 	
 	private bool CanPlayerSeeLight(Light light)
 	{
-	    foreach(NetworkObject player in PlayerNetwork.alivePlayers)
+	    foreach(NetworkObject player in playerNetworkManager.alivePlayers)
 	    {
+			if (!player.IsOwner)
+            	continue;
+            	
 	        PlayerCamera playerCamera = player.GetComponent<PlayerCamera>();
 			if(playerCamera != null)
 			{
-				
 				if(playerCamera.CheckForLightVisibility(light)){
 					if(Vector3.Distance(transform.position, player.transform.position) >= Camera.main.farClipPlane/2f)
 					{
@@ -214,11 +231,21 @@ public class LightScript : NetworkBehaviour
 	{
 		foreach(NetworkObject enemy in enemiesInLight.ToList())
 		{
-			if(enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
+			// Ensure the enemy is not null before processing
+			if (enemy == null)
 			{
-				enemy.GetComponent<IAffectedByLight>().ExitLight();
 				enemiesInLight.Remove(enemy);
-				EnemyExitLightServerRpc(enemy);
+				continue;
+			}
+			IAffectedByLight affectedByLight = enemy.GetComponent<IAffectedByLight>();
+			if(affectedByLight != null)
+			{
+			    if(enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
+				{
+					affectedByLight.ExitLight();
+					enemiesInLight.Remove(enemy);
+					EnemyExitLightServerRpc(enemy);
+				}
 			}
 		}
 	}
@@ -244,4 +271,5 @@ public class LightScript : NetworkBehaviour
 		return true;
 		
 	}
+
 }

@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerHealth : NetworkBehaviour
@@ -10,12 +11,27 @@ public class PlayerHealth : NetworkBehaviour
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(
         100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public static event Action<int> onTakeDamage;
+    private PlayerNetworkManager playerNetworkManager;
     public override void OnNetworkSpawn()
 	{
         if(IsServer)
         {
             currentHealth.Value = playerScriptable.health;
         }
+        GetPlayerNetworkManager();
+	}
+	private void GetPlayerNetworkManager()
+	{
+	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
+			if (persistScene.isLoaded)
+			{
+				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
+				{
+					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
+					if (playerNetworkManager != null)
+						break;
+				}
+			}
 	}
 	
     [ServerRpc(RequireOwnership = false)]
@@ -41,26 +57,11 @@ public class PlayerHealth : NetworkBehaviour
             onTakeDamage?.Invoke(currentHealth);
         }
     }
-    [ServerRpc]
-    private void RemovePlayerFromAliveListServerRpc(NetworkObjectReference playerNetObjRef)
-	{
-	    RemovePlayerFromAliveListClientRpc(playerNetObjRef);
-	}
-	[ClientRpc]
-	private void RemovePlayerFromAliveListClientRpc(NetworkObjectReference playerNetObjRef)
-	{
-        if(playerNetObjRef.TryGet(out NetworkObject playerNetObject))
-        {
-            PlayerNetwork.alivePlayers.RemoveAll(p => p == playerNetObject);
-	        if(PlayerNetwork.alivePlayers.Count <= 0) GameManager.Instance.ChangeGameState(GameState.GameOver);
-        }
-	    
-	}
-    
+
     private void Die()
     {
         Debug.Log($"{gameObject.name} | NetworkObjectId: {NetworkObjectId} has died.");
-        RemovePlayerFromAliveListServerRpc(GetComponent<NetworkObject>());
+        PlayerNetworkManager.Instance.UnregisterPlayerClientRpc(GetComponent<NetworkObject>());
         gameObject.GetComponent<PlayerController>().enabled = false;
         HidePlayerFromPlayersClientRpc(GetComponent<NetworkObject>());
         DieClientRpc();

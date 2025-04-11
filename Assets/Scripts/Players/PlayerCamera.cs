@@ -6,12 +6,12 @@ using Unity.Cinemachine;
 using UnityEngine.Rendering.Universal;
 using System.Linq;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 {
 	
 	private PlayerController playerController;
-	[SerializeField] private MeshRenderer playerMesh;
 	private bool canMove;
 	[Header("Camera Properties")]
 	
@@ -53,24 +53,23 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	[SerializeField] private LayerMask groundLayer;
 	[SerializeField] private LayerMask enemyLayer;
 	[SerializeField] private LayerMask obstacleLayer;
+	[SerializeField] private LayerMask interactableMoveablesLayer;
 	[SerializeField] private float peripheralAngle; //max angle that determines how wide the field of view extends around the player. If angle is 90 degrees, it means the view is limited to 45 to the left and right
-	
+	private PlayerNetworkManager playerNetworkManager;
 	void Start()
 	{
 		if(!IsOwner)
 		{
-			playerMesh.enabled = true;
 			this.enabled = false;
 		}else
 		{
 			playerCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineCamera>();
-	
 			cmCamPanTilt = playerCam.gameObject.GetComponent<CinemachinePanTilt>();
 			playerCam.Follow = camFollowPivot;
 			camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
 			inputAxisController = playerCam.GetComponentInChildren<CinemachineInputAxisController>();
 			followZoom = playerCam.GetComponentInChildren<CinemachineFollowZoom>();
-			playerMesh.enabled = false;
+
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.visible = false;
 			playerController = gameObject.GetComponent<PlayerController>();
@@ -111,9 +110,10 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
     
     private void PickRandomPlayerToSpectate()
     {
-        if(PlayerNetwork.alivePlayers.Count != 0)
+		NetworkObject playerNetworkObject = PlayerNetworkManager.Instance.GetRandomPlayer();
+        if(playerNetworkObject != null)
         {
-            currentPlayerToSpectate = PlayerNetwork.alivePlayers[Random.Range(0, PlayerNetwork.alivePlayers.Count)].transform;
+			currentPlayerToSpectate = playerNetworkObject.transform;
         }else
         {
             currentPlayerToSpectate = transform;
@@ -231,7 +231,7 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	
 	private void CheckForObstaclesBetweenEnemy(Vector3 directionToEnemy, float enemyDistance)
 	{
-		int obstacleLayers = obstacleLayer.value | groundLayer.value;
+		int obstacleLayers = obstacleLayer.value | groundLayer.value | interactableMoveablesLayer;
 		if(Physics.Raycast(Camera.main.transform.position, directionToEnemy, out RaycastHit hit, enemyDistance + 1))
 		{
 			if(((1 << hit.collider.gameObject.layer) & enemyLayer) != 0 && ((1 << hit.collider.gameObject.layer) & obstacleLayers) == 0)

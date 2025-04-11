@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 public class Grid3D
@@ -110,5 +111,10 @@ public class Grid3D
 	public void SetNodeType(Vector3 worldPosition, CellType cellType)
 	{
 		GetNode(worldPosition).cellType = cellType;
+	}
+	
+	public void ClearGrid()
+	{
+	    Array.Clear(grid, 0, grid.Length);
 	}
 }

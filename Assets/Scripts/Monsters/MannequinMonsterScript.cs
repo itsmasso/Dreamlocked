@@ -4,7 +4,8 @@ using Unity.Netcode;
 using Pathfinding;
 using System.Linq;
 using System.Collections;
-
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 /*****************************************************************
  * MannequinMonsterScript
@@ -57,7 +58,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     
     [Header("Optimization Properties")]
     private float callTimer;
-    
+    private PlayerNetworkManager playerNetworkManager;
 
     private void Start()
     {
@@ -66,7 +67,21 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         threatLevelNetworkState.Value = manager.GetMQThreatLevel();
         agent.stopDistance = STOPPING_DISTANCE;
         callTimer = 0;
+        GetPlayerNetworkManager();
     }
+    private void GetPlayerNetworkManager()
+	{
+	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
+			if (persistScene.isLoaded)
+			{
+				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
+				{
+					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
+					if (playerNetworkManager != null)
+						break;
+				}
+			}
+	}
     private void Update()
     {
         //only server can run this code
@@ -129,16 +144,16 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     
     private void SetClosestPlayerAsTarget()
 	{
-	    if(PlayerNetwork.alivePlayers.Count != 0)
+	    if(PlayerNetworkManager.Instance.alivePlayers.Count > 0)
 	    {
-	        currentTarget = PlayerNetwork.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
+	        currentTarget = PlayerNetworkManager.Instance.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
 	        .OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
 	    
 	    	if(currentTarget == null)
 	    	{
                 Debug.Log("no target on same floor");
                 
-	    	    currentTarget = PlayerNetwork.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
+	    	    currentTarget = PlayerNetworkManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
 	    	}
 	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
         }
@@ -147,8 +162,10 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     [ClientRpc]
     private void SetCurrentTargetClientRpc(NetworkObjectReference playerObjectRef)
     {
-        playerObjectRef.TryGet(out NetworkObject playerObject);
-        currentTarget = playerObject.transform;
+        if(playerObjectRef.TryGet(out NetworkObject playerNetObj))
+        {
+            currentTarget = playerNetObj.transform;
+        }
     }
     private void MoveToPlayer(float speed)
     {
@@ -156,6 +173,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         agent.maxSpeed = speed;
         agent.destination = currentTarget.position;
         agent.SearchPath();
+        
     }
     
     private void AttackPlayer()
@@ -168,6 +186,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
                 playerHealth.TakeDamageServerRpc(mannequinScriptable.damage);
                 StartAttackCooldown();
             }
+            
         }
     }
     

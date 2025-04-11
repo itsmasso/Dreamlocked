@@ -4,6 +4,7 @@ using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using Unity.Netcode.Components;
 using System.Collections;
+using UnityEngine.TextCore.Text;
 
 public enum PlayerState
 {
@@ -16,12 +17,13 @@ public enum PlayerState
 public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 {
  	public PlayerState currentState {get; private set;}
-
+	public NetworkVariable<Quaternion> currentRotation = new NetworkVariable<Quaternion>(Quaternion.identity, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+ 	
 	[Header("Initialize")]
 	[SerializeField] private CharacterController characterController;
 	[SerializeField] private PlayerScriptable playerScriptableObj;
-	[SerializeField] private GameObject meshRenderer;
-	[SerializeField] private CapsuleCollider playereCollder;
+	[SerializeField] private MeshRenderer meshRenderer;
+	[SerializeField] private CapsuleCollider playerCollider;
 	
 	[Header("Camera")]
 	[SerializeField] private Transform camFollowPivot;
@@ -59,24 +61,36 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	[SerializeField] private LayerMask groundCheckLayer;
 	public bool isGrounded;
 	public float floorPosition;
-
+    void Awake()
+    {
+		//start character controller disabled
+        gameObject.GetComponent<CharacterController>().enabled = false;
+    }
+    
 	public override void OnNetworkSpawn()
 	{
 		if(IsOwner)
 		{
-		    PlayerLoadedServerRpc();
+			gameObject.GetComponent<CharacterController>().enabled = true;
+	
+		}else
+		{
+		    gameObject.GetComponent<CharacterController>().enabled = false;
+		    gameObject.GetComponent<PlayerInput>().enabled = false;
+		}
+		if(IsServer)
+		{
+		    PlayerNetworkManager.Instance.RegisterPlayerClientRpc(GetComponent<NetworkObject>());
 		}
 	}
+
 	
 	void Start()
 	{
-		if(!IsOwner)
+		
+		if(IsOwner)
 		{
-			gameObject.GetComponent<CharacterController>().enabled = false;
-			gameObject.GetComponent<PlayerInput>().enabled = false;
-			
-		}else
-		{
+			meshRenderer.enabled = false;
 			canMove = true;
 			baseMoveSpeed = playerScriptableObj.baseMovementSpeed;
 			moveSpeed = baseMoveSpeed; //setting movespeed to default base speed
@@ -85,27 +99,13 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			//setting booleans
 			enabledCrouching = false;
 			enabledSprinting = false;
-
+			
 
 			//initializing player character controller
 			characterController = GetComponent<CharacterController>();
 		}
 		
 		
-	}
-	
-	[ServerRpc]
-	public void PlayerLoadedServerRpc()
-	{
-	    PlayerLoadedClientRpc();
-	}
-	
-	[ClientRpc]
-	public void PlayerLoadedClientRpc()
-	{
-	   // Debug.Log("player loaded");
-	   meshRenderer.SetActive(true);
-	   playereCollder.enabled = true;
 	}
 
 	public void OnMove(InputAction.CallbackContext ctx)
@@ -169,7 +169,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	void Update()
 	{
 		if(IsOwner)
-		{
+		{	
 			if(!canMove)
 			{
 			    currentState = PlayerState.MovementLocked;
@@ -265,6 +265,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 
     public void ApplyAnimationLock(float animationTime)
     {
+		Debug.Log("called animation lock");
         StartCoroutine(AnimationLocked(animationTime));
     }
     
@@ -273,5 +274,10 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
         canMove = false;
         yield return new WaitForSeconds(lockTime);
         canMove = true;
+    }
+
+    public override void OnDestroy()
+    {
+        
     }
 }

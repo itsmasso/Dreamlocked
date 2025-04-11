@@ -26,7 +26,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	
 	}
 	
-	
 
 	[Header("Map Properties")]
 	[SerializeField] private Vector3Int mapSize;
@@ -34,9 +33,8 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	private Vector3 worldBottomLeft;
 	[SerializeField] private int floors;
 	[SerializeField] private AstarPath aStarComponent;
-	private List<Vector3> playerSpawnPositions = new List<Vector3>();
-	[SerializeField] private PlayerNetwork playerNetwork;
-	private bool firstGeneration;
+	public bool isLevelGenerated;
+
 	[Header("Grid Properties")]
 	[SerializeField] private float nodeRadius;
 	private int nodeDiameter;
@@ -59,15 +57,13 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[Header("Special Room Properties")]
 	[SerializeField] private List<GameObject> specialRooms;
 	private int specialRoomIndex = 0;
-	private bool spawnedMainRoom;
-	private bool spawnedGFClockRoom;
 	
 	[Header("Room Properties")]
 	[SerializeField] private int roomsPerFloor;
 	
 	[Header("Spawn Room Algorithm")]
 	[SerializeField] private int spaceBetweenRooms;
-	public List<GameObject> rooms {get; private set;}
+	[SerializeField] public List<GameObject> rooms {get; private set;}
 	[SerializeField] private HouseMapRoomGenerator roomGenerator;
 	[SerializeField] private int maxIteration = 30;
 
@@ -103,13 +99,11 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		mapSize.y = Mathf.RoundToInt(floorHeight * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x/2 - Vector3.up * mapSize.y/2 - Vector3.forward * mapSize.z/2;
-		GameManager.Instance.onLevelGenerate += Generate;
+		GameManager.Instance.onNextLevel += ClearMap;
 	}
 
 	void Start()
-	{
-		firstGeneration = true;
-		
+	{	
 		Generate();
 		
 	}
@@ -121,14 +115,14 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
-		spawnedMainRoom = false;
-		spawnedGFClockRoom = false;
+		isLevelGenerated= false;
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
 		hallwayPathFinder = new AStarPathfinder(grid);
 		hallways  = new List<Node>();
 		currentHallwaySpawnIndex = 0;
+		specialRoomIndex = 0;
 		
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
@@ -146,25 +140,18 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		
 		aStarComponent.Scan();
 		sw.Stop();
-		if(firstGeneration)
-			playerNetwork.SpawnPlayers(GetPlayerSpawnPosition());
-		else
+		isLevelGenerated = true;
+		if(IsServer)
 		{
-		    if(IsServer)
-		    {
-		        foreach(NetworkObject player in PlayerNetwork.alivePlayers){
-					player.transform.position = GetPlayerSpawnPosition();
-					//todo: coroutine to fade then TP
-				}
-		    }
+		    
+		    GameManager.Instance.ChangeGameState(GameState.GameStart);
 		}
-		GameManager.Instance.ChangeGameState(GameState.GameStart);
-		firstGeneration = false;
+
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		
 	}
-	
-	/*****************************************************************
+
+    /*****************************************************************
 	* GetRoomsList
 	*****************************************************************
 	* Author: Dylan Werelius
@@ -174,7 +161,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		rooms that have been spawned. I use it in the UnitManager
 		script to spawn the mannequin monsters in each room.
 	*****************************************************************/
-	public List<Vector3> GetRoomsList()
+    public List<Vector3> GetRoomsList()
 	{
 		List<Vector3> roomPositions = new List<Vector3>();
 		UnityEngine.Debug.Log("Getting Room Positions");
@@ -188,7 +175,10 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	}
 	
 	public Vector3 GetPlayerSpawnPosition(){
-		return rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true).transform.position;
+		//UnityEngine.Debug.Log(rooms.Count);
+		Vector3 position = rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true).transform.position;
+		
+		return position;
 	}
 	
 	public Vector3 GetRandomHallwayPosition()
@@ -641,11 +631,25 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	
 	public void ClearMap()
 	{
-	    foreach(Transform child in transform){
-			Destroy(child);
-		}
 		roomGenerator.ClearObjects();
+	    foreach(Transform child in transform){
+			Destroy(child.gameObject);
+		}
+		grid.ClearGrid();
+		delaunay.Clear();
+		rooms.Clear();
+		hallways.Clear();
+		
+		
+		
 	}
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        
+        GameManager.Instance.onNextLevel -= ClearMap;
+    }
 	private void OnDrawGizmos() {
 		
 		

@@ -9,14 +9,26 @@ EditorBuildSettings:
     path: Assets/Scenes/Bootstrapper.unity
     guid: b23a388c831b0db448da7e836adf253c
   - enabled: 1
-    path: Assets/Scenes/MenuScene.unity
-    guid: afe5f3abc4beb2e489de8e4b61a2cafe
-  - enabled: 0
     path: Assets/Scenes/TestScene/TestMenuScene.unity
     guid: c0d06d24e4ff96a4d97c948fa6c25f7a
   - enabled: 1
+    path: Assets/Scenes/PersistScene.unity
+    guid: 74cb9d89049f56b4a9e04b4a5fb4efb1
+  - enabled: 1
+    path: Assets/Scenes/MenuScene.unity
+    guid: afe5f3abc4beb2e489de8e4b61a2cafe
+  - enabled: 1
     path: Assets/Scenes/GameScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/HouseMapLevel.unity
+    guid: 4ec76577081d136419b2a4410edde290
+  - enabled: 0
+    path: Assets/Scenes/TestScene/TestUnload.unity
+    guid: a6a4a4a2aab44054584bf134ebc4d906
+  - enabled: 0
+    path: Assets/Scenes/TestScene/TestBootStrapper.unity
+    guid: 46c37ebcf95659647a472c09f5df3bb8
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

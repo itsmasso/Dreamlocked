@@ -16,12 +16,15 @@ using Unity.VisualScripting;
     it will play a soothing song to wake the dreamer up. The 
     players will have to find their way back to the spawn room
     before the song ends or else they will die.
+
+    NOTE: To find the currentDreamLayer value and the
+    MAX_DREAM_LAYER value, go to the GameManager.cs script
  *****************************************************************/
 public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
 {
     void Start()
     {
-        Debug.Log("Current Dream Layer: " + GameManager.Instance.GetCurretnDreamLayer());
+        Debug.Log("Current Dream Layer: " + GameManager.Instance.GetCurrentDreamLayer());
     }
     void Update()
     {
@@ -118,6 +121,7 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
     private void StartExtractionProtocol()
     {
         Debug.Log("Starting Extraction Protocol...");
+        GFClockManager.Instance.StartExtraction();
         PlaySong();
     }
 }

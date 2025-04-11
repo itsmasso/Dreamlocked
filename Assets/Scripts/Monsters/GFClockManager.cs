@@ -15,6 +15,7 @@
     them when they can be active and roaming.
  *****************************************************************/
 using UnityEngine;
+using Unity.Netcode;
 
 // This enum will handle what stage the timer is at
 public enum MQThreatLevel
@@ -24,14 +25,16 @@ public enum MQThreatLevel
     AWAKENED
 }
 
-public class GFClockManager : NetworkSingleton<GFClockManager>
+public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 {
     private const float TOTAL_TIME = 60;
-    private const float TIME_TO_DANGER = 15;
+    private const float TIME_TO_DANGER = 20;
+    private const float EXTRACTION_TIME = 60;
+    private const float REWIND_BUFFER = TOTAL_TIME - 10;
+    private bool gameEnding = false;
     private float currentTime;
     private bool timeRunning;
     private MQThreatLevel currentThreatLevel = MQThreatLevel.PASSIVE;
-    //private bool canBeWound = false;
 
     // Developer Variables
     private bool printedActivating = false;
@@ -44,11 +47,43 @@ public class GFClockManager : NetworkSingleton<GFClockManager>
     {
         currentTime = TOTAL_TIME;
         timeRunning = true;
-        //Debug.Log("Timer Started");
+        Debug.Log("Timer Started");
     }
 
     // Update is called once per frame
     void Update()
+    {
+        if(!gameEnding)
+        {
+            Timer();
+        } else {
+            ExtractionTimer();
+        }
+    }
+
+    /*****************************************************************
+    * InstantResetTimer
+    *****************************************************************
+    * Author: Dylan Werelius
+    *****************************************************************
+    * Description:
+        This function will reset the timer back to the TOTAL_TIME and
+        start it.
+    *****************************************************************/
+    private void InstantResetTimer()
+    {
+        currentTime = TOTAL_TIME;
+        timeRunning = true;
+        printedActivating = false;
+        printedAwakened = false;
+    }
+
+    public MQThreatLevel GetMQThreatLevel()
+    {
+        return currentThreatLevel;
+    }
+
+    private void Timer()
     {
         // Decrement the timer by one second if the clock is running and the currentTime > -1
         currentTime = (timeRunning && currentTime > -1) ? currentTime -= Time.deltaTime : currentTime;
@@ -80,38 +115,45 @@ public class GFClockManager : NetworkSingleton<GFClockManager>
                 printedActivating = true;
             }
             //Debug.Log("Current Time: " + currentTime);
+        } 
+        else if (timeRunning) 
+        {
+            currentThreatLevel = MQThreatLevel.PASSIVE;
         }
     }
 
-    /*****************************************************************
-    * InstantResetTimer
-    *****************************************************************
-    * Author: Dylan Werelius
-    *****************************************************************
-    * Description:
-        This function will reset the timer back to the TOTAL_TIME and
-        start it.
-    *****************************************************************/
-    private void InstantResetTimer()
+    private void ExtractionTimer()
     {
-        currentTime = TOTAL_TIME;
-        timeRunning = true;
-    }
+        currentThreatLevel = MQThreatLevel.ACTIVATING;
 
-    public MQThreatLevel GetMQThreatLevel()
-    {
-        return currentThreatLevel;
-    }
+        // Count down the timer
+        currentTime = (timeRunning && currentTime > 0) ? currentTime -= Time.deltaTime : 0;
 
-    // This will be used to rewind the timer. Note that you can only rewind the timer back to TOTAL_TIME
-    private void RewindTime()
-    {
-        timeRunning = true;
-        if (currentTime >= TOTAL_TIME)
+        if (currentTime <= 0)
         {
-            currentTime = TOTAL_TIME;
-        } else {
-            currentTime = currentTime + 5;
+            timeRunning = false;
+            //Debug.Log("Extraction Complete");
+        }
+    }
+
+    public void StartExtraction()
+    {
+        gameEnding = true;
+        currentTime = EXTRACTION_TIME;
+        timeRunning = true;
+    }
+
+    public void Interact(NetworkObjectReference playerObjectRef)
+    {
+        //Debug.Log("Trying to Rewind");
+        if (!gameEnding && currentTime <= REWIND_BUFFER)
+        {
+            Debug.Log("Clock Rewound");
+            InstantResetTimer();
+        }
+        else
+        {
+            Debug.Log("Cannot Rewind Time Right Now");
         }
     }
 }

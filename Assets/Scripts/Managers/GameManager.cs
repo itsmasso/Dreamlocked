@@ -143,7 +143,7 @@ public class GameManager : NetworkSingleton<GameManager>
 		return MAX_DREAM_LAYERS;
 	}
 	
-	public int GetCurretnDreamLayer()
+	public int GetCurrentDreamLayer()
 	{
 		return currentDreamLayer.Value;
 	}

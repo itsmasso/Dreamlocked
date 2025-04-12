@@ -20,7 +20,7 @@ public enum GameState
 
 public class GameManager : NetworkSingleton<GameManager>
 {
-	
+
 	//events
 	public event Action onGameStart;
 	public event Action onGameStateChanged;
@@ -32,58 +32,66 @@ public class GameManager : NetworkSingleton<GameManager>
 	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.Lobby, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private LoadingScreenManager loadingScreenManager;
 	[SerializeField] private LevelLoader levelLoader;
+	private const int MAX_DREAM_LAYERS = 2;
+	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	protected override void Awake()
 	{
 		base.Awake();
 		//DontDestroyOnLoad(this.gameObject);
-		
-		
+
+
 	}
 
 	public override void OnNetworkSpawn()
 	{
-		if(IsServer)
+		if (IsServer)
 		{
 			NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneLoaded;
-			
+
 			currentLevel.OnValueChanged += (oldValue, newValue) =>
-            {
-                Debug.Log($"Current Level changed from {oldValue} to {newValue}");
-            };
-     
+			{
+				Debug.Log($"Current Level changed from {oldValue} to {newValue}");
+			};
+
 		}
-		
-		
+
+
 	}
 
-    void Start()
+	void Start()
+	{
+
+	}
+    void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            OnNextLevel();
+        }
     }
 
-    
-	public void OnNextLevel()
-    {
-        if(!IsServer) return;
-        StartCoroutine(TransitionToNextLevel());
-        //add respawn here
-    }
-    
-    private IEnumerator TransitionToNextLevel()
-    {
-        onNextLevel?.Invoke();
-        currentLevel.Value++;
-        yield return new WaitForSeconds(0.1f);
-        ChangeGameState(GameState.GeneratingLevel);
-    }
+    public void OnNextLevel()
+	{
+		if (!IsServer) return;
+		StartCoroutine(TransitionToNextLevel());
+		//add respawn here
+	}
+
+	private IEnumerator TransitionToNextLevel()
+	{
+		onNextLevel?.Invoke();
+		currentLevel.Value++;
+		yield return new WaitForSeconds(0.1f);
+		ChangeGameState(GameState.GeneratingLevel);
+	}
 
 	public void ChangeGameState(GameState newState)
 	{
-		if(IsServer)
+		if (IsServer)
 		{
 			onGameStateChanged?.Invoke();
 			netGameState.Value = newState;
-			switch(netGameState.Value)
+			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
 					HandleLobbyClientRpc();
@@ -95,7 +103,7 @@ public class GameManager : NetworkSingleton<GameManager>
 					ShowSleepLoadingScreenClientRpc();
 					HandleGenerateLevelClientRpc();
 					levelLoader.LoadHouseMap();
-					
+
 					break;
 				case GameState.GameStart:
 					HandleGameStartClientRpc();
@@ -112,58 +120,69 @@ public class GameManager : NetworkSingleton<GameManager>
 			}
 		}
 	}
-	
+
 	[ClientRpc]
 	private void HandleLobbyClientRpc()
 	{
-	   
-	    	
+
+
 	}
-	
+
 	[ClientRpc]
 	private void HandleGenerateLevelClientRpc()
 	{
 		onLevelGenerate?.Invoke();
-	   
+
 	}
-	
+
 	[ClientRpc]
 	private void HandleGameStartClientRpc()
 	{
-	    onGameStart?.Invoke();
-	
+		onGameStart?.Invoke();
+
 	}
-	
+
 	[ClientRpc]
 	private void HandleGamePlayingClientRpc()
 	{
-	    onGamePlaying?.Invoke();
-	
+		onGamePlaying?.Invoke();
+
 	}
-	
+
 	[ClientRpc]
 	public void ShowSleepLoadingScreenClientRpc()
 	{
-	    loadingScreenManager.ShowSleepingLoadingScreen();
+		loadingScreenManager.ShowSleepingLoadingScreen();
 	}
 	[ClientRpc]
 	public void HideSleepLoadingScreenClientRpc()
 	{
-	    loadingScreenManager.HideSleepingLoadingScreen();
+		loadingScreenManager.HideSleepingLoadingScreen();
 	}
 	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 	{
 		//do something here if needed after scene loads
 	}
 
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.G))
-        {
-            OnNextLevel();
-           
-        }
-    }
+	public int GetMaxDreamLayer()
+	{
+		return MAX_DREAM_LAYERS;
+	}
 
+	public int GetCurrentDreamLayer()
+	{
+		return currentDreamLayer.Value;
+	}
+
+	public bool IsFinalDreamLayer()
+	{
+		return currentDreamLayer.Value >= MAX_DREAM_LAYERS;
+	}
+
+
+	public void DescendToNextDreamLayer()
+	{
+		currentDreamLayer.Value++;
+	}
 
 }

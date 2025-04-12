@@ -44,15 +44,10 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	[SerializeField] private GameObject roomCeilingPrefab;
 	[SerializeField]private GameObject roomCeilingWithLightPrefab;
 	[SerializeField] private GameObject roomFloorPrefab;
-	[SerializeField] private GameObject roomLightPrefab;
+	[SerializeField] private GameObject hallwayLightPrefab;
 	[SerializeField] private GameObject wallPrefab;
 	[SerializeField] private float wallThickness, ceilingThickness, floorThickness;
 	[SerializeField] private List<GameObject> roomPrefabList;
-	
-	// We can possibly remove these since they will be stored in the specialRooms list
-	[Header("Special Room Prefab Components")]
-	[SerializeField] private GameObject mainRoomPrefab;
-	[SerializeField] private GameObject GFClockRoomPrefab;
 	
 	[Header("Special Room Properties")]
 	[SerializeField] private List<GameObject> specialRooms;
@@ -77,6 +72,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	
 	[Header("Create Hallways (A*)")]
 	[SerializeField] private float hallwayLightSpawnInterval;
+	private List<NetworkObject> hallwayLights = new List<NetworkObject>();
 	private List<Node> hallways;
 	private AStarPathfinder hallwayPathFinder;
 	private float currentHallwaySpawnIndex;
@@ -161,12 +157,12 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		rooms that have been spawned. I use it in the UnitManager
 		script to spawn the mannequin monsters in each room.
 	*****************************************************************/
-    public List<Vector3> GetRoomsList()
+    public List<Vector3> GetNormalRoomsList()
 	{
 		List<Vector3> roomPositions = new List<Vector3>();
-		UnityEngine.Debug.Log("Getting Room Positions");
+		//UnityEngine.Debug.Log("Getting Room Positions");
 		foreach(GameObject room in rooms) {
-			if (!room.GetComponent<Room>().isMainRoom && !room.GetComponent<Room>().isStairs)
+			if (!room.GetComponent<Room>().isSpecialRoom && !room.GetComponent<Room>().isStairs)
 			{
 				roomPositions.Add(room.transform.position);
 			}
@@ -597,8 +593,9 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
     		ceiling.transform.SetParent(transform);
     		if(IsServer)
     		{
-    		    GameObject roomLightObject = Instantiate(roomLightPrefab, ceiling.GetComponent<CeilingPiece>().lightsTransform.position, Quaternion.identity);
+    		    GameObject roomLightObject = Instantiate(hallwayLightPrefab, ceiling.GetComponent<CeilingPiece>().lightsTransform.position, Quaternion.identity);
             	roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+            	hallwayLights.Add(roomLightObject.GetComponent<NetworkObject>());
     		}
 	    }else
 	    {
@@ -635,6 +632,17 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	    foreach(Transform child in transform){
 			Destroy(child.gameObject);
 		}
+		foreach (NetworkObject light in hallwayLights)
+        {
+            if (light.IsSpawned)
+            {
+                // Despawn the networked object
+                light.Despawn();
+
+                // Destroy the local game object
+                Destroy(light.gameObject);
+            }
+        }
 		grid.ClearGrid();
 		delaunay.Clear();
 		rooms.Clear();
@@ -647,7 +655,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
     public override void OnDestroy()
     {
         base.OnDestroy();
-        
+        ClearMap();
         GameManager.Instance.onNextLevel -= ClearMap;
     }
 	private void OnDrawGizmos() {

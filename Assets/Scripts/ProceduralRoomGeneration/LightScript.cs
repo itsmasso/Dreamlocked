@@ -11,6 +11,7 @@ public class LightScript : NetworkBehaviour
 	const float MAX_FLICKER_TIME = 1f;
 	private GFClockManager manager;
 	[SerializeField] private Light lightSource;
+	[SerializeField] private List<Renderer> lightMaterialList = new List<Renderer>();
 	[SerializeField] private LayerMask enemyLayer;
 	[SerializeField] private LayerMask playerLayer;
 	[SerializeField] private LayerMask obstacleLayer;
@@ -22,7 +23,7 @@ public class LightScript : NetworkBehaviour
 	private int obstacleLayers;
 	[SerializeField] private HashSet<NetworkObject> enemiesInLight = new HashSet<NetworkObject>();
 	[SerializeField] private Collider[] enemyColliders;
-	private PlayerNetworkManager playerNetworkManager;
+
 	private float Timer;
 
     void Awake()
@@ -36,22 +37,9 @@ public class LightScript : NetworkBehaviour
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 		Timer = MIN_FLICKER_TIME;
 		obstacleLayers = obstacleLayer.value | groundLayer.value | interactableMoveables;
-		GetPlayerNetworkManager();
+	
 	}
 
-	private void GetPlayerNetworkManager()
-	{
-	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
-			if (persistScene.isLoaded)
-			{
-				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
-				{
-					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
-					if (playerNetworkManager != null)
-						break;
-				}
-			}
-	}
 	void Update()
 	{
 		if(IsServer)
@@ -64,13 +52,34 @@ public class LightScript : NetworkBehaviour
 		if(IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
 		{
 		    playerSeesLight = true;
-		    lightSource.enabled = true;
+		    
 		}else
 		{
 		    playerSeesLight = false;
 		    lightSource.enabled = false;
+		    TurnOffMaterialLight();
 		}
 		
+	}
+	
+	private void TurnOnMaterialLight()
+	{
+	    foreach(Renderer renderer in lightMaterialList)
+	    {
+			Material targetMat = renderer.materials.FirstOrDefault(mat => mat.name.Contains("Lamp"));
+			targetMat.EnableKeyword("_EMISSION");
+	        
+	        //material.SetColor("_EmissionColor", Color.white * 2f);
+	    }
+	}
+	
+	private void TurnOffMaterialLight()
+	{
+	    foreach(Renderer renderer in lightMaterialList)
+	    {
+			Material targetMat = renderer.materials.FirstOrDefault(mat => mat.name.Contains("Lamp"));
+			targetMat.DisableKeyword("_EMISSION");
+		}
 	}
 	
 	private bool IsPlayerNear(Light light)
@@ -80,7 +89,11 @@ public class LightScript : NetworkBehaviour
 	    {
 	        if(collider != null)
 	        {
-				return true;
+				NetworkObject networkObject = collider.GetComponent<NetworkObject>();
+				if(networkObject.IsOwner)
+				{
+				    return true;
+				}
 	            
 	        }
 	    }
@@ -89,7 +102,7 @@ public class LightScript : NetworkBehaviour
 	
 	private bool CanPlayerSeeLight(Light light)
 	{
-	    foreach(NetworkObject player in playerNetworkManager.alivePlayers)
+	    foreach(NetworkObject player in PlayerNetworkManager.Instance.alivePlayers)
 	    {
 			if (!player.IsOwner)
             	continue;
@@ -103,13 +116,14 @@ public class LightScript : NetworkBehaviour
 					    light.shadows = LightShadows.None;
 					}else
 					{
-					    light.shadows = LightShadows.Hard;
+					    light.shadows = LightShadows.Soft;
 					}
 					return true;
 				}
 				
 				
 			}
+			
 	    }
 	    return false;
 	}
@@ -147,6 +161,10 @@ public class LightScript : NetworkBehaviour
 			if(playerSeesLight)
 			{
 			    lightSource.enabled = !lightSource.enabled;
+			    if(lightSource.enabled)
+			    	TurnOnMaterialLight();
+			    else
+			    	TurnOffMaterialLight();
 			}
 			// The comment out line would make the flickering all different and random
 			//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
@@ -158,14 +176,16 @@ public class LightScript : NetworkBehaviour
 	{
 		isLightOn = false;
 		lightSource.enabled = false;
+		TurnOffMaterialLight();
 	}
 
 	private void TurnLightsOn()
 	{
 		isLightOn = true;
-		if(!playerSeesLight)
+		if(playerSeesLight)
 		{
 		    lightSource.enabled = true;
+		    TurnOnMaterialLight();
 		}
 	}
 	

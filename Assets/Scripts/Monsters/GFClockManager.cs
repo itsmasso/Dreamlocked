@@ -15,7 +15,7 @@
     them when they can be active and roaming.
  *****************************************************************/
 using UnityEngine;
-
+using Unity.Netcode;
 // This enum will handle what stage the timer is at
 public enum MQThreatLevel
 {
@@ -24,14 +24,16 @@ public enum MQThreatLevel
     AWAKENED
 }
 
-public class GFClockManager : NetworkSingleton<GFClockManager>
+public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 {
-    private const float TOTAL_TIME = 300;
-    private const float TIME_TO_DANGER = 100;
+    private const float TOTAL_TIME = 30;
+    private const float TIME_TO_DANGER = 20;
+    private const float EXTRACTION_TIME = 60;
+    private const float REWIND_BUFFER = TOTAL_TIME - 10;
+    private bool gameEnding = false;
     private float currentTime;
     private bool timeRunning;
-    private MQThreatLevel currentThreatLevel = MQThreatLevel.PASSIVE;
-    private bool canBeWound = false;
+    public NetworkVariable<MQThreatLevel> currentThreatLevel = new NetworkVariable<MQThreatLevel>(MQThreatLevel.PASSIVE, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     // Developer Variables
     private bool printedActivating = false;
@@ -51,37 +53,14 @@ public class GFClockManager : NetworkSingleton<GFClockManager>
     void Update()
     {
         if(!IsServer) return;
-        // Decrement the timer by one second if the clock is running and the currentTime > -1
-        currentTime = (timeRunning && currentTime > -1) ? currentTime -= Time.deltaTime : currentTime;
-
-        // This will interpret the timer and update the level of danger based on how much time is left
-        if (timeRunning && currentTime <= 0)
+        
+        if(!gameEnding)
         {
-            // At this time, the GF Clock stops chiming and the lights go out
-            currentThreatLevel = MQThreatLevel.AWAKENED;
-            timeRunning = false;
-            
-            // This is just for the sake of making sure the timer is running
-            if (!printedAwakened)
-            {
-                Debug.Log("Monsters have Awakened");
-                printedAwakened = true;
-            }
-            //Debug.Log("Current Time: " + currentTime);
-        } 
-        else if (timeRunning && currentTime <= TIME_TO_DANGER) 
-        {
-            // At this time, the GF Clock will start to chime and lights begin to flicker
-            currentThreatLevel = MQThreatLevel.ACTIVATING;
-
-            // This is just for the sake of making sure the timer is running
-            if (!printedActivating)
-            {
-                Debug.Log("Monsters are Activating");
-                printedActivating = true;
-            }
-            //Debug.Log("Current Time: " + currentTime);
+            Timer();
+        } else {
+            ExtractionTimer();
         }
+        
     }
 
     /*****************************************************************
@@ -97,22 +76,80 @@ public class GFClockManager : NetworkSingleton<GFClockManager>
     {
         currentTime = TOTAL_TIME;
         timeRunning = true;
+        printedActivating = false;
+        printedAwakened = false;
     }
 
     public MQThreatLevel GetMQThreatLevel()
     {
-        return currentThreatLevel;
+        return currentThreatLevel.Value;
+    }
+    
+    private void Timer()
+    {
+        // Decrement the timer by one second if the clock is running and the currentTime > -1
+        currentTime = (timeRunning && currentTime > -1) ? currentTime -= Time.deltaTime : currentTime;
+
+        // This will interpret the timer and update the level of danger based on how much time is left
+        if (timeRunning && currentTime <= 0)
+        {
+            // At this time, the GF Clock stops chiming and the lights go out
+            currentThreatLevel.Value = MQThreatLevel.AWAKENED;
+            timeRunning = false;
+            
+            // This is just for the sake of making sure the timer is running
+            if (!printedAwakened)
+            {
+                Debug.Log("Monsters have Awakened");
+                printedAwakened = true;
+            }
+            //Debug.Log("Current Time: " + currentTime);
+        } 
+        else if (timeRunning && currentTime <= TIME_TO_DANGER) 
+        {
+            // At this time, the GF Clock will start to chime and lights begin to flicker
+            currentThreatLevel.Value = MQThreatLevel.ACTIVATING;
+
+            // This is just for the sake of making sure the timer is running
+            if (!printedActivating)
+            {
+                Debug.Log("Monsters are Activating");
+                printedActivating = true;
+            }
+            //Debug.Log("Current Time: " + currentTime);
+        } else if (timeRunning) 
+        {
+            currentThreatLevel.Value = MQThreatLevel.PASSIVE;
+        }
+        
     }
 
-    // This will be used to rewind the timer. Note that you can only rewind the timer back to TOTAL_TIME
-    private void RewindTime()
+    private void ExtractionTimer()
     {
-        timeRunning = true;
-        if (currentTime >= TOTAL_TIME)
+        currentThreatLevel.Value = MQThreatLevel.ACTIVATING;
+
+        // Count down the timer
+        currentTime = (timeRunning && currentTime > 0) ? currentTime -= Time.deltaTime : 0;
+
+        if (currentTime <= 0)
         {
-            currentTime = TOTAL_TIME;
-        } else {
-            currentTime = currentTime + 5;
+            timeRunning = false;
+            //Debug.Log("Extraction Complete");
+        }
+    }
+    public void StartExtraction()
+    {
+        gameEnding = true;
+        currentTime = EXTRACTION_TIME;
+        timeRunning = true;
+    }
+
+    public void Interact(NetworkObjectReference playerObject)
+    {
+       
+        if(!gameEnding && currentTime <= REWIND_BUFFER){
+         Debug.Log("interacting");
+            InstantResetTimer();
         }
     }
 }

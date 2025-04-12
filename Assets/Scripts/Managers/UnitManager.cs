@@ -4,6 +4,7 @@ using System.Linq;
 using Pathfinding;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UnitManager : MonoBehaviour
 {
@@ -18,12 +19,31 @@ public class UnitManager : MonoBehaviour
 	[SerializeField] private float whenToSpawnEnemies = 5f;
 	private bool alreadySpawnedEnemies= false;
 	private bool canSpawnEnemies = false;
+	[SerializeField] private string defaultScene;
 
 	void Start()
 	{
-		GameManager.Instance.onGamePlaying += CanSpawnEnemies;
-		GameManager.Instance.onNextLevel += DespawnAllEnemies;
+		//GameManager.Instance.onGamePlaying += CanSpawnEnemies;
+		
 	}
+	
+	void OnEnable()
+    {
+        if (GameManager.Instance != null)
+		{
+			GameManager.Instance.onGameStart += CanSpawnEnemies;
+			GameManager.Instance.onNextLevel += DespawnAllEnemies;
+		}
+    }
+
+    void OnDisable()
+    {
+        if (GameManager.Instance != null)
+		{
+			GameManager.Instance.onGameStart -= CanSpawnEnemies;
+			GameManager.Instance.onNextLevel -= DespawnAllEnemies;
+		}
+    }
 		
 	private Vector3 GetPositionInRangeOfPlayers()
 	{
@@ -80,7 +100,7 @@ public class UnitManager : MonoBehaviour
     private void SpawnStartEnemies()
 	{
 		SpawnLurker();
-		//SpawnMannequinMonsters();
+		SpawnMannequinMonsters();
 	}
 	
 	private void SpawnLurker()
@@ -110,7 +130,7 @@ public class UnitManager : MonoBehaviour
 	
 	private void SpawnMannequinMonsters()
 	{
-		foreach(Vector3 roomPos in houseMapGenerator.GetRoomsList().ToList())
+		foreach(Vector3 roomPos in houseMapGenerator.GetNormalRoomsList().ToList())
 		{
 			// Spawn the monster on the first floor
 			if (roomPos.y == -8.00)
@@ -123,12 +143,15 @@ public class UnitManager : MonoBehaviour
 	
 	public void DespawnAllEnemies()
 	{
-		foreach (var enemy in spawnedEnemies)
+		if(spawnedEnemies.Count > 0)
 		{
-			if (enemy != null && enemy.IsSpawned)
+		    foreach (var enemy in spawnedEnemies)
 			{
-				enemy.Despawn(true);
-				//Destroy(enemy.gameObject);
+				if (enemy != null && enemy.IsSpawned)
+				{
+					enemy.Despawn(true);
+					//Destroy(enemy.gameObject);
+				}
 			}
 		}
 		spawnedEnemies.Clear();
@@ -139,8 +162,7 @@ public class UnitManager : MonoBehaviour
 
     void OnDestroy()
     {
-        GameManager.Instance.onGamePlaying -= SpawnStartEnemies;
-		GameManager.Instance.onNextLevel -= DespawnAllEnemies;
+        DespawnAllEnemies();
     }
 
 }

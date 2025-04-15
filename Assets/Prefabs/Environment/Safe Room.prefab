@@ -911,7 +911,7 @@ MonoBehaviour:
   interactableObjectTransforms:
   - {fileID: 1147655203066651862}
   interactableObjectPrefabs:
-  - {fileID: 2849634166944264067, guid: 7895b677aa9b1cf4ca665107c57c0be9, type: 3}
+  - {fileID: 2849634166944264067, guid: 51b77a3f84637ab4783bbfc846a616fa, type: 3}
 --- !u!1 &7892424507282510531
 GameObject:
   m_ObjectHideFlags: 0

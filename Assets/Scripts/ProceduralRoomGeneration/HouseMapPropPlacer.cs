@@ -43,7 +43,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
         {
             foreach (Transform lights in room.lightsTransforms)
             {
-                Debug.Log("spawning light");
+                //Debug.Log("spawning light");
                 GameObject roomLightObject = Instantiate(roomLightPrefab, lights.position, Quaternion.identity);
 
                 roomLightObject.transform.rotation *= Quaternion.Euler(0, room.yRotation, 0);
@@ -59,7 +59,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
         {
             if (hallwaySpawnIndex % hallwayLightSpawnInterval == 0)
             {
-                Debug.Log("spawning light");
+                //Debug.Log("spawning light");
                 GameObject roomLightObject = Instantiate(hallwayLightPrefab, position, Quaternion.identity);
                 roomLightObject.GetComponent<NetworkObject>().Spawn(true);
                 hallwayLights.Add(roomLightObject.GetComponent<NetworkObject>());
@@ -76,6 +76,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
                 GameObject doorObject = Instantiate(doorPrefab, doors.position, doors.transform.rotation);
 
                 doorObject.GetComponent<NetworkObject>().Spawn(true);
+                doorObject.GetComponent<Door>().isLocked = room.roomLocked;
                 doorsInRoom.Add(doorObject.GetComponent<NetworkObject>());
             }
         }

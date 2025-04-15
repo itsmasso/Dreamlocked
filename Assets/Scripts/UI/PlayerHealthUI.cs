@@ -9,21 +9,23 @@ public class PlayerHealthUI : NetworkBehaviour
 
     void Start()
     {
-        PlayerHealth.onTakeDamage += UpdateHealthBar;
+        PlayerHealth.onUpdateHealth += UpdateHealthBar;
         maxHealth = playerScriptable.health;
-        UpdateHealthBar(maxHealth); //temp
-        //add code for udpating health bar betweens scenes
+        UpdateHealthBar(maxHealth); 
     }
-    
+
     private void UpdateHealthBar(int currentHealth)
     {
-        healthBar.value = (float)currentHealth/maxHealth; 
-        if(currentHealth <= 0) healthBar.value = 0;
-        
+        float val = Mathf.Clamp01((float)currentHealth / maxHealth);
+
+        //Debug.Log($"HealthBar Value: {val}");
+        healthBar.value = val;
+        if (currentHealth <= 0) healthBar.value = 0;
+
     }
 
     public override void OnDestroy()
     {
-        PlayerHealth.onTakeDamage -= UpdateHealthBar;
+        PlayerHealth.onUpdateHealth -= UpdateHealthBar;
     }
 }

@@ -31,9 +31,12 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 
 		isStored.Value = false;
 		objectRb.constraints = RigidbodyConstraints.None;
-		HideItemServerRpc();
 		playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj);
-		playerNetworkObj.GetComponent<PlayerInteractScript>().SpawnVisualItemClientRpc(GetItemSOIndex(itemScriptableObject));
+		//playerNetworkObj.GetComponent<PlayerInteractScript>().SpawnVisualItemClientRpc(GetItemSOIndex(itemScriptableObject));
+		if(playerNetworkObj.GetComponent<PlayerInventory>().AddItems(itemScriptableObject))
+		{
+		    HideItemServerRpc();
+		}
 	}
 
 

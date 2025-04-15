@@ -167,7 +167,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             {
                 SceneManager.SetActiveScene(scene);
                 currentActiveScene = scene;
-                Debug.Log($"Active scene set to: {sceneName}");
+                //Debug.Log($"Active scene set to: {sceneName}");
                 yield break;
             }
 

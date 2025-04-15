@@ -172,7 +172,6 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 
 			playerObjectRef.TryGet(out NetworkObject playerObject);
 			float distance = Vector2.Distance(playerObject.transform.position, transform.position);
-			Debug.Log(networkState.Value);
 			if (networkState.Value != LurkerState.Chasing && networkState.Value != LurkerState.Prechase && networkState.Value != LurkerState.Attacking && distance <= aggressionDistance)
 			{
 				SetCurrentTargetClientRpc(playerObjectRef);

@@ -5,8 +5,9 @@ public class SafePuzzle : NetworkBehaviour, IInteractable
 {
     private Transform safeTransform;
     [SerializeField] private GameObject safePrefab;
-    [SerializeField] private GameObject safeDoorPrefab;
     [SerializeField] private Animator safeAnimator;
+    [SerializeField] private GameObject keyParent;
+    private bool keyUnlocked;
     private bool isLocked;
     private bool isOpen;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -14,6 +15,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable
     {
         isOpen = false;
         isLocked = false;
+        keyUnlocked = false;
         safeAnimator = GetComponentInChildren<Animator>();
     }
 
@@ -43,11 +45,34 @@ public class SafePuzzle : NetworkBehaviour, IInteractable
         }
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void GetKeyServerRpc()
+    {
+        GetKeyClientRpc();
+    }
+
+    [ClientRpc]
+    private void GetKeyClientRpc()
+    {
+        GetKey();
+    }
+
+    private void GetKey()
+    {
+        Debug.Log("Key Obtained");
+        keyParent.SetActive(false);
+        keyUnlocked = true;
+    }
+
     public void Interact(NetworkObjectReference playerObject)
     {
         if (!isOpen && !isLocked)
         {
             OpenSafeServerRpc();
+        } 
+        else if (isOpen && !keyUnlocked)
+        {
+            GetKeyServerRpc();
         }
     }
 }

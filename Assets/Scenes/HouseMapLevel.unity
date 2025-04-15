@@ -271,6 +271,22 @@ PrefabInstance:
       propertyPath: 'specialRooms.Array.data[2]'
       value: 
       objectReference: {fileID: 4367447932712270340, guid: a885274777859e14191d30d75056c3b6, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: specialRoomPrefabList.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'specialRoomPrefabList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 4367447932712270340, guid: a885274777859e14191d30d75056c3b6, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'specialRoomPrefabList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 4367447932712270340, guid: dae1e217d89dd3644bf8c8e05caed9ac, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'specialRoomPrefabList.Array.data[2]'
+      value: 
+      objectReference: {fileID: 4367447932712270340, guid: e11ce4ee630151c45b3c92754befe4f8, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

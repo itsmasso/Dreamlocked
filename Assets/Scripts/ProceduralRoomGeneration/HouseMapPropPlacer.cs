@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class HouseMapPropPlacer : NetworkBehaviour
 {
@@ -76,6 +77,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
                 GameObject doorObject = Instantiate(doorPrefab, doors.position, doors.transform.rotation);
 
                 doorObject.GetComponent<NetworkObject>().Spawn(true);
+                doorObject.GetComponent<Door>().isLocked = room.roomLocked;
                 doorsInRoom.Add(doorObject.GetComponent<NetworkObject>());
             }
         }

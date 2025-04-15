@@ -9,12 +9,15 @@ public class Door : NetworkBehaviour, IInteractable
     [SerializeField] private Transform pivot;
     [SerializeField] private float maxDoorAngle;
     [SerializeField] private NavmeshCut navmeshCut;
-    [SerializeField]private bool isOpen;
+    [SerializeField] private bool isOpen;
+
+    // IMPORTANT!!! THE ROOM.CS FILE WILL DETERMINE IF THE DOOR IS LOCKED
+    public bool isLocked;
     
     void Start()
     {
         isOpen = false;
-       defaultYRotation = pivot.eulerAngles.y;
+        defaultYRotation = pivot.eulerAngles.y;
     }
 
     void Update()
@@ -94,7 +97,14 @@ public class Door : NetworkBehaviour, IInteractable
     {
         if(playerObjectRef.TryGet(out NetworkObject playerObject))
         {
-            ToggleDoorServerRpc(playerObject.transform.position);
+            if(!isLocked)
+            {
+                ToggleDoorServerRpc(playerObject.transform.position);
+            }
+            else
+            {
+                Debug.Log("Door is Locked");
+            }
         }
     }
 }

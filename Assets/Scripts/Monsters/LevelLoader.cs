@@ -1,30 +1,37 @@
 using UnityEngine;
 using Unity.Netcode;
-using  UnityEngine.SceneManagement;
+using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
-public enum Level
+public enum Map
 {
     HouseMap
 }
 public class LevelLoader : NetworkBehaviour
 {
-    [SerializeField]private string bootStrapSceneName;
+    [SerializeField] private string bootStrapSceneName;
     public event Action onLoadMap;
+    [Tooltip("Put the scriptable objects in order from easiest to hardest.")]
+    public List<HouseMapDifficultySettingsSO> houseMapDifficultySettingList = new List<HouseMapDifficultySettingsSO>();
+    public HouseMapDifficultySettingsSO currentHouseMapDifficultySetting;
+    private int nextDifficultyCheckpoint;
+    private int currentDifficultyIndex;
     void Awake()
     {
-        
+
     }
     void Start()
     {
-       if(IsServer)
-       {
-           GameManager.Instance.ChangeGameState(GameState.GeneratingLevel);
-            
-       }
+        if (IsServer)
+        {
+            GameManager.Instance.ChangeGameState(GameState.GeneratingLevel);
+            ResetSettings();
+            GameManager.Instance.onLobby += ResetSettings;
+        }
     }
-    private IEnumerator WaitUntilGameSceneIsReady(string sceneName, Level level)
+    private IEnumerator WaitUntilGameSceneIsReady(string sceneName, Map level)
     {
         // Check if the scene is already loaded
         Scene scene = SceneManager.GetSceneByName(sceneName);
@@ -44,26 +51,46 @@ public class LevelLoader : NetworkBehaviour
         yield return null;
         HandleSceneLoaded(level);
     }
-    
-    private void HandleSceneLoaded(Level level)
-{
-    switch(level)
+
+    private void HandleSceneLoaded(Map map)
     {
-        case Level.HouseMap:
-            onLoadMap?.Invoke();
-            NetworkSceneLoader.Instance.ReloadSceneAdditively("HouseMapLevel");
-            break;
+        switch (map)
+        {
+            case Map.HouseMap:
+                TryChangeHouseMapDifficultySetting();
+                onLoadMap?.Invoke();
+                NetworkSceneLoader.Instance.ReloadSceneAdditively("HouseMapLevel");
+                break;
+        }
     }
-}
 
     public void LoadHouseMap()
     {
-        if(!IsServer) return;
-        StartCoroutine(WaitUntilGameSceneIsReady("GameScene", Level.HouseMap));
+        if (!IsServer) return;
+        StartCoroutine(WaitUntilGameSceneIsReady("GameScene", Map.HouseMap));
+        
+    }
+    
+    public void TryChangeHouseMapDifficultySetting()
+    {
+        if(GameManager.Instance.GetCurrentDreamLayer() == nextDifficultyCheckpoint)
+        {
+            currentDifficultyIndex++;
+            currentHouseMapDifficultySetting = houseMapDifficultySettingList[currentDifficultyIndex];
+            nextDifficultyCheckpoint += currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;
+        }
+    }
+    
+    private void ResetSettings()
+    {
+        //add all resets for all maps here
+        currentHouseMapDifficultySetting = houseMapDifficultySettingList[0];
+        nextDifficultyCheckpoint = currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;
+        currentDifficultyIndex = 0;
     }
     public override void OnDestroy()
     {
         base.OnDestroy();
-        
+        if(IsServer) GameManager.Instance.onLobby -= ResetSettings;
     }
 }

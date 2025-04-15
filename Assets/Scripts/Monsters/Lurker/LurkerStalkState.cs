@@ -79,11 +79,11 @@ public class LurkerStalkState : LurkerBaseState
 	
 	private void HoverNearPlayerInRoom(LurkerMonsterScript lurker)
 	{
-		if(!chosenDoorToHover)
+		if(!chosenDoorToHover && lurker.houseMapGenerator != null)
 		{
 			//gets random node next to door, returns 0 vector if it cant retrieve the node and sets it to go roam. 
 			//Only picks a room position once and will stay there until player leaves the room.
-			doorToHoverPosition = HouseMapGenerator.Instance.GetDoorClosestToTarget(targetPosition);
+			doorToHoverPosition = lurker.houseMapGenerator.GetDoorClosestToTarget(targetPosition);
 			if(doorToHoverPosition != Vector3.zero)
 			{
 				Debug.Log(doorToHoverPosition);

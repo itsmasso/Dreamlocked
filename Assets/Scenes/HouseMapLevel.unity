@@ -135,6 +135,50 @@ PrefabInstance:
       propertyPath: defaultScene
       value: HouseMapLevel
       objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: propSpawnInterval
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: hallwayLightPrefab
+      value: 
+      objectReference: {fileID: 6844388644389274886, guid: a07d31e458f4f454ba8e4b690b350637, type: 3}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: chanceToSpawnHallwayProp
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: hallwayLightSpawnInterval
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: deadEndPropsList.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'deadEndPropsList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: propScriptableObjList.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'propScriptableObjList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: ca6bda15d489b8e41b682f937eee238b, type: 2}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'propScriptableObjList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: houseMapPropScriptableObjs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'houseMapPropScriptableObjs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
     - target: {fileID: 2366112785228832510, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -192,6 +236,14 @@ PrefabInstance:
       value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: propPlacer
+      value: 
+      objectReference: {fileID: 1288498009}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: wallPrefab
+      value: 
+      objectReference: {fileID: 2602338538655731649, guid: ff0e79e57d101424ebf38356c34cab78, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: roomsPerFloor
       value: 8
       objectReference: {fileID: 0}
@@ -200,6 +252,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4209551940367580512}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: propObjectPlacer
+      value: 
+      objectReference: {fileID: 1288498009}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: hallwayLightPrefab
       value: 
       objectReference: {fileID: 6844388644389274886, guid: a07d31e458f4f454ba8e4b690b350637, type: 3}
@@ -207,6 +263,10 @@ PrefabInstance:
       propertyPath: specialRooms.Array.size
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: difficultyListScriptable
+      value: 
+      objectReference: {fileID: 11400000, guid: 9166041e5760a814eb6efd7e86f9e9b4, type: 2}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: 'specialRooms.Array.data[2]'
       value: 
@@ -225,6 +285,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 19760aad257e1384fbbb65cae4476ce5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1288498009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
+  m_PrefabInstance: {fileID: 1288498007}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abad2f7842ce1c48915b3e3b70f32b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1794200464
@@ -290,8 +361,41 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1727414324805171222, guid: a28c1ec6000988e41bc074a096003813, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 1794200466}
   m_SourcePrefab: {fileID: 100100000, guid: a28c1ec6000988e41bc074a096003813, type: 3}
+--- !u!1 &1794200465 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1727414324805171222, guid: a28c1ec6000988e41bc074a096003813, type: 3}
+  m_PrefabInstance: {fileID: 1794200464}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1794200466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1794200465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 313878090
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &2607428641999220457
 GameObject:
   m_ObjectHideFlags: 0

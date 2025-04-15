@@ -6,6 +6,7 @@ public class LurkerRoamState : LurkerBaseState
 {
     private FollowerEntity agent;
     private LurkerAnimationManager anim;
+    private float openingDoorRange = 1f;
     public override void EnterState(LurkerMonsterScript lurker)
     {
         agent = lurker.agent;
@@ -25,6 +26,10 @@ public class LurkerRoamState : LurkerBaseState
 		
 		//Set animations
 		anim.PlayWalkAnimation();
+		
+		//open door
+		if(lurker.houseMapGenerator.GetRoomFromPosition(lurker.transform.position) != null)
+			CheckForDoor(lurker);
 		
 		//Search for random point to roam to
 		if (!agent.pathPending && (agent.reachedEndOfPath || !agent.hasPath)) {
@@ -63,6 +68,19 @@ public class LurkerRoamState : LurkerBaseState
 		}
     }
     
+    private void CheckForDoor(LurkerMonsterScript lurker)
+    {
+        Collider[] colliders = Physics.OverlapSphere(lurker.transform.position, openingDoorRange, lurker.doorLayer);
+        foreach(Collider collider in colliders)
+        {
+            Door door = collider.GetComponent<Door>();
+            if(door != null)
+            {
+                door.OpenDoor(lurker.transform.position);
+            }
+        }
+        
+    }
 
 	
 }

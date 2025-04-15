@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class LoadingScreenManager : MonoBehaviour
+public class ScreenManager : MonoBehaviour
 {
 
     [SerializeField] private GameObject sleepingLoadingScreen;
+    [SerializeField] private GameObject gameOverScreen;
     [SerializeField] private float fadeSpeed;
     public static event Action onHideSleepingLoadScreen;
     public void ShowSleepingLoadingScreen()
@@ -30,5 +31,15 @@ public class LoadingScreenManager : MonoBehaviour
         sleepingLoadingScreen.GetComponent<FadeUIElements>().FadeOutUI(fadeSpeed);
         yield return new WaitForSeconds(fadeSpeed);
         sleepingLoadingScreen.SetActive(false);
+    }
+    
+    public void ShowGameOverScreen()
+    {
+        gameOverScreen.SetActive(true);
+    }
+    
+    public void HideGameOverScreen()
+    {
+        gameOverScreen.SetActive(false);
     }
 }

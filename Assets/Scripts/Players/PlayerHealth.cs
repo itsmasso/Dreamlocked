@@ -11,29 +11,15 @@ public class PlayerHealth : NetworkBehaviour
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(
         100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public static event Action<int> onTakeDamage;
-    private PlayerNetworkManager playerNetworkManager;
     public override void OnNetworkSpawn()
 	{
         if(IsServer)
         {
             currentHealth.Value = playerScriptable.health;
         }
-        GetPlayerNetworkManager();
+ 
 	}
-	private void GetPlayerNetworkManager()
-	{
-	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
-			if (persistScene.isLoaded)
-			{
-				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
-				{
-					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
-					if (playerNetworkManager != null)
-						break;
-				}
-			}
-	}
-	
+
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(int amount)
     {

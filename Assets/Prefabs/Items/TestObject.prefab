@@ -34,7 +34,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.48, y: 0.48, z: 0.48}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -154,7 +154,8 @@ MonoBehaviour:
   objectRb: {fileID: 2546405151104806582}
   itemScriptableObject: {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}
   itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
-  networkObject: {fileID: 994776895492263134}
+  isStored:
+    m_InternalValue: 0
 --- !u!54 &2546405151104806582
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -196,7 +197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 1
-  AuthorityMode: 1
+  AuthorityMode: 0
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1

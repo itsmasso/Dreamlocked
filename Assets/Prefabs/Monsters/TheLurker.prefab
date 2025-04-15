@@ -333,7 +333,7 @@ MonoBehaviour:
   chanceToStalkPlayer: 100
   targetStalkRange: 8
   maxStalkTime: 600
-  stalkCooldown: 5
+  stalkCooldown: 25
   canStalk: 0
   pauseBeforeChasingDuration: 5
   aggressionDistance: 15
@@ -361,6 +361,7 @@ MonoBehaviour:
   inLightSpeed: 2
   anim: {fileID: 7914557563573989929}
   animationManager: {fileID: 4344768006437791759}
+  houseMapGenerator: {fileID: 0}
 --- !u!114 &4344768006437791759
 MonoBehaviour:
   m_ObjectHideFlags: 0

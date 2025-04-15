@@ -3,16 +3,17 @@ using Unity.Netcode;
 using Pathfinding;
 public class Door : NetworkBehaviour, IInteractable
 {
-    private float targetYRotation;
+    [SerializeField]private float targetYRotation;
     [SerializeField] private float smoothTime;
     public float defaultYRotation;
     [SerializeField] private Transform pivot;
     [SerializeField] private float maxDoorAngle;
     [SerializeField] private NavmeshCut navmeshCut;
-    private bool isOpen;
+    [SerializeField]private bool isOpen;
     
     void Start()
     {
+        isOpen = false;
        defaultYRotation = pivot.eulerAngles.y;
     }
 
@@ -34,6 +35,7 @@ public class Door : NetworkBehaviour, IInteractable
     }
     private void ToggleDoor(Vector3 pos)
     {
+    
         isOpen = !isOpen;
         if(isOpen)
         {

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba2dc7d9ff395c641b06d5a2e2257305, type: 3}
+  m_Name: Difficulty2
+  m_EditorClassIdentifier: 
+  mapSize: {x: 200, y: 200, z: 200}
+  levelsUntilHarderDifficulty: 2
+  floors: 1
+  specialRoomPrefabsList:
+  - {fileID: 4367447932712270340, guid: d5cd6f412bf28664ca76b0a7d2587cba, type: 3}
+  - {fileID: 4367447932712270340, guid: dae1e217d89dd3644bf8c8e05caed9ac, type: 3}
+  roomPrefabsList:
+  - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
+  - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
+  - {fileID: 4367447932712270340, guid: a388b4dda312535448f579ae01365e28, type: 3}
+  roomsPerFloor: 15
+  chanceToSpawnLurker: 100
+  lurkerSpawnDelay: 1
+  lurkerSpawnAmount: 1
+  mannequinSpawnAmount: 5
+  chanceToSpawnMannequin: 100

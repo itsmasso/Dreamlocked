@@ -20,7 +20,7 @@ public class TransitionManager : MonoBehaviour
     void Start()
     {
         GameManager.Instance.onNextLevel += StartFadeInTransition;
-        LoadingScreenManager.onHideSleepingLoadScreen += StartFadeOutTransition;
+        ScreenManager.onHideSleepingLoadScreen += StartFadeOutTransition;
         DepthOfField tmp;
         if (volume.profile.TryGet(out tmp))
         {
@@ -102,7 +102,7 @@ public class TransitionManager : MonoBehaviour
     void OnDestroy()
     {
         GameManager.Instance.onNextLevel -= StartFadeInTransition;
-        LoadingScreenManager.onHideSleepingLoadScreen -= StartFadeOutTransition;
+        ScreenManager.onHideSleepingLoadScreen -= StartFadeOutTransition;
     }
 
 }

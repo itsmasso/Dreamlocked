@@ -6,7 +6,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class UnitManager : MonoBehaviour
+public class UnitManager : NetworkBehaviour
 {
 	
 	[SerializeField] private GameObject lurkerPrefab;
@@ -15,16 +15,24 @@ public class UnitManager : MonoBehaviour
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
 	[SerializeField] private float minSpawnDistFromPlayers;
 	[SerializeField] private float maxSpawnDistFromPlayers;
-	private float timer;
 	[SerializeField] private float whenToSpawnEnemies = 5f;
-	private bool alreadySpawnedEnemies= false;
 	private bool canSpawnEnemies = false;
 	[SerializeField] private string defaultScene;
-
+	private HouseMapDifficultySettingsSO currentDifficultySetting;
+	private float lurkerSpawnTimer;
+	private int lurkerSpawnCount;
+	private bool canSpawnLurker;
+	private int mannequinSpawnCount;
 	void Start()
 	{
-		//GameManager.Instance.onGamePlaying += CanSpawnEnemies;
-		
+		if(IsServer)
+		{
+		    currentDifficultySetting = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
+		    lurkerSpawnTimer = currentDifficultySetting.lurkerSpawnDelay;
+		    float rand = UnityEngine.Random.value;
+		    if(rand <= currentDifficultySetting.chanceToSpawnLurker)
+		    	canSpawnLurker = true;
+		}
 	}
 	
 	void OnEnable()
@@ -33,6 +41,7 @@ public class UnitManager : MonoBehaviour
 		{
 			GameManager.Instance.onGameStart += CanSpawnEnemies;
 			GameManager.Instance.onNextLevel += DespawnAllEnemies;
+			GameManager.Instance.onLobby += DespawnAllEnemies;
 		}
     }
 
@@ -42,6 +51,7 @@ public class UnitManager : MonoBehaviour
 		{
 			GameManager.Instance.onGameStart -= CanSpawnEnemies;
 			GameManager.Instance.onNextLevel -= DespawnAllEnemies;
+			GameManager.Instance.onLobby -= DespawnAllEnemies;
 		}
     }
 		
@@ -82,31 +92,36 @@ public class UnitManager : MonoBehaviour
 	private void CanSpawnEnemies()
 	{
 	    canSpawnEnemies = true;
+	    SpawnMannequinMonsters();
 	}
     void Update()
     {
-        if(!alreadySpawnedEnemies && canSpawnEnemies)
+        if(canSpawnEnemies && lurkerSpawnCount < currentDifficultySetting.lurkerSpawnAmount && canSpawnLurker)
         {
-            timer += Time.deltaTime;
-			if(timer >= whenToSpawnEnemies)
-			{
-				SpawnStartEnemies();
-				timer = 0f;
-				alreadySpawnedEnemies = true;
-			}
+			HandleLurkerSpawnTimer();
+		}
+    }
+    
+    private void HandleLurkerSpawnTimer()
+    {
+        if(lurkerSpawnTimer > 0)
+        {
+            lurkerSpawnTimer -= Time.deltaTime;
+        }else if(lurkerSpawnTimer <= 0)
+        {
+            SpawnLurker();
+            lurkerSpawnTimer = currentDifficultySetting.lurkerSpawnDelay;
         }
     }
 
-    private void SpawnStartEnemies()
-	{
-		SpawnLurker();
-		SpawnMannequinMonsters();
-	}
-	
 	private void SpawnLurker()
 	{
 		Vector3 spawnPosition = GetPositionInRangeOfPlayers();
-	    SpawnMonster(lurkerPrefab, new Vector3(spawnPosition.x, spawnPosition.y + lurkerPrefab.GetComponent<FollowerEntity>().height/2, spawnPosition.z), Quaternion.identity);
+	    GameObject lurker = Instantiate(lurkerPrefab, new Vector3(spawnPosition.x, spawnPosition.y + lurkerPrefab.GetComponent<FollowerEntity>().height/2, spawnPosition.z), Quaternion.identity);
+	    lurker.GetComponent<LurkerMonsterScript>().houseMapGenerator = houseMapGenerator;
+		spawnedEnemies.Add(lurker.GetComponent<NetworkObject>());
+		lurker.GetComponent<NetworkObject>().Spawn(true);
+	    lurkerSpawnCount++;
 	}
 
 	public void SpawnMonster(GameObject monsterPrefab, Vector3 position, Quaternion rotation)
@@ -133,9 +148,14 @@ public class UnitManager : MonoBehaviour
 		foreach(Vector3 roomPos in houseMapGenerator.GetNormalRoomsList().ToList())
 		{
 			// Spawn the monster on the first floor
-			if (roomPos.y == -8.00)
+			if (roomPos.y == -8.00 && mannequinSpawnCount <= currentDifficultySetting.mannequinSpawnAmount)
 			{
-				SpawnMonster(MQMonsterPrefab, new Vector3(roomPos.x, roomPos.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/16, roomPos.z), Quaternion.identity);
+				float rand = UnityEngine.Random.value;
+				if(rand <= currentDifficultySetting.chanceToSpawnMannequin)
+				{
+				    SpawnMonster(MQMonsterPrefab, new Vector3(roomPos.x, roomPos.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/16, roomPos.z), Quaternion.identity);
+					mannequinSpawnCount++;
+				}
 				//Debug.Log("Mannequin Spawned at: " + roomPos);
 			}
 		}
@@ -155,12 +175,11 @@ public class UnitManager : MonoBehaviour
 			}
 		}
 		spawnedEnemies.Clear();
-		alreadySpawnedEnemies = false;
 		canSpawnEnemies = false;
 		Debug.Log("All enemies despawned.");
 	}
 
-    void OnDestroy()
+    public override void OnDestroy()
     {
         DespawnAllEnemies();
     }

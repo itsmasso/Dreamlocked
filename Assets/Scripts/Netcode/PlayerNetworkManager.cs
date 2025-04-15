@@ -12,18 +12,17 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	public const int MAX_PLAYERS = 4;
 	[SerializeField] private GameObject playerPrefab;
 	public List<NetworkObject> alivePlayers = new List<NetworkObject>();
+	public NetworkVariable<int> alivePlayersCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
-	public NetworkVariable<bool> spawnedPlayers = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone);
 	public static event Action onRespawnPlayer;
-	[SerializeField] private LoadingScreenManager loadingScreenManager;
-
+	[SerializeField] private ScreenManager screenManager;
+	private NetworkVariable<Vector3> currentSpawnPos = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	void Start()
 	{
 		if (IsServer)
 		{
-			spawnedPlayers.Value = false;
 			GameManager.Instance.onGameStart += RespawnPlayers;
-
+			GameManager.Instance.onNextLevel += DespawnPlayers;
 		}
 	}
 
@@ -34,27 +33,38 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	[ClientRpc]
 	public void RegisterPlayerClientRpc(NetworkObjectReference playerRef)
 	{
-		if(playerRef.TryGet(out NetworkObject player))
+		if (playerRef.TryGet(out NetworkObject player))
 		{
-		    if (!alivePlayers.Contains(player))
+			if (!alivePlayers.Contains(player))
 			{
 				alivePlayers.Add(player);
+				if(IsServer) alivePlayersCount.Value++;
 			}
 		}
 	}
-	
+
 	[ServerRpc]
 	public void UnregisterPlayerServerRpc(NetworkObjectReference playerRef)
 	{
 		UnregisterPlayerClientRpc(playerRef);
 	}
-	
+
 	[ClientRpc]
 	public void UnregisterPlayerClientRpc(NetworkObjectReference playerRef)
 	{
-		if(playerRef.TryGet(out NetworkObject player))
+		if (playerRef.TryGet(out NetworkObject player))
 		{
-		    alivePlayers.Remove(player);
+			if(player.IsOwner)
+			{
+			    alivePlayers.Remove(player);
+			    Debug.Log(alivePlayersCount.Value);
+			}
+			if(IsServer) alivePlayersCount.Value--;
+		}
+		if (IsServer && alivePlayersCount.Value <= 0)
+		{
+			alivePlayersCount.Value = 0;
+			GameManager.Instance.ChangeGameState(GameState.GameOver);
 		}
 	}
 
@@ -128,6 +138,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	}
 	private IEnumerator WaitUntilLevelGeneratedToSpawnPlayer()
 	{
+		//when adding more maps, make sure to generalize map generators like attatch interface with get generator function or abstract class
 		HouseMapGenerator houseMapGenerator = null;
 
 		// Wait until HouseMapGenerator is found
@@ -138,34 +149,18 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 
 		// Wait until the level is generated
 		yield return new WaitUntil(() => houseMapGenerator.isLevelGenerated);
-		loadingScreenManager.HideSleepingLoadingScreen();
+		screenManager.HideSleepingLoadingScreen();
 
-		Vector3 baseSpawnPos = houseMapGenerator.GetPlayerSpawnPosition();
+		if (IsServer) currentSpawnPos.Value = houseMapGenerator.GetPlayerSpawnPosition();
 
-		if (!spawnedPlayers.Value && IsServer)
+
+		if (IsServer)
 		{
-			SpawnPlayers(baseSpawnPos);
-			spawnedPlayers.Value = true;
-		}
-		else if (spawnedPlayers.Value)
-		{
-			foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-			{
-				var playerObj = client.PlayerObject;
-				if (playerObj != null)
-				{
-					if (IsServer)
-					{
-						Vector3 spawnPos = DetermineSpawnPosition(baseSpawnPos);
-						playerObj.transform.position = spawnPos;
-						MovePlayerToSpawnPositionClientRpc(playerObj, spawnPos);
-					}
-				}
-			}
+			SpawnPlayers(currentSpawnPos.Value);
 		}
 
 	}
-
+	//use this function if we need logic to move players if they are out of bounds for example or something
 	[ClientRpc]
 	private void MovePlayerToSpawnPositionClientRpc(NetworkObjectReference playerObjRef, Vector3 spawnPos)
 	{
@@ -195,6 +190,33 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		}
 	}
 
+	public void DespawnPlayers()
+	{
+		if (IsServer)
+		{
+			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+			{
+				if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+				{
+					 NetworkObject playerObject = client.PlayerObject;
+
+					if (playerObject != null)
+					{
+						playerObject.Despawn(true);
+						ClearAlivePlayersClientRpc();
+						Debug.Log($"Despawned {clientId}: {playerObject.name}");
+					}
+				}
+			}
+		}
+	}
+	
+	[ClientRpc]
+	private void ClearAlivePlayersClientRpc()
+	{
+	    alivePlayers.Clear();
+	}
+
 	private Vector3 DetermineSpawnPosition(Vector3 pos)
 	{
 		Vector3[] offsets = new Vector3[]
@@ -216,6 +238,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		if (IsServer)
 		{
 			GameManager.Instance.onGameStart -= RespawnPlayers;
+			GameManager.Instance.onNextLevel -= DespawnPlayers;
 		}
 	}
 

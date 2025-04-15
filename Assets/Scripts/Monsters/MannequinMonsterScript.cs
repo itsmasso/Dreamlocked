@@ -58,7 +58,6 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     
     [Header("Optimization Properties")]
     private float callTimer;
-    private PlayerNetworkManager playerNetworkManager;
 
     private void Start()
     {
@@ -67,21 +66,8 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         threatLevelNetworkState.Value = manager.GetMQThreatLevel();
         agent.stopDistance = STOPPING_DISTANCE;
         callTimer = 0;
-        GetPlayerNetworkManager();
     }
-    private void GetPlayerNetworkManager()
-	{
-	    Scene persistScene = SceneManager.GetSceneByName("PersistScene");
-			if (persistScene.isLoaded)
-			{
-				foreach (GameObject rootObj in persistScene.GetRootGameObjects())
-				{
-					playerNetworkManager = rootObj.GetComponentInChildren<PlayerNetworkManager>(true);
-					if (playerNetworkManager != null)
-						break;
-				}
-			}
-	}
+
     private void Update()
     {
         //only server can run this code

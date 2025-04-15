@@ -76,6 +76,8 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	[Header("Animation Properties")]
 	public Animator anim;
 	public LurkerAnimationManager animationManager;
+	[Header("Map Properties")]
+	public HouseMapGenerator houseMapGenerator;
 
 
 	private void Start()
@@ -159,6 +161,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
 		ChaseTargetServerRpc(playerObjectRef);
+
 	}
 
 	[ServerRpc(RequireOwnership = false)]
@@ -166,23 +169,26 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	{
 		if (canAttack)
 		{
+
 			playerObjectRef.TryGet(out NetworkObject playerObject);
 			float distance = Vector2.Distance(playerObject.transform.position, transform.position);
-			if (networkState.Value != LurkerState.Chasing && networkState.Value != LurkerState.Prechase && distance <= aggressionDistance)
+			Debug.Log(networkState.Value);
+			if (networkState.Value != LurkerState.Chasing && networkState.Value != LurkerState.Prechase && networkState.Value != LurkerState.Attacking && distance <= aggressionDistance)
 			{
 				SetCurrentTargetClientRpc(playerObjectRef);
 				SwitchState(LurkerState.Prechase);
 			}
+
 		}
 	}
-	
+
 	[ClientRpc]
 	private void SetCurrentTargetClientRpc(NetworkObjectReference playerObjectRef)
 	{
-	    playerObjectRef.TryGet(out NetworkObject playerObject);
-	    currentTarget = playerObject.transform;
+		playerObjectRef.TryGet(out NetworkObject playerObject);
+		currentTarget = playerObject.transform;
 	}
-	
+
 	[ClientRpc]
 	public void SetRandomPlayerAsTargetClientRpc()
 	{

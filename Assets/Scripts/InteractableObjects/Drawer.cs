@@ -8,6 +8,10 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
     public GameObject drawerBoxPrefab;
     private NetworkObject drawerBox;
     public HouseMapPropPlacer houseMapPropPlacer;
+    public List<Transform> propTransforms = new List<Transform>();
+    public List<HouseMapPropScriptableObj> potentialProps = new List<HouseMapPropScriptableObj>();
+    [SerializeField] private float chanceToSpawnProp = 0.75f;
+    [SerializeField] private float propSpawnRadius = 1f;
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -19,6 +23,31 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
                 drawerBox = drawerBoxObj.GetComponent<NetworkObject>();
                 drawerBox.Spawn(true);
                 drawerBox.TrySetParent(gameObject);
+            }
+
+        }
+    }
+
+    void Start()
+    {
+        foreach (Transform propTransforms in propTransforms)
+        {
+            if (Random.value <= chanceToSpawnProp)
+            {
+                Randomizer<HouseMapPropScriptableObj> propPicker = new Randomizer<HouseMapPropScriptableObj>(potentialProps);
+                Vector2 randomOffset = Random.insideUnitCircle * propSpawnRadius;
+                Vector3 spawnPosition = propTransforms.position + new Vector3(randomOffset.x, 0f, randomOffset.y);
+                GameObject propObj = Instantiate(propPicker.GetNext().prefab, spawnPosition, propTransforms.rotation);
+
+                if (IsServer)
+                {
+                    NetworkObject propNetobj = propObj.GetComponent<NetworkObject>();
+                    if (propNetobj != null)
+                    {
+                        propNetobj.Spawn(true);
+                        propNetobj.TrySetParent(gameObject);
+                    }
+                }
             }
         }
     }
@@ -33,7 +62,7 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
                 //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
                 if (childNetObj.IsSpawned)
                 {
-                    if(childNetObj.GetComponent<IHasNetworkChildren>() != null)
+                    if (childNetObj.GetComponent<IHasNetworkChildren>() != null)
                         childNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
                     childNetObj.Despawn(true); // Despawn child
                 }

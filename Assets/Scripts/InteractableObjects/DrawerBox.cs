@@ -27,15 +27,15 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
             itemScriptableObjectToSpawn = itemScriptableObjectsList[Random.Range(0, itemScriptableObjectsList.Count)];
             item = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, itemPosition.position, itemPosition.rotation);
             item.GetComponent<NetworkObject>().Spawn(true);
-            InitItemClientRpc(item.GetComponent<NetworkObject>());
+            AllInitItemRpc(item.GetComponent<NetworkObject>());
             itemScript = item.GetComponent<InteractableItemBase>();
             itemScript.isStored.Value = true;
-            HideItemClientRpc();
+            AllHideItemRpc();
         }
     }
 
-    [ClientRpc]
-    private void InitItemClientRpc(NetworkObjectReference networkObjectReference)
+    [Rpc(SendTo.Everyone)]
+    private void AllInitItemRpc(NetworkObjectReference networkObjectReference)
     {
         if (networkObjectReference.TryGet(out NetworkObject networkObject))
         {
@@ -77,15 +77,15 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void ToggleDrawerServerRpc()
+    [Rpc(SendTo.Server)]
+    private void RequestServerToToggleDrawerRpc()
     {
         interactCooldownTimer = interactCooldown;
-        ToggleDrawerClientRpc();
+        AllObserveToggleDrawerRpc();
     }
 
-    [ClientRpc]
-    private void ToggleDrawerClientRpc()
+    [Rpc(SendTo.Everyone)]
+    private void AllObserveToggleDrawerRpc()
     {
         ToggleDrawer();
     }
@@ -94,7 +94,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         isOpen = !isOpen;
         if (isOpen)
         {
-            if (IsServer && item != null) ShowItemClientRpc();
+            if (IsServer && item != null) AllShowItemRpc();
             targetZPosition = extendAmount;
         }
         else
@@ -112,10 +112,10 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private IEnumerator HideDelay()
     {
         yield return new WaitForSeconds(0.5f);
-        HideItemClientRpc();
+        AllHideItemRpc();
     }
-    [ClientRpc]
-    private void HideItemClientRpc()
+    [Rpc(SendTo.Everyone)]
+    private void AllHideItemRpc()
     {
         if (item != null)
         {
@@ -126,8 +126,8 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
             item.GetComponent<Collider>().enabled = false;
         }
     }
-    [ClientRpc]
-    private void ShowItemClientRpc()
+    [Rpc(SendTo.Everyone)]
+    private void AllShowItemRpc()
     {
         if (item != null)
         {
@@ -143,7 +143,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (canInteract.Value)
         {
-            ToggleDrawerServerRpc();
+            RequestServerToToggleDrawerRpc();
         }
     }
 

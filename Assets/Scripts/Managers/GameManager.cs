@@ -101,35 +101,35 @@ public class GameManager : NetworkSingleton<GameManager>
 					currentDreamLayer.Value = 1;
 					Debug.Log("Lobby");
 					screenManager.HideGameOverScreen();
-					HandleLobbyClientRpc();
+					AllHandlesLobbyRpc();
 					break;
 				case GameState.GeneratingLevel:
 
 					seed.Value = UnityEngine.Random.Range(1, 999999);
 					Debug.Log("Current seed:" + seed.Value);
-					ShowSleepLoadingScreenClientRpc();
-					HandleGenerateLevelClientRpc();
+					ShowSleepLoadingScreenToAllRpc();
+					AllHandlesGenerateLevelRpc();
 					levelLoader.LoadHouseMap();
 
 					break;
 				case GameState.GameStart:
-					HandleGameStartClientRpc();
+					AllHandlesGameStartRpc();
 					ChangeGameState(GameState.GamePlaying);
 					break;
 				case GameState.GamePlaying:
-					HandleGamePlayingClientRpc();
+					AllHandlesGamePlayingRpc();
 					break;
 				case GameState.GameBeaten:
-					HandleGameBeatenClientRpc();
+					AllHandlesGameBeatenRpc();
 					break;
 				case GameState.GameOver:
-					HandleGameOverClientRpc();
-					ShowGameOverScreenClientRpc();
+					AllHandlesGameOverRpc();
+					ShowGameOverScreenToAllRpc();
 					Debug.Log("Game over");
 					gameOverTimer += Time.deltaTime;
 					if(gameOverTimer >= gameOverScreenDuration)
 					{
-						HideGameOverScreenClientRpc();
+						HideGameOverScreenToAllRpc();
 					    ChangeGameState(GameState.Lobby);
 					    gameOverTimer = 0;
 					}
@@ -141,64 +141,64 @@ public class GameManager : NetworkSingleton<GameManager>
 		}
 	}
 
-	[ClientRpc]
-	private void HandleLobbyClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesLobbyRpc()
 	{
 		onLobby?.Invoke();
 	}
 
-	[ClientRpc]
-	private void HandleGenerateLevelClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesGenerateLevelRpc()
 	{
 		onLevelGenerate?.Invoke();
 
 	}
 
-	[ClientRpc]
-	private void HandleGameStartClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesGameStartRpc()
 	{
 		onGameStart?.Invoke();
 
 	}
 
-	[ClientRpc]
-	private void HandleGamePlayingClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesGamePlayingRpc()
 	{
 		onGamePlaying?.Invoke();
 
 	}
 	
-	[ClientRpc]
-	private void HandleGameBeatenClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesGameBeatenRpc()
 	{
 	    
 	}
 	
-	[ClientRpc]
-	private void HandleGameOverClientRpc()
+	[Rpc(SendTo.Everyone)]
+	private void AllHandlesGameOverRpc()
 	{
 	    
 	}
 
-	[ClientRpc]
-	public void ShowSleepLoadingScreenClientRpc()
+	[Rpc(SendTo.Everyone)]
+	public void ShowSleepLoadingScreenToAllRpc()
 	{
 		screenManager.ShowSleepingLoadingScreen();
 	}
-	[ClientRpc]
-	public void HideSleepLoadingScreenClientRpc()
+	[Rpc(SendTo.Everyone)]
+	public void HideSleepLoadingScreenToAllRpc()
 	{
 		screenManager.HideSleepingLoadingScreen();
 	}
 	
-	[ClientRpc]
-	public void ShowGameOverScreenClientRpc()
+	[Rpc(SendTo.Everyone)]
+	public void ShowGameOverScreenToAllRpc()
 	{
 	    screenManager.ShowGameOverScreen();
 	}
 	
-	[ClientRpc]
-	public void HideGameOverScreenClientRpc()
+	[Rpc(SendTo.Everyone)]
+	public void HideGameOverScreenToAllRpc()
 	{
 	    screenManager.HideGameOverScreen();
 	}

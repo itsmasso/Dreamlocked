@@ -3,17 +3,14 @@ using Unity.Netcode;
 using Pathfinding;
 public class Door : NetworkBehaviour, IInteractable
 {
-    [SerializeField]private float targetYRotation;
+    [SerializeField] private float targetYRotation;
     [SerializeField] private float smoothTime;
     public float defaultYRotation;
     [SerializeField] private Transform pivot;
     [SerializeField] private float maxDoorAngle;
     [SerializeField] private NavmeshCut navmeshCut;
     [SerializeField] private bool isOpen;
-
-    // IMPORTANT!!! THE ROOM.CS FILE WILL DETERMINE IF THE DOOR IS LOCKED
     public bool isLocked;
-    
     void Start()
     {
         isOpen = false;
@@ -24,69 +21,70 @@ public class Door : NetworkBehaviour, IInteractable
     {
         pivot.rotation = Quaternion.Lerp(pivot.rotation, Quaternion.Euler(0f, defaultYRotation + targetYRotation, 0f), smoothTime * Time.deltaTime);
     }
-    
-    [ServerRpc(RequireOwnership = false)]
-    private void ToggleDoorServerRpc(Vector3 pos)
+
+    [Rpc(SendTo.Server)]
+    private void RequestServerToToggleDoorRpc(Vector3 pos)
     {
-        ToggleDoorClientRpc(pos);
+        AllObserveToggleDoorRpc(pos);
     }
-    
-    [ClientRpc]
-    private void ToggleDoorClientRpc(Vector3 pos)
+
+    [Rpc(SendTo.Everyone)]
+    private void AllObserveToggleDoorRpc(Vector3 pos)
     {
         ToggleDoor(pos);
     }
     private void ToggleDoor(Vector3 pos)
     {
-    
+
         isOpen = !isOpen;
-        if(isOpen)
+        if (isOpen)
         {
             Vector3 dir = pos - transform.position;
             targetYRotation = -Mathf.Sign(Vector3.Dot(transform.right, dir)) * maxDoorAngle;
             //navmeshCut.enabled = false;
-        }else
+        }
+        else
         {
             //navmeshCut.enabled = true;
             targetYRotation = 0f;
         }
     }
-    
+
     public void OpenDoor(Vector3 pos)
     {
-        OpenDoorServerRpc(pos);
+        RequestServerToOpenDoorRpc(pos);
     }
-    
-    [ServerRpc(RequireOwnership = false)]
-    public void OpenDoorServerRpc(Vector3 pos)
+
+    [Rpc(SendTo.Server)]
+    public void RequestServerToOpenDoorRpc(Vector3 pos)
     {
-        OpenDoorClientRpc(pos);
+        AllObserveOpeningDoorRpc(pos);
     }
-    
-    [ClientRpc]
-    public void OpenDoorClientRpc(Vector3 pos)
+
+    [Rpc(SendTo.Everyone)]
+    public void AllObserveOpeningDoorRpc(Vector3 pos)
     {
-        if(!isOpen)
+        if (!isOpen)
         {
             ToggleDoor(pos);
         }
     }
-    
+
     public void CloseDoor(Vector3 pos)
     {
-        CloseDoorServerRpc(pos);
+        RequestServerToCloseDoorRpc(pos);
     }
-    
-    [ServerRpc(RequireOwnership = false)]
-    public void CloseDoorServerRpc(Vector3 pos)
+
+    [Rpc(SendTo.Server)]
+    public void RequestServerToCloseDoorRpc(Vector3 pos)
     {
-        CloseDoorClientRpc(pos);
+        AllObserveDoorClosingRpc(pos);
     }
-    
-    [ClientRpc]
-    public void CloseDoorClientRpc(Vector3 pos)
+
+    [Rpc(SendTo.Everyone)]
+    public void AllObserveDoorClosingRpc(Vector3 pos)
     {
-        if(isOpen)
+        if (isOpen)
         {
             ToggleDoor(pos);
         }
@@ -95,15 +93,14 @@ public class Door : NetworkBehaviour, IInteractable
     //for players
     public void Interact(NetworkObjectReference playerObjectRef)
     {
-        if(playerObjectRef.TryGet(out NetworkObject playerObject))
+        if (playerObjectRef.TryGet(out NetworkObject playerObject))
         {
             if(!isLocked)
             {
-                ToggleDoorServerRpc(playerObject.transform.position);
-            }
-            else
+                RequestServerToToggleDoorRpc(playerObject.transform.position);
+            }else
             {
-                Debug.Log("Door is Locked");
+                Debug.Log("Door is locked");
             }
         }
     }

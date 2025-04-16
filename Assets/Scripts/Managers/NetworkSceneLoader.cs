@@ -12,17 +12,17 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
     [SerializeField] private string defaultActiveScene = "GameScene";
 
     private Scene currentActiveScene;
-    [SerializeField]private bool isProcessingSceneOperation = false;
+    [SerializeField] private bool isProcessingSceneOperation = false;
     private string waitingForSceneName = "";
     private SceneEventType waitingForSceneEventType;
     public override void OnNetworkSpawn()
     {
-       
+
         base.OnNetworkSpawn();
-        
+
         if (IsServer)
         {
-        
+
             NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneEvent;
             // Optional: Enable active scene synchronization
             NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
@@ -31,21 +31,21 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
                 SceneManager.LoadScene(persistentScene, LoadSceneMode.Single);
                 currentActiveScene = SceneManager.GetSceneByName(persistentScene);
             }
-            
-            
+
+
         }
     }
 
     void Start()
     {
-        if(IsServer)
+        if (IsServer)
         {
             LoadSceneAdditively("GameScene");
             SetActiveScene("GameScene");
         }
-		    
+
     }
-    
+
 
     public void LoadSceneAdditively(string sceneName)
     {
@@ -71,14 +71,14 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
     public void ReloadSceneAdditively(string sceneName)
     {
         if (!IsServer || isProcessingSceneOperation) return;
-      
+
         StartCoroutine(ReloadSceneRoutine(sceneName));
     }
 
     private IEnumerator ReloadSceneRoutine(string sceneName)
     {
         isProcessingSceneOperation = true;
-     
+
         Scene scene = SceneManager.GetSceneByName(sceneName);
         if (scene.IsValid() && scene.isLoaded)
         {
@@ -105,28 +105,13 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
 
         waitingForSceneName = sceneName;
         waitingForSceneEventType = SceneEventType.LoadComplete;
-        
+
         yield return WaitForSceneEvent();
 
         isProcessingSceneOperation = false;
     }
-    
-    [ClientRpc]
-    private void RequestSetActiveSceneClientRpc(string sceneName)
-    {
-        Scene targetScene = SceneManager.GetSceneByName(sceneName);
-        if (!targetScene.isLoaded)
-        {
-            StartCoroutine(WaitForSceneToLoad(sceneName));
-            return;
-        }
 
-        // Set the scene as active on the client
-        SceneManager.SetActiveScene(targetScene);
-        currentActiveScene = targetScene;
 
-        Debug.Log($"Active scene set to: {sceneName}");
-    }
     public void SetActiveScene(string sceneName)
     {
         if (!IsServer) return;
@@ -141,19 +126,36 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         // If scene is not loaded, start the loading process
         if (!targetScene.isLoaded)
         {
-            WaitForSceneToLoadClientRpc(sceneName);
+            AllWaitForSceneLoadRpc(sceneName);
             return;
         }
 
         // If the scene is already loaded, set it as active
-        RequestSetActiveSceneClientRpc(sceneName);
+        AllSetActiveSceneRpc(sceneName);
         currentActiveScene = targetScene;
 
         Debug.Log($"Active scene set to: {sceneName}");
     }
     
-    [ClientRpc]
-    private void WaitForSceneToLoadClientRpc(string sceneName)
+    [Rpc(SendTo.Everyone)]
+    private void AllSetActiveSceneRpc(string sceneName)
+    {
+        Scene targetScene = SceneManager.GetSceneByName(sceneName);
+        if (!targetScene.isLoaded)
+        {
+            StartCoroutine(WaitForSceneToLoad(sceneName));
+            return;
+        }
+
+        // Set the scene as active on the client
+        SceneManager.SetActiveScene(targetScene);
+        currentActiveScene = targetScene;
+
+        Debug.Log($"Active scene set to: {sceneName}");
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void AllWaitForSceneLoadRpc(string sceneName)
     {
         StartCoroutine(WaitForSceneToLoad(sceneName));
     }
@@ -167,7 +169,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             {
                 SceneManager.SetActiveScene(scene);
                 currentActiveScene = scene;
-                Debug.Log($"Active scene set to: {sceneName}");
+                //Debug.Log($"Active scene set to: {sceneName}");
                 yield break;
             }
 
@@ -175,7 +177,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             yield return null;
         }
     }
-    
+
     public void UnloadSceneAdditively(string sceneName)
     {
         if (!IsServer || isProcessingSceneOperation) return;
@@ -204,7 +206,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         waitingForSceneEventType = SceneEventType.UnloadComplete;
         StartCoroutine(WaitForSceneEvent());
     }
-    
+
     private void OnSceneEvent(SceneEvent sceneEvent)
     {
         switch (sceneEvent.SceneEventType)
@@ -233,13 +235,13 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             yield return null;
         }
     }
-    
-    
+
+
     public void LoadSceneClientSideOnly(string sceneName)
-    {       
+    {
         // Check if scene is already loaded
         if (SceneManager.GetSceneByName(sceneName).isLoaded) return;
-        
+
         // Load scene locally on client
         SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
     }
@@ -252,7 +254,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             SceneManager.UnloadSceneAsync(scene);
         }
     }
-    
+
     public override void OnNetworkDespawn()
     {
         if (IsServer)

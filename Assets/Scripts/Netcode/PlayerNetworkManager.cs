@@ -185,6 +185,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
+				player.GetComponent<PlayerHealth>().ResetHealth();
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
 			}
 		}

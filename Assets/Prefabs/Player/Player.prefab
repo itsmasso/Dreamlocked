@@ -479,6 +479,7 @@ GameObject:
   - component: {fileID: 5310495392972413353}
   - component: {fileID: 2376784028857367506}
   - component: {fileID: 5858055776748554268}
+  - component: {fileID: 177223168877353542}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -566,7 +567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3132528564
+  GlobalObjectIdHash: 84419574
   InScenePlacedSourceGlobalObjectIdHash: 3132528564
   DeferredDespawnTick: 0
   Ownership: 1
@@ -803,14 +804,6 @@ MonoBehaviour:
     m_ActionId: f1ba0d36-48eb-4cd5-b651-1c94a6531f70
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 2776c80d-3c14-4091-8c56-d04ced07a2b0
-    m_ActionName: 'Player/Previous[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: b7230bb6-fc9b-4f52-8b25-f5e19cb2c2ba
-    m_ActionName: 'Player/Next[/Keyboard/2]'
-  - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 3109504795284010200}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
@@ -868,8 +861,8 @@ MonoBehaviour:
     m_ActionName: UI/TrackedDeviceOrientation
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2376784028857367506}
-        m_TargetAssemblyTypeName: PlayerInteractScript, Assembly-CSharp
+      - m_Target: {fileID: 177223168877353542}
+        m_TargetAssemblyTypeName: PlayerInventory, Assembly-CSharp
         m_MethodName: OnDropItem
         m_Mode: 0
         m_Arguments:
@@ -882,6 +875,70 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 95cfb41d-88a5-4800-bbda-9443d008f6fc
     m_ActionName: Player/DropItem
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 177223168877353542}
+        m_TargetAssemblyTypeName: PlayerInventory, Assembly-CSharp
+        m_MethodName: OnSlot1
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b98024b5-ed6f-4242-ab4a-f482df229aeb
+    m_ActionName: 'Player/InventorySlot1[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 177223168877353542}
+        m_TargetAssemblyTypeName: PlayerInventory, Assembly-CSharp
+        m_MethodName: OnSlot2
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 31589106-9210-460e-8bfa-f7b9f291371f
+    m_ActionName: 'Player/InventorySlot2[/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 177223168877353542}
+        m_TargetAssemblyTypeName: PlayerInventory, Assembly-CSharp
+        m_MethodName: OnSlot3
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 8bac2dd8-9f38-434d-91f2-81e622eff2b0
+    m_ActionName: 'Player/InventorySlot3[/Keyboard/3]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 177223168877353542}
+        m_TargetAssemblyTypeName: PlayerInventory, Assembly-CSharp
+        m_MethodName: OnSlot4
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e4b4094e-639a-4d2d-85ad-02d91c98e26d
+    m_ActionName: 'Player/InventorySlot4[/Keyboard/4]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -900,10 +957,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  itemParent: {fileID: 3888133073890299233}
-  itemPosition: {fileID: 4222349174482778473}
-  itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
-  heldObject: {fileID: 0}
   interactRange: 5
   sphereRadius: 0.2
   interactableLayer:
@@ -913,10 +966,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   pressedInteract: 0
-  throwForce: 2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 8
   hits: []
 --- !u!114 &5858055776748554268
 MonoBehaviour:
@@ -934,3 +983,22 @@ MonoBehaviour:
   playerScriptable: {fileID: 11400000, guid: 134973381f452b94bbaedd0870e70c97, type: 2}
   currentHealth:
     m_InternalValue: 100
+--- !u!114 &177223168877353542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7062762779246524609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b397c3084611749afd0636d93909fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  itemScriptableObjList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
+  inventoryList: []
+  itemParent: {fileID: 4941982663017989936}
+  itemPosition: {fileID: 4222349174482778473}
+  heldObject: {fileID: 0}
+  throwForce: 3

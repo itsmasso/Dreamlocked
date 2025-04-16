@@ -5,4 +5,5 @@ public class ItemScriptableObject : ScriptableObject
 {
 	public GameObject physicalItemPrefab;
 	public GameObject visualItemPrefab;
+	public Sprite itemSprite;
 }

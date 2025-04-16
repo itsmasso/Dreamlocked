@@ -10,20 +10,37 @@ public class PlayerHealth : NetworkBehaviour
     public event Action onDeath;
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(
         100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public static event Action<int> onTakeDamage;
+    public static event Action<int> onUpdateHealth;
     public override void OnNetworkSpawn()
-	{
-        if(IsServer)
+    {
+        if (IsServer)
         {
             currentHealth.Value = playerScriptable.health;
         }
- 
-	}
 
-    [ServerRpc(RequireOwnership = false)]
-    public void TakeDamageServerRpc(int amount)
+    }
+    
+    public void ResetHealth()
     {
-        if (!IsServer) return;  
+        RestoreHealthRpc(playerScriptable.health);
+    }
+    
+    [Rpc(SendTo.Server)]
+    public void RestoreHealthRpc(int amount)
+    {
+        if (!IsServer) return;
+
+        int newHealth = Mathf.Clamp(currentHealth.Value + amount, 0, playerScriptable.health);
+        currentHealth.Value = newHealth;
+
+        OwnerUpdateHealthRpc(currentHealth.Value);
+    }
+
+
+    [Rpc(SendTo.Server)]
+    public void RequestServerTakeDamageRpc(int amount)
+    {
+        if (!IsServer) return;
 
         currentHealth.Value -= amount;
         if (currentHealth.Value <= 0)
@@ -31,17 +48,14 @@ public class PlayerHealth : NetworkBehaviour
             currentHealth.Value = 0;
             Die();
         }
-        
-        UpdateHealthClientRpc(currentHealth.Value);
-        
+
+        OwnerUpdateHealthRpc(currentHealth.Value);
+
     }
-    [ClientRpc]
-    private void UpdateHealthClientRpc(int currentHealth)
+    [Rpc(SendTo.Owner)]
+    private void OwnerUpdateHealthRpc(int currentHealth)
     {
-        if(IsOwner)
-        {
-            onTakeDamage?.Invoke(currentHealth);
-        }
+        onUpdateHealth?.Invoke(currentHealth);
     }
 
     private void Die()
@@ -49,26 +63,27 @@ public class PlayerHealth : NetworkBehaviour
         Debug.Log($"{gameObject.name} | NetworkObjectId: {NetworkObjectId} has died.");
         PlayerNetworkManager.Instance.UnregisterPlayerClientRpc(GetComponent<NetworkObject>());
         gameObject.GetComponent<PlayerController>().enabled = false;
-        HidePlayerFromPlayersClientRpc(GetComponent<NetworkObject>());
-        DieClientRpc();
+        HidePlayerFromAllRpc(GetComponent<NetworkObject>());
+        OwnerDiesRpc();
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void OwnerDiesRpc()
+    {
+        onDeath?.Invoke();
     }
     
-    [ClientRpc]
-    private void DieClientRpc()
+    [Rpc(SendTo.Everyone)]
+    private void HidePlayerFromAllRpc(NetworkObjectReference playerNetworkObjRef)
     {
-        if(IsOwner)
-        {
-            onDeath?.Invoke();
-        }
-    }
-    [ClientRpc]
-    private void HidePlayerFromPlayersClientRpc(NetworkObjectReference playerNetworkObjRef)
-    {
-        if(playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj))
+        if (playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj))
         {
             playerNetworkObj.GetComponentInChildren<MeshRenderer>().enabled = false;
             playerNetworkObj.GetComponent<CapsuleCollider>().enabled = false;
         }
     }
-    
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+    }
 }

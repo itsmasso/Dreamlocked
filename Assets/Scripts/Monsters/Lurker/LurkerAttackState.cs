@@ -25,12 +25,12 @@ public class LurkerAttackState : LurkerBaseState
         yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(lurker.animationManager.attackLayer).normalizedTime >= 0.1f);
         AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(lurker.animationManager.attackLayer);
         float animationTime = clipInfo.Length > 0 ? clipInfo[0].clip.length : 1.0f; // Default to 1s if not found
-        lurker.AnimationLockClientRpc(lurker.currentTarget.GetComponent<NetworkObject>(), animationTime);
-        lurker.SmoothRotateToLurkerClientRpc(lurker.currentTarget.GetComponent<NetworkObject>(), 0.5f);
+        lurker.AllObserveAnimationLockRpc(lurker.currentTarget.GetComponent<NetworkObject>(), animationTime);
+        lurker.AllObservePlayerRotateRpc(lurker.currentTarget.GetComponent<NetworkObject>(), 0.5f);
         yield return new WaitForSeconds(animationTime);
 
         PlayerHealth playerHealth = lurker.currentTarget.GetComponent<PlayerHealth>();
-        playerHealth.TakeDamageServerRpc(lurker.lurkerScriptableObj.damage);
+        playerHealth.RequestServerTakeDamageRpc(lurker.lurkerScriptableObj.damage);
         lurker.StartStalkCooldown();
         lurker.StartAttackCooldown();
         lurker.SwitchState(LurkerState.Roaming);

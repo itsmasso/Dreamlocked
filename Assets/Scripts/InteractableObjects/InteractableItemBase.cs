@@ -21,45 +21,41 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 
 	public virtual void Interact(NetworkObjectReference playerNetworkObjRef)
 	{
-
-		InteractServerRpc(playerNetworkObjRef);
+		RequestServerToInteractRpc(playerNetworkObjRef);
 	}
 
-	[ServerRpc(RequireOwnership = false)]
-	protected virtual void InteractServerRpc(NetworkObjectReference playerNetworkObjRef)
+	[Rpc(SendTo.Server)]
+	protected virtual void RequestServerToInteractRpc(NetworkObjectReference playerNetworkObjRef)
 	{
-
 		isStored.Value = false;
 		objectRb.constraints = RigidbodyConstraints.None;
 		playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj);
 		//playerNetworkObj.GetComponent<PlayerInteractScript>().SpawnVisualItemClientRpc(GetItemSOIndex(itemScriptableObject));
 		if(playerNetworkObj.GetComponent<PlayerInventory>().AddItems(itemScriptableObject))
 		{
-		    HideItemServerRpc();
+		    HideItem();
 		}
 	}
 
 
 	public virtual void ThrowItem(Vector3 direction, float throwForce)
 	{
-		ThrowItemServerRpc(direction, throwForce);
+		RequestServerToThrowItemRpc(direction, throwForce);
 	}
 
-	[ServerRpc]
-	protected virtual void ThrowItemServerRpc(Vector3 direction, float throwForce)
+	[Rpc(SendTo.Server)]
+	protected virtual void RequestServerToThrowItemRpc(Vector3 direction, float throwForce)
 	{
-		ThrowItemClientRpc(direction, throwForce);
+		AllSeeClientThrowItemRpc(direction, throwForce);
 	}
 
-	[ClientRpc]
-	protected virtual void ThrowItemClientRpc(Vector3 direction, float throwForce)
+	[Rpc(SendTo.Everyone)]
+	protected virtual void AllSeeClientThrowItemRpc(Vector3 direction, float throwForce)
 	{
 		objectRb.AddForce(direction.normalized * throwForce, ForceMode.VelocityChange);
 
 	}
-
-	[ServerRpc]
-	public virtual void HideItemServerRpc()
+	public virtual void HideItem()
 	{
 		Debug.Log("despawned item");
 		GetComponent<NetworkObject>().Despawn(true);

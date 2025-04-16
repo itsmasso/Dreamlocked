@@ -39,32 +39,35 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     private bool printedActivating = false;
     private bool printedAwakened = false;
     protected override void Awake()
-	{
-		base.Awake();
-	}
+    {
+        base.Awake();
+    }
     void Start()
     {
-        currentTime = TOTAL_TIME;
-        timeRunning = true;
-        //Debug.Log("Timer Started");
+        if (IsServer)
+        {
+            currentTime = TOTAL_TIME;
+            timeRunning = true;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(!IsServer) return;
-        
-        if(!gameEnding)
+        if (!IsServer) return;
+
+        if (!gameEnding)
         {
             Timer();
-        } else {
+        }
+        else
+        {
             ExtractionTimer();
         }
-        
+
     }
 
     /*****************************************************************
-    * InstantResetTimer
+    * InstantResetTimerRpc
     *****************************************************************
     * Author: Dylan Werelius
     *****************************************************************
@@ -72,7 +75,8 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
         This function will reset the timer back to the TOTAL_TIME and
         start it.
     *****************************************************************/
-    private void InstantResetTimer()
+    [Rpc(SendTo.Server)]
+    private void ServerInstantResetTimerRpc()
     {
         currentTime = TOTAL_TIME;
         timeRunning = true;
@@ -84,7 +88,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     {
         return currentThreatLevel.Value;
     }
-    
+
     private void Timer()
     {
         // Decrement the timer by one second if the clock is running and the currentTime > -1
@@ -96,7 +100,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
             // At this time, the GF Clock stops chiming and the lights go out
             currentThreatLevel.Value = MQThreatLevel.AWAKENED;
             timeRunning = false;
-            
+
             // This is just for the sake of making sure the timer is running
             if (!printedAwakened)
             {
@@ -104,8 +108,8 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
                 printedAwakened = true;
             }
             //Debug.Log("Current Time: " + currentTime);
-        } 
-        else if (timeRunning && currentTime <= TIME_TO_DANGER) 
+        }
+        else if (timeRunning && currentTime <= TIME_TO_DANGER)
         {
             // At this time, the GF Clock will start to chime and lights begin to flicker
             currentThreatLevel.Value = MQThreatLevel.ACTIVATING;
@@ -117,11 +121,12 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
                 printedActivating = true;
             }
             //Debug.Log("Current Time: " + currentTime);
-        } else if (timeRunning) 
+        }
+        else if (timeRunning)
         {
             currentThreatLevel.Value = MQThreatLevel.PASSIVE;
         }
-        
+
     }
 
     private void ExtractionTimer()
@@ -146,10 +151,9 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 
     public void Interact(NetworkObjectReference playerObject)
     {
-       
-        if(!gameEnding && currentTime <= REWIND_BUFFER){
-         Debug.Log("interacting");
-            InstantResetTimer();
+        if (!gameEnding && currentTime <= REWIND_BUFFER)
+        {
+            ServerInstantResetTimerRpc();
         }
     }
 }

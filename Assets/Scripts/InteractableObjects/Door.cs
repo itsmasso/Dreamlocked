@@ -22,14 +22,14 @@ public class Door : NetworkBehaviour, IInteractable
         pivot.rotation = Quaternion.Lerp(pivot.rotation, Quaternion.Euler(0f, defaultYRotation + targetYRotation, 0f), smoothTime * Time.deltaTime);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void ToggleDoorServerRpc(Vector3 pos)
+    [Rpc(SendTo.Server)]
+    private void RequestServerToToggleDoorRpc(Vector3 pos)
     {
-        ToggleDoorClientRpc(pos);
+        AllObserveToggleDoorRpc(pos);
     }
 
-    [ClientRpc]
-    private void ToggleDoorClientRpc(Vector3 pos)
+    [Rpc(SendTo.Everyone)]
+    private void AllObserveToggleDoorRpc(Vector3 pos)
     {
         ToggleDoor(pos);
     }
@@ -52,17 +52,17 @@ public class Door : NetworkBehaviour, IInteractable
 
     public void OpenDoor(Vector3 pos)
     {
-        OpenDoorServerRpc(pos);
+        RequestServerToOpenDoorRpc(pos);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void OpenDoorServerRpc(Vector3 pos)
+    [Rpc(SendTo.Server)]
+    public void RequestServerToOpenDoorRpc(Vector3 pos)
     {
-        OpenDoorClientRpc(pos);
+        AllObserveOpeningDoorRpc(pos);
     }
 
-    [ClientRpc]
-    public void OpenDoorClientRpc(Vector3 pos)
+    [Rpc(SendTo.Everyone)]
+    public void AllObserveOpeningDoorRpc(Vector3 pos)
     {
         if (!isOpen)
         {
@@ -72,17 +72,17 @@ public class Door : NetworkBehaviour, IInteractable
 
     public void CloseDoor(Vector3 pos)
     {
-        CloseDoorServerRpc(pos);
+        RequestServerToCloseDoorRpc(pos);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void CloseDoorServerRpc(Vector3 pos)
+    [Rpc(SendTo.Server)]
+    public void RequestServerToCloseDoorRpc(Vector3 pos)
     {
-        CloseDoorClientRpc(pos);
+        AllObserveDoorClosingRpc(pos);
     }
 
-    [ClientRpc]
-    public void CloseDoorClientRpc(Vector3 pos)
+    [Rpc(SendTo.Everyone)]
+    public void AllObserveDoorClosingRpc(Vector3 pos)
     {
         if (isOpen)
         {
@@ -97,7 +97,7 @@ public class Door : NetworkBehaviour, IInteractable
         {
             if(!isLocked)
             {
-                ToggleDoorServerRpc(playerObject.transform.position);
+                RequestServerToToggleDoorRpc(playerObject.transform.position);
             }else
             {
                 Debug.Log("Door is locked");

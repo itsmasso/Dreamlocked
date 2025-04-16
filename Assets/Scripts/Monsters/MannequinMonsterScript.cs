@@ -130,6 +130,8 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     
     private void SetClosestPlayerAsTarget()
 	{
+        if(!IsServer) return;
+        
 	    if(PlayerNetworkManager.Instance.alivePlayers.Count > 0)
 	    {
 	        currentTarget = PlayerNetworkManager.Instance.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
@@ -141,18 +143,17 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
                 
 	    	    currentTarget = PlayerNetworkManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
 	    	}
-	    	SetCurrentTargetClientRpc(currentTarget.GetComponent<NetworkObject>());
         }
 	}
 
-    [ClientRpc]
-    private void SetCurrentTargetClientRpc(NetworkObjectReference playerObjectRef)
-    {
-        if(playerObjectRef.TryGet(out NetworkObject playerNetObj))
-        {
-            currentTarget = playerNetObj.transform;
-        }
-    }
+    // [Rpc(SendTo.Everyone)]
+    // private void SetCurrentTargetRpc(NetworkObjectReference playerObjectRef)
+    // {
+    //     if(playerObjectRef.TryGet(out NetworkObject playerNetObj))
+    //     {
+    //         currentTarget = playerNetObj.transform;
+    //     }
+    // }
     private void MoveToPlayer(float speed)
     {
         agent.canMove = true;
@@ -169,7 +170,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             if(canAttack && Vector3.Distance(currentTarget.position, transform.position) <= attackRange)
             {
                 PlayerHealth playerHealth = currentTarget.GetComponent<PlayerHealth>();
-                playerHealth.TakeDamageServerRpc(mannequinScriptable.damage);
+                playerHealth.RequestServerTakeDamageRpc(mannequinScriptable.damage);
                 StartAttackCooldown();
             }
             

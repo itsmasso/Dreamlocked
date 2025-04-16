@@ -103,7 +103,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		if(IsServer)
 		{
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
-			SetDifficultySOClientRpc(GetDifficultySOIndex(currentDifficultySettingSO));
+			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
 		}
 		SetDifficulty();
 		Generate();
@@ -114,8 +114,8 @@ public class HouseMapGenerator : NetworkBehaviour
 	{
 		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
 	}
-	[ClientRpc]
-	private void SetDifficultySOClientRpc(int difficultySOIndex)
+	[Rpc(SendTo.Everyone)]
+	private void AllSetDifficultySORpc(int difficultySOIndex)
 	{
 	    currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
 	}

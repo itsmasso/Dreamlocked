@@ -17,13 +17,14 @@ MonoBehaviour:
   floors: 1
   specialRoomPrefabsList:
   - {fileID: 4367447932712270340, guid: d5cd6f412bf28664ca76b0a7d2587cba, type: 3}
+  - {fileID: 4367447932712270340, guid: a885274777859e14191d30d75056c3b6, type: 3}
   roomPrefabsList:
   - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
   - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
   roomsPerFloor: 10
-  chanceToSpawnLurker: 0
-  lurkerSpawnDelay: 0
-  lurkerSpawnAmount: 0
+  chanceToSpawnLurker: 100
+  lurkerSpawnDelay: 0.1
+  lurkerSpawnAmount: 1
   mannequinSpawnAmount: 0
   chanceToSpawnMannequin: 0
   chanceToSpawnGFClock: 0

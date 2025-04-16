@@ -198,10 +198,8 @@ public class LightScript : NetworkBehaviour
 		}
 	}
 
-	//add clientrpc later maybe
-
-	[ServerRpc]
-	private void EnemyEnteredLightServerRpc(NetworkObjectReference enemyNetObjRef)
+	[Rpc(SendTo.Server)]
+	private void ServerSeesEnemyEnteredLightRpc(NetworkObjectReference enemyNetObjRef)
 	{
 		if (enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
 		{
@@ -212,8 +210,8 @@ public class LightScript : NetworkBehaviour
 		}
 	}
 
-	[ServerRpc]
-	private void EnemyExitLightServerRpc(NetworkObjectReference enemyNetObjRef)
+	[Rpc(SendTo.Server)]
+	private void ServerSeesEnemyExitLightRpc(NetworkObjectReference enemyNetObjRef)
 	{
 		if (enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
 		{
@@ -248,7 +246,7 @@ public class LightScript : NetworkBehaviour
 
 					enemiesInLight.Add(enemyNetObj);
 					monsterAffectedByLight.EnteredLight();
-					EnemyEnteredLightServerRpc(enemyNetObj);
+					ServerSeesEnemyEnteredLightRpc(enemyNetObj);
 				}
 			}
 
@@ -273,7 +271,7 @@ public class LightScript : NetworkBehaviour
 				{
 					affectedByLight.ExitLight();
 					enemiesInLight.Remove(enemy);
-					EnemyExitLightServerRpc(enemy);
+					ServerSeesEnemyExitLightRpc(enemy);
 				}
 			}
 		}

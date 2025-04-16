@@ -10,7 +10,6 @@ public class LurkerAnimationManager : NetworkBehaviour
     [SerializeField] private Transform sourceTarget;
     public int baseLayer, headLayer, rightArmLayer, leftArmLayer, attackLayer;
     public NetworkVariable<float> currentAnimSpeed = new NetworkVariable<float>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private int emptyStateHash;
 
     public override void OnNetworkSpawn()
     {
@@ -24,7 +23,6 @@ public class LurkerAnimationManager : NetworkBehaviour
         rightArmLayer = animator.GetLayerIndex("Right Arm");
         leftArmLayer = animator.GetLayerIndex("Left Arm");
         attackLayer = animator.GetLayerIndex("Attack");
-        emptyStateHash = Animator.StringToHash("Empty");
     }
     
     void OnEnable()

@@ -22,23 +22,23 @@ public class PlayerHealth : NetworkBehaviour
     
     public void ResetHealth()
     {
-        RestoreHealthServerRpc(playerScriptable.health);
+        RestoreHealthRpc(playerScriptable.health);
     }
     
-    [ServerRpc(RequireOwnership = false)]
-    public void RestoreHealthServerRpc(int amount)
+    [Rpc(SendTo.Server)]
+    public void RestoreHealthRpc(int amount)
     {
         if (!IsServer) return;
 
         int newHealth = Mathf.Clamp(currentHealth.Value + amount, 0, playerScriptable.health);
         currentHealth.Value = newHealth;
 
-        UpdateHealthClientRpc(currentHealth.Value);
+        OwnerUpdateHealthRpc(currentHealth.Value);
     }
 
 
-    [ServerRpc(RequireOwnership = false)]
-    public void TakeDamageServerRpc(int amount)
+    [Rpc(SendTo.Server)]
+    public void RequestServerTakeDamageRpc(int amount)
     {
         if (!IsServer) return;
 
@@ -49,16 +49,13 @@ public class PlayerHealth : NetworkBehaviour
             Die();
         }
 
-        UpdateHealthClientRpc(currentHealth.Value);
+        OwnerUpdateHealthRpc(currentHealth.Value);
 
     }
-    [ClientRpc]
-    private void UpdateHealthClientRpc(int currentHealth)
+    [Rpc(SendTo.Owner)]
+    private void OwnerUpdateHealthRpc(int currentHealth)
     {
-        if (IsOwner)
-        {
-            onUpdateHealth?.Invoke(currentHealth);
-        }
+        onUpdateHealth?.Invoke(currentHealth);
     }
 
     private void Die()
@@ -66,20 +63,18 @@ public class PlayerHealth : NetworkBehaviour
         Debug.Log($"{gameObject.name} | NetworkObjectId: {NetworkObjectId} has died.");
         PlayerNetworkManager.Instance.UnregisterPlayerClientRpc(GetComponent<NetworkObject>());
         gameObject.GetComponent<PlayerController>().enabled = false;
-        HidePlayerFromPlayersClientRpc(GetComponent<NetworkObject>());
-        DieClientRpc();
+        HidePlayerFromAllRpc(GetComponent<NetworkObject>());
+        OwnerDiesRpc();
     }
 
-    [ClientRpc]
-    private void DieClientRpc()
+    [Rpc(SendTo.Owner)]
+    private void OwnerDiesRpc()
     {
-        if (IsOwner)
-        {
-            onDeath?.Invoke();
-        }
+        onDeath?.Invoke();
     }
-    [ClientRpc]
-    private void HidePlayerFromPlayersClientRpc(NetworkObjectReference playerNetworkObjRef)
+    
+    [Rpc(SendTo.Everyone)]
+    private void HidePlayerFromAllRpc(NetworkObjectReference playerNetworkObjRef)
     {
         if (playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj))
         {

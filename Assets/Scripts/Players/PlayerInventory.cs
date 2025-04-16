@@ -19,8 +19,8 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] private GameObject itemParent;
     [SerializeField] private Transform itemPosition;
     [Tooltip("Don't initialize held object.")]
-    [SerializeField] private ItemScriptableObject heldObject;
-    private GameObject currentVisualItem;
+    [SerializeField] private ItemScriptableObject currentHeldItemSO;
+    private GameObject currentHeldItemObject;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
     //[SerializeField] private LayerMask groundLayer;
@@ -80,9 +80,9 @@ public class PlayerInventory : NetworkBehaviour
 
     public void OnDropItem(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && heldObject != null)
+        if (ctx.performed && currentHeldItemSO != null)
         {
-            DropItemRpc(Camera.main.transform.forward, throwForce);
+            RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
     public bool AddItems(ItemScriptableObject itemScriptableObject)
@@ -97,7 +97,7 @@ public class PlayerInventory : NetworkBehaviour
             {
                 if(currentInventoryIndex == i)
                 {
-                    UpdateEmptySlotRpc(itemIndex);
+                    OwnerUpdatesEmptySlotRpc(itemIndex);
                 }
                 syncedInventory[i] = itemIndex;
                 
@@ -110,9 +110,9 @@ public class PlayerInventory : NetworkBehaviour
     }
     
     [Rpc(SendTo.Owner)]
-    private void UpdateEmptySlotRpc(int itemIndex)
+    private void OwnerUpdatesEmptySlotRpc(int itemIndex)
     {
-        SpawnVisualItemRpc(itemIndex);
+        OwnerSpawnsHeldItemRpc(itemIndex);
     }
 
     [Rpc(SendTo.Server)]
@@ -121,47 +121,47 @@ public class PlayerInventory : NetworkBehaviour
         // Always check if item changed, even if index hasn't
         int currentItemIndex = inventoryIndex < syncedInventory.Count ? syncedInventory[inventoryIndex] : -1;
 
-        if (inventoryIndex == lastInventoryIndex && heldObject == GetItemFromIndex(inventoryIndex))
+        if (inventoryIndex == lastInventoryIndex && currentHeldItemSO == GetItemFromIndex(inventoryIndex))
             return; // same slot & same item
         Debug.Log(currentInventoryIndex);
         currentInventoryIndex = inventoryIndex;
         lastInventoryIndex = currentInventoryIndex;
-        HighlightNewSlotRpc(currentInventoryIndex);
+        OwnerHighlightsNewSlotRpc(currentInventoryIndex);
         if (currentItemIndex != -1)
         {
             Debug.Log("selecting item at slot " + currentInventoryIndex);
 
-            DestroyVisualItemRpc();
-            SpawnVisualItemRpc(currentItemIndex);
+            OwnerDestroysHeldItemRpc();
+            OwnerSpawnsHeldItemRpc(currentItemIndex);
         }
         else
         {
-            DestroyVisualItemRpc();
+            OwnerDestroysHeldItemRpc();
         }
 
     }
     [Rpc(SendTo.Owner)]
-    private void HighlightNewSlotRpc(int inventoryIndex)
+    private void OwnerHighlightsNewSlotRpc(int inventoryIndex)
     {
         onNewSlotSelected?.Invoke(inventoryIndex);
     }
 
     [Rpc(SendTo.Owner)]
-    private void SpawnVisualItemRpc(int itemSOIndex)
+    private void OwnerSpawnsHeldItemRpc(int itemSOIndex)
     {
         GameObject visualItem = Instantiate(itemScriptableObjList.itemListSO[itemSOIndex].visualItemPrefab, itemPosition.position, Quaternion.identity);
         visualItem.transform.SetParent(itemPosition);
-        currentVisualItem = visualItem;
-        heldObject = itemScriptableObjList.itemListSO[itemSOIndex];
+        currentHeldItemObject = visualItem;
+        currentHeldItemSO = itemScriptableObjList.itemListSO[itemSOIndex];
     }
 
     [Rpc(SendTo.Server)]
-    private void DropItemRpc(Vector3 dropPosition, float throwForce)
+    private void RequestServerToDropItemRpc(Vector3 dropPosition, float throwForce)
     {
         int index = syncedInventory[currentInventoryIndex];
         if (index != -1)
         {
-            DestroyVisualItemRpc();
+            OwnerDestroysHeldItemRpc();
             GameObject currentItem = Instantiate(GetItemFromIndex(index).physicalItemPrefab, itemPosition.position, Quaternion.identity);
             currentItem.GetComponent<NetworkObject>().Spawn(true);
             currentItem.GetComponent<InteractableItemBase>().ThrowItem(dropPosition, throwForce);
@@ -171,13 +171,13 @@ public class PlayerInventory : NetworkBehaviour
     }
 
     [Rpc(SendTo.Owner)]
-    private void DestroyVisualItemRpc()
+    private void OwnerDestroysHeldItemRpc()
     {
-        if (currentVisualItem != null)
+        if (currentHeldItemObject != null)
         {
             Debug.Log("destroying visual item");
-            Destroy(currentVisualItem);
-            heldObject = null;
+            Destroy(currentHeldItemObject);
+            currentHeldItemSO = null;
         }
     }
 
@@ -202,7 +202,7 @@ public class PlayerInventory : NetworkBehaviour
                 for (int i = 0; i < 4; i++)
                 {
                     syncedInventory[currentInventoryIndex] = -1;
-                    DestroyVisualItemRpc();
+                    OwnerDestroysHeldItemRpc();
                     lastInventoryIndex = -1;
                 }
 

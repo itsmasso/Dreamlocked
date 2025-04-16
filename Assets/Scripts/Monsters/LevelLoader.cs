@@ -18,10 +18,6 @@ public class LevelLoader : NetworkBehaviour
     public HouseMapDifficultySettingsSO currentHouseMapDifficultySetting;
     private int nextDifficultyCheckpoint;
     private int currentDifficultyIndex;
-    void Awake()
-    {
-
-    }
     void Start()
     {
         if (IsServer)
@@ -68,7 +64,6 @@ public class LevelLoader : NetworkBehaviour
     {
         if (!IsServer) return;
         StartCoroutine(WaitUntilGameSceneIsReady("GameScene", Map.HouseMap));
-        
     }
     
     public void TryChangeHouseMapDifficultySetting()

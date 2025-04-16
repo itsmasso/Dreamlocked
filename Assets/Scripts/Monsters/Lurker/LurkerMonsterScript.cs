@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
+using Unity.VisualScripting;
 public enum LurkerState
 {
 	Roaming,
@@ -160,37 +161,28 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 
 	public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
-		ChaseTargetServerRpc(playerObjectRef);
-
+		RequestServerToChasePlayerRpc(playerObjectRef);
 	}
 
-	[ServerRpc(RequireOwnership = false)]
-	private void ChaseTargetServerRpc(NetworkObjectReference playerObjectRef)
+	[Rpc(SendTo.Server)]
+	private void RequestServerToChasePlayerRpc(NetworkObjectReference playerObjectRef)
 	{
 		if (canAttack)
 		{
-
 			playerObjectRef.TryGet(out NetworkObject playerObject);
 			float distance = Vector2.Distance(playerObject.transform.position, transform.position);
 			if (networkState.Value != LurkerState.Chasing && networkState.Value != LurkerState.Prechase && networkState.Value != LurkerState.Attacking && distance <= aggressionDistance)
 			{
-				SetCurrentTargetClientRpc(playerObjectRef);
+				//SetCurrentTargetRpc(playerObjectRef);
+				currentTarget = playerObject.transform;
 				SwitchState(LurkerState.Prechase);
 			}
-
 		}
 	}
 
-	[ClientRpc]
-	private void SetCurrentTargetClientRpc(NetworkObjectReference playerObjectRef)
+	public void SetRandomPlayerAsTarget()
 	{
-		playerObjectRef.TryGet(out NetworkObject playerObject);
-		currentTarget = playerObject.transform;
-	}
-
-	[ClientRpc]
-	public void SetRandomPlayerAsTargetClientRpc()
-	{
+		if(!IsServer) return;
 		NetworkObject playerNetworkObject = PlayerNetworkManager.Instance.GetRandomPlayer();
 		if (playerNetworkObject != null && playerNetworkObject.IsSpawned)
 		{
@@ -237,8 +229,8 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		attackCooldownCoroutine = StartCoroutine(AttackCooldown());
 	}
 
-	[ClientRpc]
-	public void AnimationLockClientRpc(NetworkObjectReference networkObjectReference, float animationTime)
+	[Rpc(SendTo.Everyone)]
+	public void AllObserveAnimationLockRpc(NetworkObjectReference networkObjectReference, float animationTime)
 	{
 		if (networkObjectReference.TryGet(out NetworkObject networkObject))
 		{
@@ -252,8 +244,8 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		}
 
 	}
-	[ClientRpc]
-	public void SmoothRotateToLurkerClientRpc(NetworkObjectReference networkObjectReference, float duration)
+	[Rpc(SendTo.Everyone)]
+	public void AllObservePlayerRotateRpc(NetworkObjectReference networkObjectReference, float duration)
 	{
 		networkObjectReference.TryGet(out NetworkObject networkObject);
 		if (!networkObject.IsOwner) return;

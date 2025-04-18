@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2306764692473554653}
   - component: {fileID: 1837391358015973595}
   m_Layer: 7
-  m_Name: SafeParent
+  m_Name: SafeParentAlt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3040398230
+  GlobalObjectIdHash: 2321820440
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -98,8 +98,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   safeCollider: {fileID: 2849634166944264067}
   itemTransform: {fileID: 2063605273927869882}
-  itemScriptableObjectToSpawn: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
-  securityCode: 01000000090000000800000007000000
+  itemScriptableObjectToSpawn: {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}
+  securityCode: 04000000040000000400000004000000
 --- !u!1 &4729389012068560875
 GameObject:
   m_ObjectHideFlags: 0

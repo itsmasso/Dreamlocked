@@ -6,13 +6,16 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 {
     [Header("Item Prefabs")]
     private Animator safeAnimator;
-    private GameObject key;
+    private GameObject item;
     [SerializeField] private GameObject safeCollider;
-    [SerializeField] private Transform keyTransform;
+    [SerializeField] private Transform itemTransform;
     [SerializeField] private ItemScriptableObject itemScriptableObjectToSpawn;
-    private InteractableItemBase keyScript;
+    private InteractableItemBase itemScript;
     private float interactCooldown = 1f;
     private float interactCooldownTimer;
+
+    [Header("Safe Combinations")]
+    private int[] securityCode = new int[4];
 
     [Header("Network Variables")]
     private NetworkVariable<bool> isOpen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -21,6 +24,20 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     void Start()
     {
         safeAnimator = GetComponentInChildren<Animator>();
+        if (IsServer)
+        {
+            FillArrayWithRandomIntegers(securityCode);
+            Debug.Log("Security Code Generated: " + securityCode[0].ToString() + securityCode[1].ToString() + securityCode[2].ToString() + securityCode[3].ToString() );
+        }
+    }
+
+    // Fills the given array with random positive integers between min and max (inclusive)
+    private void FillArrayWithRandomIntegers(int[] array, int minValue = 1, int maxValue = 9)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            array[i] = Random.Range(minValue, maxValue + 1); // Random.Range is inclusive on min, exclusive on max, so we add 1
+        }
     }
 
     void Update()
@@ -36,16 +53,16 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         base.OnNetworkSpawn();
         if (IsServer)
         {
-           SpawnKey();
+           SpawnItem();
         }
     }
 
-    private void SpawnKey()
+    private void SpawnItem()
     {
-        key = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, keyTransform.position, keyTransform.rotation);
-        key.GetComponent<NetworkObject>().Spawn(true);
-        keyScript = key.GetComponent<InteractableItemBase>();
-        keyScript.isStored.Value = true;
+        item = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, itemTransform.position, itemTransform.rotation);
+        item.GetComponent<NetworkObject>().Spawn(true);
+        itemScript = item.GetComponent<InteractableItemBase>();
+        itemScript.isStored.Value = true;
     }
 
     public void DestroyNetworkChildren()
@@ -109,11 +126,25 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         }
     }
 
+    private bool CheckCode(int[] arr1, int[] arr2)
+    {
+        Debug.Log("Current Code: " + arr1[0].ToString() + arr1[1].ToString() + arr1[2].ToString() + arr1[3].ToString());
+        Debug.Log("Correct Code: " + arr2[0].ToString() + arr2[1].ToString() + arr2[2].ToString() + arr2[3].ToString());
+        for (int index = 0; index < arr1.Length; index++)
+        {
+            if (arr1[index] != arr2[index])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void Interact(NetworkObjectReference playerObject)
     {
         if (!isOpen.Value && canInteract.Value)
         {
-            if (KeypadScript.CheckCode())
+            if (CheckCode(KeypadScript.GetEnteredCode(), securityCode))
             {
                 //Debug.Log("Code Accepted");
                 OpenSafeServerRpc();

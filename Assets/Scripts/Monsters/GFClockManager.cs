@@ -26,8 +26,8 @@ public enum MQThreatLevel
 
 public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 {
-    private const float TOTAL_TIME = 180;
-    private const float TIME_TO_DANGER = 20;
+    private const float TOTAL_TIME = 300;
+    private const float TIME_TO_DANGER = 30;
     private const float EXTRACTION_TIME = 60;
     private const float REWIND_BUFFER = TOTAL_TIME - 10;
     private bool gameEnding = false;

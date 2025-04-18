@@ -81,8 +81,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.72306573, y: 1.2154686, z: 0.17590094}
-  m_Center: {x: -0.0017876029, y: 0.7215588, z: -0.35846293}
+  m_Size: {x: 0.72306573, y: 0.9188031, z: 0.16177404}
+  m_Center: {x: -0.0017876029, y: 0.57322603, z: 0.3737828}
 --- !u!114 &1837391358015973595
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,9 +96,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  safeCollider: {fileID: 0}
+  safeCollider: {fileID: 2849634166944264067}
   keyTransform: {fileID: 2063605273927869882}
   itemScriptableObjectToSpawn: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
+  keypadUI: {fileID: 2267609107756851503, guid: bd2657c915537c946aa98d34a060f068, type: 3}
 --- !u!1 &4729389012068560875
 GameObject:
   m_ObjectHideFlags: 0

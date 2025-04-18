@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 {
+    [Header("Item Prefabs")]
     private Animator safeAnimator;
     private GameObject key;
     [SerializeField] private GameObject safeCollider;
@@ -15,7 +16,6 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     [Header("Network Variables")]
     private NetworkVariable<bool> isOpen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private NetworkVariable<bool> isLocked = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> canInteract = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -36,16 +36,16 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         base.OnNetworkSpawn();
         if (IsServer)
         {
-           
+           SpawnKey();
         }
     }
 
     private void SpawnKey()
     {
-         key = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, keyTransform.position, keyTransform.rotation);
-            key.GetComponent<NetworkObject>().Spawn(true);
-            keyScript = key.GetComponent<InteractableItemBase>();
-            keyScript.isStored.Value = true;
+        key = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, keyTransform.position, keyTransform.rotation);
+        key.GetComponent<NetworkObject>().Spawn(true);
+        keyScript = key.GetComponent<InteractableItemBase>();
+        keyScript.isStored.Value = true;
     }
 
     public void DestroyNetworkChildren()
@@ -84,14 +84,10 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         Debug.Log("Opening Safe");
         isOpen.Value = true;
-        //safeCollider.GetComponent<BoxCollider>().enabled = false;
+        safeCollider.GetComponent<BoxCollider>().enabled = false;
         if (safeAnimator != null)
         {
             safeAnimator.SetTrigger("open");
-            if (IsServer)
-            {
-                SpawnKey();
-            }
         }
         else
         {
@@ -115,11 +111,17 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     public void Interact(NetworkObjectReference playerObject)
     {
-        if (!isOpen.Value && !isLocked.Value)
+        if (!isOpen.Value && canInteract.Value)
         {
-            if(canInteract.Value)
+            if (KeypadScript.CheckCode())
             {
+                //Debug.Log("Code Accepted");
                 OpenSafeServerRpc();
+            }
+            else
+            {
+                //Debug.Log("Enter Code");
+                KeypadScript.AccessKeypad();
             }
         }
     }

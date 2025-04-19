@@ -98,8 +98,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   safeCollider: {fileID: 2849634166944264067}
   itemTransform: {fileID: 2063605273927869882}
-  itemScriptableObjectToSpawn: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
-  securityCode: 01000000090000000800000007000000
+  itemScriptableObject: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
 --- !u!1 &4729389012068560875
 GameObject:
   m_ObjectHideFlags: 0

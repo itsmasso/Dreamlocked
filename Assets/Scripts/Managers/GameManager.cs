@@ -41,8 +41,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		base.Awake();
 		//DontDestroyOnLoad(this.gameObject);
-
-
+		ItemDatabase.Initialize();
 	}
 
 	public override void OnNetworkSpawn()

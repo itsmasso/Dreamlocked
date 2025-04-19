@@ -156,7 +156,8 @@ MonoBehaviour:
   extendAmount: 0.47
   itemPosition: {fileID: 5204723764989237189}
   drawerOpenSmoothTime: 5
-  itemScriptableObjectsList:
+  itemList:
+  - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
   - {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}
   canInteract:
     m_InternalValue: 1
@@ -361,7 +362,7 @@ Transform:
   m_GameObject: {fileID: 6536477825721998259}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.002, z: 0.1237}
+  m_LocalPosition: {x: 0, y: 0.002, z: 0.1469}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

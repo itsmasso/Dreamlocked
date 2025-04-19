@@ -6,7 +6,6 @@ public class PlayerHotbarUI : MonoBehaviour
 {
     [SerializeField] private Image[] slotSprites;
     [SerializeField] private GameObject[] highlightSlots;
-    [SerializeField] private ItemListScriptableObject itemScriptableObjList;
     void Start()
     {
         PlayerInventory.onNewSlotSelected += NewSlotSelected;
@@ -23,12 +22,13 @@ public class PlayerHotbarUI : MonoBehaviour
         }
     }
 
-    private void AddSelectedSlotSprite(int slotNumber, int itemSOIndex)
+    private void AddSelectedSlotSprite(int slotNumber, int id)
     {
-        // Set sprite only if the slot is valid and sprite is not null
+
         if (slotNumber >= 0 && slotNumber < slotSprites.Length)
         {
-            slotSprites[slotNumber].sprite = itemScriptableObjList.itemListSO[itemSOIndex].itemSprite;
+            var item = ItemDatabase.Get(id);
+            slotSprites[slotNumber].sprite = item.icon;
         }
     }
 

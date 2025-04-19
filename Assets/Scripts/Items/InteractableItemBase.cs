@@ -5,20 +5,44 @@ using Unity.Netcode;
 public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 {
 	[SerializeField] private Rigidbody objectRb;
+	[SerializeField] private Collider col;
 	public ItemScriptableObject itemScriptableObject;
-	[SerializeField] private ItemListScriptableObject itemSOList;
 	public NetworkVariable<bool> isStored = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-	void Awake()
+	private ItemData itemData;
+	protected virtual void Start()
 	{
-		isStored.Value = false;
-
+		if (IsServer)
+		{
+			isStored.Value = false;
+			
+		}
 	}
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
+		objectRb.isKinematic = true;
+		GetComponent<Collider>().enabled = false;
+
+	}
+	
+	public void EnablePhysics()
+	{
+	    objectRb.isKinematic = false;
+		GetComponent<Collider>().enabled = true;
+	}
+	
+	public void DisablePhysics()
+	{
+	    objectRb.isKinematic = true;
+		GetComponent<Collider>().enabled = false;
 	}
 
+    public void InitializeItemData(ItemData data)
+	{
+		if (!IsServer) return;
+		itemData = data;
+	}
+	
 	public virtual void Interact(NetworkObjectReference playerNetworkObjRef)
 	{
 		RequestServerToInteractRpc(playerNetworkObjRef);
@@ -30,13 +54,11 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 		isStored.Value = false;
 		objectRb.constraints = RigidbodyConstraints.None;
 		playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj);
-		//playerNetworkObj.GetComponent<PlayerInteractScript>().SpawnVisualItemClientRpc(GetItemSOIndex(itemScriptableObject));
-		if(playerNetworkObj.GetComponent<PlayerInventory>().AddItems(itemScriptableObject))
+		if (playerNetworkObj.GetComponent<PlayerInventory>().AddItems(itemData))
 		{
-		    HideItem();
+			DespawnItem();
 		}
 	}
-
 
 	public virtual void ThrowItem(Vector3 direction, float throwForce)
 	{
@@ -52,20 +74,19 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 	[Rpc(SendTo.Everyone)]
 	protected virtual void AllSeeClientThrowItemRpc(Vector3 direction, float throwForce)
 	{
+		Debug.Log("throwing item");
+		
+		GetComponent<NetworkObject>().TrySetParent((Transform)null, true);
+		transform.parent = null;
+		objectRb.isKinematic = false;
+		GetComponent<Collider>().enabled = true;
 		objectRb.AddForce(direction.normalized * throwForce, ForceMode.VelocityChange);
-
 	}
-	public virtual void HideItem()
+
+	public virtual void DespawnItem()
 	{
-		Debug.Log("despawned item");
 		GetComponent<NetworkObject>().Despawn(true);
 	}
-
-	protected int GetItemSOIndex(ItemScriptableObject itemScriptableObject)
-	{
-		return itemSOList.itemListSO.IndexOf(itemScriptableObject);
-	}
-
 
 
 }

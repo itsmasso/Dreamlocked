@@ -75,10 +75,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   objectRb: {fileID: 4637797688586026763}
+  col: {fileID: 5491212900296856415}
   itemScriptableObject: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
   itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
   isStored:
     m_InternalValue: 0
+  isUsingItem:
+    m_InternalValue: 0
+  itemData:
+    m_InternalValue:
+      type: 0
+      id: 0
+      itemCharge: 0
+      usesRemaining: 0
+  itemType: 8
 --- !u!54 &4637797688586026763
 Rigidbody:
   m_ObjectHideFlags: 0

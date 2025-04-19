@@ -22,9 +22,9 @@ MonoBehaviour:
   - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
   - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
   roomsPerFloor: 10
-  chanceToSpawnLurker: 100
-  lurkerSpawnDelay: 0.1
-  lurkerSpawnAmount: 1
+  chanceToSpawnLurker: 0
+  lurkerSpawnDelay: 0
+  lurkerSpawnAmount: 0
   mannequinSpawnAmount: 0
   chanceToSpawnMannequin: 0
   chanceToSpawnGFClock: 0

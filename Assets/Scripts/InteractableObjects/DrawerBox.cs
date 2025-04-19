@@ -10,8 +10,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private float defaultZPosition;
     private float targetZPosition;
     private bool isOpen;
-    [SerializeField] private List<ItemScriptableObject> itemScriptableObjectsList = new List<ItemScriptableObject>();
-    private ItemScriptableObject itemScriptableObjectToSpawn;
+    [SerializeField] private List<ItemScriptableObject> itemList = new List<ItemScriptableObject>();
     private GameObject item;
     private InteractableItemBase itemScript;
     [SerializeField] private NetworkVariable<bool> canInteract = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -24,13 +23,20 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         base.OnNetworkSpawn();
         if (IsServer)
         {
-            itemScriptableObjectToSpawn = itemScriptableObjectsList[Random.Range(0, itemScriptableObjectsList.Count)];
-            item = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, itemPosition.position, itemPosition.rotation);
-            item.GetComponent<NetworkObject>().Spawn(true);
-            AllInitItemRpc(item.GetComponent<NetworkObject>());
+            ItemScriptableObject randomItemSO = itemList[Random.Range(0, itemList.Count)];
+
+            GameObject item = Instantiate(randomItemSO.droppablePrefab, itemPosition.position, Quaternion.identity);
             itemScript = item.GetComponent<InteractableItemBase>();
-            itemScript.isStored.Value = true;
-            AllHideItemRpc();
+
+            ItemData newItemData = new ItemData
+            {
+                id = randomItemSO.id,
+                itemCharge = randomItemSO.itemCharge,
+                usesRemaining = randomItemSO.usesRemaining
+            };
+
+            item.GetComponent<NetworkObject>().Spawn(true); 
+            StartCoroutine(InitItemDelayed(item.GetComponent<NetworkObject>(), newItemData));
         }
     }
 
@@ -42,6 +48,19 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
             item = networkObject.gameObject;
         }
     }
+    private IEnumerator InitItemDelayed(NetworkObject netObj, ItemData data)
+    {
+        yield return null; // wait one frame (lets Netcode finish spawn phase)
+
+        if (netObj.TryGetComponent(out InteractableItemBase itemScript))
+        {
+            itemScript.InitializeItemData(data);
+            itemScript.isStored.Value = true;
+            AllInitItemRpc(netObj);
+            AllHideItemRpc();
+        }
+    }
+
 
     void Start()
     {
@@ -56,8 +75,9 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
             Vector3 currentLocalPos = transform.localPosition;
             Vector3 targetLocalPos = new Vector3(currentLocalPos.x, currentLocalPos.y, defaultZPosition - targetZPosition);
             transform.localPosition = Vector3.Lerp(currentLocalPos, targetLocalPos, drawerOpenSmoothTime * Time.deltaTime);
-
             if (item != null) item.transform.position = itemPosition.transform.position;
+            if (item != null && item.activeSelf == false)
+                item = null;
             HandleInteractCooldown();
         }
 
@@ -119,11 +139,11 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (item != null)
         {
-            var rb = item.GetComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity = false;
-            item.GetComponent<MeshRenderer>().enabled = false;
-            item.GetComponent<Collider>().enabled = false;
+
+            MeshRenderer meshRenderer = item.GetComponent<MeshRenderer>() != null ? item.GetComponent<MeshRenderer>() : item.GetComponentInChildren<MeshRenderer>();
+            Collider col = item.GetComponent<Collider>() != null ? item.GetComponent<Collider>() : item.GetComponentInChildren<Collider>();
+            meshRenderer.enabled = false;
+            col.enabled = false;
         }
     }
     [Rpc(SendTo.Everyone)]
@@ -131,11 +151,11 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (item != null)
         {
-            var rb = item.GetComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity = false;
-            item.GetComponent<MeshRenderer>().enabled = true;
-            item.GetComponent<Collider>().enabled = true;
+
+            MeshRenderer meshRenderer = item.GetComponent<MeshRenderer>() != null ? item.GetComponent<MeshRenderer>() : item.GetComponentInChildren<MeshRenderer>();
+            Collider col = item.GetComponent<Collider>() != null ? item.GetComponent<Collider>() : item.GetComponentInChildren<Collider>();
+            meshRenderer.enabled = true;
+            col.enabled = true;
         }
     }
 
@@ -149,7 +169,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     public void DestroyNetworkChildren()
     {
-        if(item != null)
+        if (item != null)
         {
             item.GetComponent<NetworkObject>().Despawn(true);
         }

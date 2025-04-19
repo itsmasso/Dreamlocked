@@ -9,7 +9,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private GameObject item;
     [SerializeField] private GameObject safeCollider;
     [SerializeField] private Transform itemTransform;
-    [SerializeField] private ItemScriptableObject itemScriptableObjectToSpawn;
+    [SerializeField] private ItemScriptableObject itemScriptableObject;
     private InteractableItemBase itemScript;
     private float interactCooldown = 1f;
     private float interactCooldownTimer;
@@ -59,7 +59,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     private void SpawnItem()
     {
-        item = Instantiate(itemScriptableObjectToSpawn.physicalItemPrefab, itemTransform.position, itemTransform.rotation);
+        item = Instantiate(itemScriptableObject.droppablePrefab, itemTransform.position, itemTransform.rotation);
         item.GetComponent<NetworkObject>().Spawn(true);
         itemScript = item.GetComponent<InteractableItemBase>();
         itemScript.isStored.Value = true;

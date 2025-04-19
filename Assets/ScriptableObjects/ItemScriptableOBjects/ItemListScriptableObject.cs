@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,3 +7,4 @@ public class ItemListScriptableObject : ScriptableObject
 {
     public List<ItemScriptableObject> itemListSO;
 }
+

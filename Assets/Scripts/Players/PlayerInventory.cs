@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Steamworks.Ugc;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,39 +10,51 @@ public class PlayerInventory : NetworkBehaviour
     public static event Action<int> onNewSlotSelected;
     public static event Action<int> onDropItem;
     public static event Action<int, int> onAddItem;
-    [SerializeField] private ItemListScriptableObject itemScriptableObjList;
-    [SerializeField] private NetworkList<int> syncedInventory = new NetworkList<int>();
+    [SerializeField] private NetworkList<ItemData> syncedInventory = new NetworkList<ItemData>();
     //private ItemScriptableObject currentActiveItem;
     [SerializeField] private int currentInventoryIndex;
     [SerializeField] private int lastInventoryIndex = -1;
 
     [Header("Item Properties")]
     [SerializeField] private GameObject itemParent;
-    [SerializeField] private Transform itemPosition;
-    [Tooltip("Don't initialize held object.")]
-    [SerializeField] private ItemScriptableObject currentHeldItemSO;
-    private GameObject currentHeldItemObject;
+    [SerializeField] private Transform itemTransform;
+    [SerializeField] private GameObject currentHeldItemObject;
+    private ItemData currentHeldItemData;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
-    //[SerializeField] private LayerMask groundLayer;
 
     void Start()
     {
         currentInventoryIndex = 0;
+        if (IsServer)
+        {
+            ItemData emptyItem = new ItemData
+            {
+                id = -1,
+                itemCharge = 0,
+                usesRemaining = 0
+            };
+
+            while (syncedInventory.Count < 4)
+                syncedInventory.Add(emptyItem); //adding empty slots
+        }
+
     }
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (IsServer)
-        {
-            while (syncedInventory.Count < 4)
-                syncedInventory.Add(-1);
-        }
+    }
 
-        if (IsClient)
+    public void UseItem(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
         {
-            syncedInventory.OnListChanged += OnInventoryChanged;
+            IUseableItem<ItemData> activatableItem = currentHeldItemObject.GetComponent<IUseableItem<ItemData>>();
+            if (activatableItem != null)
+            {
+                activatableItem.UseItem();
+            }
         }
     }
 
@@ -80,63 +93,118 @@ public class PlayerInventory : NetworkBehaviour
 
     public void OnDropItem(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && currentHeldItemSO != null)
+        if (ctx.performed)
         {
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
-    public bool AddItems(ItemScriptableObject itemScriptableObject)
+    public bool AddItems(ItemData itemData)
     {
         if (!IsServer) return false;
 
-        int itemIndex = GetItemSOIndex(itemScriptableObject);
         // If current slot is full, add to the first available empty slot
+
         for (int i = 0; i < syncedInventory.Count; i++)
         {
-            if (syncedInventory[i] == -1)
+            if (syncedInventory[i].id == -1)
             {
-                if(currentInventoryIndex == i)
+                if (currentInventoryIndex == i)
                 {
-                    OwnerUpdatesEmptySlotRpc(itemIndex);
+                    SpawnHeldItem(itemData);
+                    
                 }
-                syncedInventory[i] = itemIndex;
+                OwnerUpdatesSpriteRpc(i, itemData.id);
                 
+                syncedInventory[i] = itemData;
                 return true;
             }
         }
 
         return false;
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void OwnerUpdatesSpriteRpc(int slotNumber, int id)
+    {
+        onAddItem?.Invoke(slotNumber, id);
+    }
+    private void HandleHeldItemDataChanged(ItemData newData)
+    {
+        if (!IsServer) return;
+        syncedInventory[currentInventoryIndex] = newData;
+        currentHeldItemData = newData;
+    }
+    private void SpawnHeldItem(ItemData itemData)
+    {
+        if (!IsServer) return;
+
+        GameObject prefab = ItemDatabase.Get(itemData.id).heldPrefab;
+        if (prefab.GetComponent<NetworkObject>() != null)
+        {
+            currentHeldItemObject = Instantiate(prefab, itemTransform.position, itemTransform.rotation);            
+            NetworkObject heldItemNetObj = currentHeldItemObject.GetComponent<NetworkObject>();
+            heldItemNetObj.Spawn(true);
+            OwnerSetCurrentHeldItemRpc(heldItemNetObj);
+            heldItemNetObj.TrySetParent(gameObject);
+            IUseableItem<ItemData> useableItem = currentHeldItemObject.GetComponent<IUseableItem<ItemData>>();
+            if (useableItem != null)
+            {
+                useableItem.InitializeData(itemData);
+                useableItem.OnDataChanged += HandleHeldItemDataChanged;
+                currentHeldItemData = itemData;
+            }
+        }else
+        {
+            EveryoneSpawnsHeldItemRpc(itemData.id);
+        }
 
     }
-    
-    [Rpc(SendTo.Owner)]
-    private void OwnerUpdatesEmptySlotRpc(int itemIndex)
+
+    [Rpc(SendTo.Everyone)]
+    private void EveryoneSpawnsHeldItemRpc(int id)
     {
-        OwnerSpawnsHeldItemRpc(itemIndex);
+        currentHeldItemObject = Instantiate(ItemDatabase.Get(id).heldPrefab, itemTransform.position, itemTransform.rotation);
+        currentHeldItemObject.transform.SetParent(transform);
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void OwnerSetCurrentHeldItemRpc(NetworkObjectReference networkObjectReference)
+    {
+        if(networkObjectReference.TryGet(out NetworkObject networkObject))
+        {
+            currentHeldItemObject = networkObject.gameObject;
+        }
     }
 
     [Rpc(SendTo.Server)]
     private void NewItemSelectedRpc(int inventoryIndex)
     {
-        // Always check if item changed, even if index hasn't
-        int currentItemIndex = inventoryIndex < syncedInventory.Count ? syncedInventory[inventoryIndex] : -1;
+        if (inventoryIndex >= syncedInventory.Count)
+            return;
 
-        if (inventoryIndex == lastInventoryIndex && currentHeldItemSO == GetItemFromIndex(inventoryIndex))
-            return; // same slot & same item
-        Debug.Log(currentInventoryIndex);
-        currentInventoryIndex = inventoryIndex;
-        lastInventoryIndex = currentInventoryIndex;
-        OwnerHighlightsNewSlotRpc(currentInventoryIndex);
-        if (currentItemIndex != -1)
+        ItemData selectedItem = syncedInventory[inventoryIndex];
+
+        // Avoid unnecessary swaps if same slot and same item type
+        if (inventoryIndex == lastInventoryIndex &&
+            currentHeldItemData.id == selectedItem.id) // if you're tracking unique ID
         {
-            Debug.Log("selecting item at slot " + currentInventoryIndex);
+            return;
+        }
 
-            OwnerDestroysHeldItemRpc();
-            OwnerSpawnsHeldItemRpc(currentItemIndex);
+        currentInventoryIndex = inventoryIndex;
+        lastInventoryIndex = inventoryIndex;
+
+        OwnerHighlightsNewSlotRpc(inventoryIndex);
+
+        // If slot contains a valid item, spawn it
+        if (selectedItem.id != -1)
+        {
+            HideItem();
+            SpawnHeldItem(selectedItem);
         }
         else
         {
-            OwnerDestroysHeldItemRpc();
+            HideItem();
         }
 
     }
@@ -146,79 +214,53 @@ public class PlayerInventory : NetworkBehaviour
         onNewSlotSelected?.Invoke(inventoryIndex);
     }
 
-    [Rpc(SendTo.Owner)]
-    private void OwnerSpawnsHeldItemRpc(int itemSOIndex)
-    {
-        GameObject visualItem = Instantiate(itemScriptableObjList.itemListSO[itemSOIndex].visualItemPrefab, itemPosition.position, Quaternion.identity);
-        visualItem.transform.SetParent(itemPosition);
-        currentHeldItemObject = visualItem;
-        currentHeldItemSO = itemScriptableObjList.itemListSO[itemSOIndex];
-    }
 
     [Rpc(SendTo.Server)]
     private void RequestServerToDropItemRpc(Vector3 dropPosition, float throwForce)
     {
-        int index = syncedInventory[currentInventoryIndex];
-        if (index != -1)
+        ItemData emptyItem = new ItemData
         {
-            OwnerDestroysHeldItemRpc();
-            GameObject currentItem = Instantiate(GetItemFromIndex(index).physicalItemPrefab, itemPosition.position, Quaternion.identity);
-            currentItem.GetComponent<NetworkObject>().Spawn(true);
-            currentItem.GetComponent<InteractableItemBase>().ThrowItem(dropPosition, throwForce);
-            syncedInventory[currentInventoryIndex] = -1;
+            id = -1,
+            itemCharge = 0,
+            usesRemaining = 0
+        };
+        if (syncedInventory[currentInventoryIndex].id != -1)
+        {
+            HideItem();
+            GameObject itemToThrow = Instantiate(ItemDatabase.Get(currentHeldItemData.id).droppablePrefab, itemTransform.position, Quaternion.identity);
+            itemToThrow.GetComponent<NetworkObject>().Spawn(true);
+            itemToThrow.GetComponent<InteractableItemBase>().InitializeItemData(currentHeldItemData);
+              
+            itemToThrow.GetComponent<InteractableItemBase>().ThrowItem(dropPosition, throwForce);
+            OwnerRemovesSpriteRpc();
+            currentHeldItemObject = null;
+            currentHeldItemData = emptyItem;
+            syncedInventory[currentInventoryIndex] = emptyItem;
             lastInventoryIndex = -1;
         }
     }
-
+    
     [Rpc(SendTo.Owner)]
-    private void OwnerDestroysHeldItemRpc()
+    private void OwnerRemovesSpriteRpc()
     {
-        if (currentHeldItemObject != null)
+        onDropItem?.Invoke(currentInventoryIndex);
+    }
+
+    private void HideItem()
+    {
+        if (currentHeldItemObject != null && currentHeldItemObject.GetComponent<NetworkObject>() != null)
         {
-            Debug.Log("destroying visual item");
-            Destroy(currentHeldItemObject);
-            currentHeldItemSO = null;
+            currentHeldItemObject.GetComponent<NetworkObject>().Despawn(true);
+        }
+        else
+        {
+            OwnerDestroysHeldObjRpc();
         }
     }
 
-    private void OnInventoryChanged(NetworkListEvent<int> changeEvent)
+    [Rpc(SendTo.Everyone)]
+    private void OwnerDestroysHeldObjRpc()
     {
-        if (!IsOwner) return;
-
-        switch (changeEvent.Type)
-        {
-            case NetworkListEvent<int>.EventType.Value:
-                Debug.Log($"Slot {changeEvent.Index} updated to item index {changeEvent.Value}");
-                if(changeEvent.Value != -1)
-                    onAddItem?.Invoke(changeEvent.Index, changeEvent.Value);
-                else
-                    onDropItem?.Invoke(changeEvent.Index);
-                break;
-            case NetworkListEvent<int>.EventType.Add:
-                Debug.Log($"Item index {changeEvent.Value} added at slot {changeEvent.Index}");
-                break;
-            case NetworkListEvent<int>.EventType.Clear:
-                Debug.Log("Inventory cleared");
-                for (int i = 0; i < 4; i++)
-                {
-                    syncedInventory[currentInventoryIndex] = -1;
-                    OwnerDestroysHeldItemRpc();
-                    lastInventoryIndex = -1;
-                }
-
-                break;
-        }
-    }
-
-
-    private int GetItemSOIndex(ItemScriptableObject itemScriptableObject)
-    {
-        return itemScriptableObjList.itemListSO.IndexOf(itemScriptableObject);
-    }
-    private ItemScriptableObject GetItemFromIndex(int index)
-    {
-        if (index < 0 || index >= itemScriptableObjList.itemListSO.Count)
-            return null;
-        return itemScriptableObjList.itemListSO[index];
+        Destroy(currentHeldItemObject);
     }
 }

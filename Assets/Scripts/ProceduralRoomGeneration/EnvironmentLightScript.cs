@@ -4,31 +4,20 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LightScript : NetworkBehaviour
+public class EnvironmentLightScript : NetworkBehaviour
 {
 
 	const float MIN_FLICKER_TIME = 0.5f;
 	const float MAX_FLICKER_TIME = 1f;
 	[SerializeField] private Light lightSource;
 	[SerializeField] private List<Renderer> lightMaterialList = new List<Renderer>();
-	[SerializeField] private LayerMask enemyLayer;
 	[SerializeField] private LayerMask playerLayer;
-	[SerializeField] private LayerMask obstacleLayer;
-	[SerializeField] private LayerMask groundLayer;
-	[SerializeField] private LayerMask interactableMoveables;
-	private float lightRange;
 	private bool isLightOn;
 	private bool playerSeesLight;
-	private int obstacleLayers;
-	[SerializeField] private HashSet<NetworkObject> enemiesInLight = new HashSet<NetworkObject>();
-	[SerializeField] private Collider[] enemyColliders;
 
+	[SerializeField] private DetectEnemyInLights interactableLightScript;
 	private float Timer;
 
-	void Awake()
-	{
-		lightRange = lightSource.range;
-	}
 	void Start()
 	{
 
@@ -36,17 +25,19 @@ public class LightScript : NetworkBehaviour
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 		Timer = MIN_FLICKER_TIME;
 		TurnLightsOn();
-		obstacleLayers = obstacleLayer.value | groundLayer.value | interactableMoveables;
-
 	}
 
 	void Update()
 	{
 		if (IsServer)
 		{
-			DetectEnemiesInLight();
-			CheckIfEnemyExitLight();
-			
+			if (isLightOn)
+			{
+				interactableLightScript.DetectEnemiesInLight();
+				interactableLightScript.CheckIfEnemyExitLight();
+			}
+
+
 		}
 		CheckLightStatus();
 		if (IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
@@ -152,9 +143,10 @@ public class LightScript : NetworkBehaviour
 					Debug.Log("ERROR: LightScript.cs - MQThreatLevel is Broken");
 					break;
 			}
-		}else
+		}
+		else
 		{
-		    TurnLightsOn();
+			TurnLightsOn();
 		}
 	}
 
@@ -198,105 +190,6 @@ public class LightScript : NetworkBehaviour
 		}
 	}
 
-	[Rpc(SendTo.Server)]
-	private void ServerSeesEnemyEnteredLightRpc(NetworkObjectReference enemyNetObjRef)
-	{
-		if (enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
-		{
-			if (enemyNetObj.TryGetComponent(out IAffectedByLight enemy))
-			{
-				enemy.EnteredLight();
-			}
-		}
-	}
 
-	[Rpc(SendTo.Server)]
-	private void ServerSeesEnemyExitLightRpc(NetworkObjectReference enemyNetObjRef)
-	{
-		if (enemyNetObjRef.TryGet(out NetworkObject enemyNetObj))
-		{
-			if (enemyNetObj.TryGetComponent(out IAffectedByLight enemy))
-			{
-				enemy.ExitLight();
-			}
-		}
-	}
-
-	private void DetectEnemiesInLight()
-	{
-		if (!isLightOn)
-		{
-			return;
-		}
-		enemyColliders = Physics.OverlapSphere(lightSource.transform.position, lightSource.range, enemyLayer);
-		// possibly need to add pointLightSource as a second collider
-		foreach (Collider enemyCollider in enemyColliders)
-		{
-			NetworkObject enemyNetObj = enemyCollider.GetComponent<NetworkObject>();
-			if (enemyNetObj != null && enemyNetObj.IsSpawned)
-			{
-				IAffectedByLight monsterAffectedByLight = enemyCollider.GetComponent<IAffectedByLight>();
-				if (monsterAffectedByLight != null)
-				{
-					if (!IsDirectlyLit(enemyCollider.transform)) continue;
-
-					// This check could possibly lead to bugs
-					// I think it check enemyNetObj not NetworkObject
-					if (enemiesInLight.Contains(enemyNetObj)) continue;
-
-					enemiesInLight.Add(enemyNetObj);
-					monsterAffectedByLight.EnteredLight();
-					ServerSeesEnemyEnteredLightRpc(enemyNetObj);
-				}
-			}
-
-
-		}
-	}
-
-	private void CheckIfEnemyExitLight()
-	{
-		foreach (NetworkObject enemy in enemiesInLight.ToList())
-		{
-			// Ensure the enemy is not null before processing
-			if (enemy == null)
-			{
-				enemiesInLight.Remove(enemy);
-				continue;
-			}
-			IAffectedByLight affectedByLight = enemy.GetComponent<IAffectedByLight>();
-			if (affectedByLight != null)
-			{
-				if (enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
-				{
-					affectedByLight.ExitLight();
-					enemiesInLight.Remove(enemy);
-					ServerSeesEnemyExitLightRpc(enemy);
-				}
-			}
-		}
-	}
-
-	private bool IsDirectlyLit(Transform enemy)
-	{
-		if (!isLightOn)
-		{
-			return false;
-		}
-		Vector3 dirToEnemy = (enemy.position - lightSource.transform.position).normalized;
-		float distance = Vector3.Distance(lightSource.transform.position, enemy.position);
-		//Debug.DrawRay(lightSource.transform.position, dirToEnemy*distance, Color.yellow);
-		if (Physics.Raycast(lightSource.transform.position, dirToEnemy, out RaycastHit hit, distance, obstacleLayers))
-		{
-			if (hit.collider != null)
-			{
-				return false;
-			}
-
-		}
-
-		return true;
-
-	}
 
 }

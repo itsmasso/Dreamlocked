@@ -2208,11 +2208,17 @@ MonoBehaviour:
   size: {x: 8, y: 8, z: 4}
   isStairs: 1
   isMainRoom: 0
+  yRotation: 0
   doorNode:
   - {fileID: 7276579131161601125}
   - {fileID: 4200470320206283232}
-  lightsTransform: {fileID: 0}
+  lightsTransforms: []
+  doorTransforms: []
+  isSpecialRoom: 1
+  roomLocked: 0
   roomPrefab: {fileID: 3286224633064905065}
+  interactableObjectTransforms: []
+  interactableObjectPrefabs: []
 --- !u!1 &3890374573536440635
 GameObject:
   m_ObjectHideFlags: 0

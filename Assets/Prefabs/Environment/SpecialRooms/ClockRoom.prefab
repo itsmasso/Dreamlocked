@@ -899,7 +899,8 @@ MonoBehaviour:
   - {fileID: 4815802873290786128}
   doorTransforms:
   - {fileID: 6147777340388181422}
-  isSpecialRoom: 0
+  isSpecialRoom: 1
+  roomLocked: 1
   roomPrefab: {fileID: 4367447932712270340}
   interactableObjectTransforms:
   - {fileID: 6220934812718763000}

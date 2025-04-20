@@ -1,2 +1,15 @@
 fileFormatVersion: 2
 guid: 811d91e72f6050141bdbe459fab8aa77
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - safeCollider: {fileID: 2849634166944264067, guid: 51b77a3f84637ab4783bbfc846a616fa, type: 3}
+  - itemTransform: {instanceID: 0}
+  - itemScriptableObject: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
+  - BookClue: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

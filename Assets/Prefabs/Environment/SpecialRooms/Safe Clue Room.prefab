@@ -848,7 +848,7 @@ GameObject:
   - component: {fileID: 2034378400268218833}
   - component: {fileID: 4012220719375766048}
   m_Layer: 0
-  m_Name: Safe Room Alt
+  m_Name: Safe Clue Room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -911,7 +911,7 @@ MonoBehaviour:
   interactableObjectTransforms:
   - {fileID: 1147655203066651862}
   interactableObjectPrefabs:
-  - {fileID: 2849634166944264067, guid: 51b77a3f84637ab4783bbfc846a616fa, type: 3}
+  - {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
 --- !u!1 &7892424507282510531
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,7 +922,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1147655203066651862}
   m_Layer: 0
-  m_Name: SafePosition
+  m_Name: BookPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -937,7 +937,7 @@ Transform:
   m_GameObject: {fileID: 7892424507282510531}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.04, y: 0.695, z: -0.038}
+  m_LocalPosition: {x: -0.04, y: 0.776, z: -0.038}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

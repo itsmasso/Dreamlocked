@@ -1,6 +1,8 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine.UI;
 
 public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 {
@@ -15,7 +17,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private float interactCooldownTimer;
 
     [Header("Safe Combinations")]
-    private int[] securityCode = new int[4];
+    private int securityCode;
 
     [Header("Network Variables")]
     private NetworkVariable<bool> isOpen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -26,17 +28,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         safeAnimator = GetComponentInChildren<Animator>();
         if (IsServer)
         {
-            FillArrayWithRandomIntegers(securityCode);
-            Debug.Log("Security Code Generated: " + securityCode[0].ToString() + securityCode[1].ToString() + securityCode[2].ToString() + securityCode[3].ToString());
-        }
-    }
-
-    // Fills the given array with random positive integers between min and max (inclusive)
-    private void FillArrayWithRandomIntegers(int[] array, int minValue = 1, int maxValue = 9)
-    {
-        for (int i = 0; i < array.Length; i++)
-        {
-            array[i] = Random.Range(minValue, maxValue + 1); // Random.Range is inclusive on min, exclusive on max, so we add 1
+            securityCode = GameManager.Instance.GetSafeCode().Value;
         }
     }
 
@@ -135,18 +127,12 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         }
     }
 
-    private bool CheckCode(int[] arr1, int[] arr2)
+    private bool CheckCode(int[] arr1, int correctCode)
     {
-        Debug.Log("Current Code: " + arr1[0].ToString() + arr1[1].ToString() + arr1[2].ToString() + arr1[3].ToString());
-        Debug.Log("Correct Code: " + arr2[0].ToString() + arr2[1].ToString() + arr2[2].ToString() + arr2[3].ToString());
-        for (int index = 0; index < arr1.Length; index++)
-        {
-            if (arr1[index] != arr2[index])
-            {
-                return false;
-            }
-        }
-        return true;
+        //Debug.Log("Current Code: " + arr1[0].ToString() + arr1[1].ToString() + arr1[2].ToString() + arr1[3].ToString());
+        //Debug.Log("Correct Code: " + arr2[0].ToString() + arr2[1].ToString() + arr2[2].ToString() + arr2[3].ToString());
+        int enteredCode = (arr1[0] * 1000) + (arr1[1] * 100) + (arr1[2] * 10) + arr1[3];
+        return correctCode == enteredCode;
     }
 
     public void Interact(NetworkObjectReference playerObject)

@@ -13,8 +13,13 @@ GameObject:
   - component: {fileID: 5929155747620279171}
   - component: {fileID: 4637797688586026763}
   - component: {fileID: 5491212900296856415}
+<<<<<<< Updated upstream
   - component: {fileID: 3348423173140216139}
   - component: {fileID: 3694292834818978824}
+=======
+  - component: {fileID: 2449339244155132353}
+  - component: {fileID: 8393567673294577615}
+>>>>>>> Stashed changes
   m_Layer: 7
   m_Name: KeyParent
   m_TagString: Untagged
@@ -129,7 +134,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.038231466, y: 0.013003163, z: 0.0052972585}
   m_Center: {x: 0.0011933248, y: -0.00004448742, z: -0.000018795332}
+<<<<<<< Updated upstream
 --- !u!114 &3348423173140216139
+=======
+--- !u!114 &2449339244155132353
+>>>>>>> Stashed changes
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -152,9 +161,15 @@ MonoBehaviour:
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
+<<<<<<< Updated upstream
   SyncScaleX: 0
   SyncScaleY: 0
   SyncScaleZ: 0
+=======
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+>>>>>>> Stashed changes
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
@@ -165,7 +180,11 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+<<<<<<< Updated upstream
 --- !u!114 &3694292834818978824
+=======
+--- !u!114 &8393567673294577615
+>>>>>>> Stashed changes
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -179,7 +198,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkRigidbodyBaseExpanded: 0
+<<<<<<< Updated upstream
   UseRigidBodyForMotion: 0
+=======
+  UseRigidBodyForMotion: 1
+>>>>>>> Stashed changes
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
 --- !u!1001 &4765305831250480841

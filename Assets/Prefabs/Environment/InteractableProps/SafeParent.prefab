@@ -99,6 +99,7 @@ MonoBehaviour:
   safeCollider: {fileID: 2849634166944264067}
   itemTransform: {fileID: 2063605273927869882}
   itemScriptableObject: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
+  BookClue: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
 --- !u!1 &4729389012068560875
 GameObject:
   m_ObjectHideFlags: 0

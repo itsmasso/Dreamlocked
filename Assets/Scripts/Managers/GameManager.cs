@@ -77,7 +77,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
 			Debug.Log("Security Code Generated: " + securityCode.Value);
 
-			BookObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(securityCode.Value.ToString());
+			//BookObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(securityCode.Value.ToString());
 		}
 	}
     void Update()

@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 3
   itemName: Safe Clue
+  isUseable: 0
   itemCharge: 0
-  usesRemaining: 0
-  heldPrefab: {fileID: 3573178721968461015, guid: aa1b171a2cf5f674691042208b0c5744, type: 3}
+  usesRemaining: 1
+  visualPrefab: {fileID: 3573178721968461015, guid: aa1b171a2cf5f674691042208b0c5744, type: 3}
   droppablePrefab: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
+  useablePrefab: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
   icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}

@@ -16,7 +16,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
     [SerializeField] private GameObject hallwayLightPrefab;
     private List<NetworkObject> hallwayLights = new List<NetworkObject>();
     [SerializeField] private float propSpawnInterval;
-    [SerializeField] private float hallwayLightSpawnInterval;
+    public float hallwayLightSpawnInterval;
     [SerializeField] private float chanceToSpawnHallwayProp = 0.5f;
     void Start()
     {

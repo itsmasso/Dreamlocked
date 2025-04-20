@@ -154,10 +154,7 @@ MonoBehaviour:
   objectRb: {fileID: 2546405151104806582}
   col: {fileID: 3400143068638190170}
   itemScriptableObject: {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}
-  itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
   isStored:
-    m_InternalValue: 0
-  isUsingItem:
     m_InternalValue: 0
 --- !u!54 &2546405151104806582
 Rigidbody:
@@ -236,6 +233,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 1
+  UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1

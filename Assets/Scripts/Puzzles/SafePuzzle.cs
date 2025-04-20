@@ -27,7 +27,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         if (IsServer)
         {
             FillArrayWithRandomIntegers(securityCode);
-            Debug.Log("Security Code Generated: " + securityCode[0].ToString() + securityCode[1].ToString() + securityCode[2].ToString() + securityCode[3].ToString() );
+            Debug.Log("Security Code Generated: " + securityCode[0].ToString() + securityCode[1].ToString() + securityCode[2].ToString() + securityCode[3].ToString());
         }
     }
 
@@ -53,15 +53,24 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         base.OnNetworkSpawn();
         if (IsServer)
         {
-           SpawnItem();
+            SpawnItem();
         }
     }
 
     private void SpawnItem()
     {
+
         item = Instantiate(itemScriptableObject.droppablePrefab, itemTransform.position, itemTransform.rotation);
         item.GetComponent<NetworkObject>().Spawn(true);
         itemScript = item.GetComponent<InteractableItemBase>();
+
+        ItemData newItemData = new ItemData
+        {
+            id = itemScriptableObject.id,
+            itemCharge = itemScriptableObject.itemCharge,
+            usesRemaining = itemScriptableObject.usesRemaining
+        };
+        itemScript.InitializeItemData(newItemData);
         itemScript.isStored.Value = true;
     }
 
@@ -74,7 +83,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
             {
                 if (childNetObj.IsSpawned)
                 {
-                    if(childNetObj.GetComponent<IHasNetworkChildren>() != null)
+                    if (childNetObj.GetComponent<IHasNetworkChildren>() != null)
                     {
                         childNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
                     }
@@ -146,7 +155,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         {
             if (CheckCode(KeypadScript.GetEnteredCode(), securityCode))
             {
-                //Debug.Log("Code Accepted");
+                Debug.Log("Code Accepted");
                 OpenSafeServerRpc();
             }
             else

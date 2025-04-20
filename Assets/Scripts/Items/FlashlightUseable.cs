@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System;
 
 public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
 {
@@ -7,13 +8,12 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     public event System.Action<ItemData> OnDataChanged;
     private bool isOn;
     [SerializeField] private Light spotLight;
-    [SerializeField] private Material defaultMat, lightMaterial;
-    [SerializeField] private Renderer meshRenderer;
     [SerializeField] private float batteryDrainRate;
     [SerializeField] private DetectEnemyInLights interactableLightsScript;
     private bool isDead;
     public ItemData itemData { private set; get; }
     private bool visuallyTurnedOff;
+    public static event Action<bool> onFlashLightToggle;
     public override void OnNetworkSpawn()
     {
 
@@ -21,6 +21,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     void Start()
     {
         isOn = false;
+        visuallyTurnedOff = false;
     }
     void Update()
     {
@@ -28,6 +29,11 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
         {
             HandleFlashLightLogic();
             HandleBatteryLife();
+        }
+        if(IsOwner && transform.parent != null)
+        {
+            transform.position = transform.parent.position;
+            transform.rotation = transform.parent.rotation;
         }
     }
     public void InitializeData(ItemData data)
@@ -59,14 +65,14 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     private void TurnOnRpc()
     {
         spotLight.enabled = true;
-        meshRenderer.materials[2] = lightMaterial;
+        onFlashLightToggle?.Invoke(true);
         visuallyTurnedOff = false;
     }
     [Rpc(SendTo.Everyone)]
     private void TurnOffRpc()
     {
         spotLight.enabled = false;
-        meshRenderer.materials[2] = defaultMat;
+        onFlashLightToggle?.Invoke(false);
         visuallyTurnedOff = true;
     }
 

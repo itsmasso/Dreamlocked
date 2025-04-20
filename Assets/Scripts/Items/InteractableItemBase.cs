@@ -14,15 +14,11 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 		if (IsServer)
 		{
 			isStored.Value = false;
-			
 		}
 	}
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
-		objectRb.isKinematic = true;
-		GetComponent<Collider>().enabled = false;
-
 	}
 	
 	public void EnablePhysics()
@@ -30,7 +26,6 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 	    objectRb.isKinematic = false;
 		GetComponent<Collider>().enabled = true;
 	}
-	
 	public void DisablePhysics()
 	{
 	    objectRb.isKinematic = true;
@@ -80,6 +75,7 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 		transform.parent = null;
 		objectRb.isKinematic = false;
 		GetComponent<Collider>().enabled = true;
+		GetComponent<Collider>().isTrigger = false;
 		objectRb.AddForce(direction.normalized * throwForce, ForceMode.VelocityChange);
 	}
 

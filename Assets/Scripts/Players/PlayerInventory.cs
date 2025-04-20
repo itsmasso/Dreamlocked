@@ -18,7 +18,8 @@ public class PlayerInventory : NetworkBehaviour
     [Header("Item Properties")]
     [SerializeField] private GameObject itemParent;
     [SerializeField] private Transform itemTransform;
-    [SerializeField] private GameObject currentHeldItemObject;
+    [SerializeField] private GameObject currentUseableItem;
+    private GameObject currentVisualItem;
     private ItemData currentHeldItemData;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
@@ -48,10 +49,9 @@ public class PlayerInventory : NetworkBehaviour
 
     public void UseItem(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && currentUseableItem != null)
         {
-            IUseableItem<ItemData> activatableItem = currentHeldItemObject.GetComponent<IUseableItem<ItemData>>();
-            if (activatableItem != null)
+            if (currentUseableItem.TryGetComponent(out IUseableItem<ItemData> activatableItem))
             {
                 activatableItem.UseItem();
             }
@@ -62,7 +62,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed)
         {
-            NewItemSelectedRpc(0);
+            RequestServerToSelectNewItemRpc(0);
         }
 
     }
@@ -70,7 +70,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed)
         {
-            NewItemSelectedRpc(1);
+            RequestServerToSelectNewItemRpc(1);
         }
 
     }
@@ -78,7 +78,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed)
         {
-            NewItemSelectedRpc(2);
+            RequestServerToSelectNewItemRpc(2);
         }
 
     }
@@ -86,7 +86,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed)
         {
-            NewItemSelectedRpc(3);
+            RequestServerToSelectNewItemRpc(3);
         }
 
     }
@@ -110,11 +110,12 @@ public class PlayerInventory : NetworkBehaviour
             {
                 if (currentInventoryIndex == i)
                 {
-                    SpawnHeldItem(itemData);
-                    
+                    SpawnVisualItemRpc(itemData);
+                    RequestToSpawnUseableItemRpc(itemData);
+
                 }
                 OwnerUpdatesSpriteRpc(i, itemData.id);
-                
+
                 syncedInventory[i] = itemData;
                 return true;
             }
@@ -134,50 +135,85 @@ public class PlayerInventory : NetworkBehaviour
         syncedInventory[currentInventoryIndex] = newData;
         currentHeldItemData = newData;
     }
-    private void SpawnHeldItem(ItemData itemData)
-    {
-        if (!IsServer) return;
 
-        GameObject prefab = ItemDatabase.Get(itemData.id).heldPrefab;
-        if (prefab.GetComponent<NetworkObject>() != null)
+    [Rpc(SendTo.Everyone)]
+    private void SpawnVisualItemRpc(ItemData itemData)
+    {
+        var itemSO = ItemDatabase.Get(itemData.id);
+        GameObject visualItemPrefab = itemSO?.visualPrefab;
+        GameObject visualItem = Instantiate(visualItemPrefab, itemTransform.position, itemTransform.rotation);
+        visualItem.transform.SetParent(itemTransform, false);
+        visualItem.transform.localPosition = Vector3.zero;
+        visualItem.transform.localRotation = Quaternion.LookRotation(Vector3.forward);
+        currentVisualItem = visualItem;
+        currentHeldItemData = itemData;
+    }
+    [Rpc(SendTo.Everyone)]
+    private void DestroyVisualItemRpc()
+    {
+        if (currentVisualItem != null)
         {
-            currentHeldItemObject = Instantiate(prefab, itemTransform.position, itemTransform.rotation);            
-            NetworkObject heldItemNetObj = currentHeldItemObject.GetComponent<NetworkObject>();
-            heldItemNetObj.Spawn(true);
-            OwnerSetCurrentHeldItemRpc(heldItemNetObj);
-            heldItemNetObj.TrySetParent(gameObject);
-            IUseableItem<ItemData> useableItem = currentHeldItemObject.GetComponent<IUseableItem<ItemData>>();
+            Destroy(currentVisualItem);
+            currentVisualItem = null;
+        }
+    }
+
+
+    [Rpc(SendTo.Server)]
+    private void RequestToSpawnUseableItemRpc(ItemData itemData)
+    {
+        var itemSO = ItemDatabase.Get(itemData.id);
+        if (itemSO.isUseable)
+        {
+            GameObject useableItemPrefab = itemSO?.useablePrefab;
+            currentUseableItem = Instantiate(useableItemPrefab, itemTransform.position, itemTransform.rotation);
+            NetworkObject useableNetObject = currentUseableItem.GetComponent<NetworkObject>();
+            useableNetObject.SpawnWithOwnership(OwnerClientId);
+            useableNetObject.TrySetParent(gameObject, false);
+            OwnerSetsCurrentHeldItemRpc(useableNetObject);
+            IUseableItem<ItemData> useableItem = currentUseableItem.GetComponent<IUseableItem<ItemData>>();
             if (useableItem != null)
             {
                 useableItem.InitializeData(itemData);
                 useableItem.OnDataChanged += HandleHeldItemDataChanged;
                 currentHeldItemData = itemData;
             }
-        }else
-        {
-            EveryoneSpawnsHeldItemRpc(itemData.id);
-        }
-
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void EveryoneSpawnsHeldItemRpc(int id)
-    {
-        currentHeldItemObject = Instantiate(ItemDatabase.Get(id).heldPrefab, itemTransform.position, itemTransform.rotation);
-        currentHeldItemObject.transform.SetParent(transform);
-    }
-
-    [Rpc(SendTo.Owner)]
-    private void OwnerSetCurrentHeldItemRpc(NetworkObjectReference networkObjectReference)
-    {
-        if(networkObjectReference.TryGet(out NetworkObject networkObject))
-        {
-            currentHeldItemObject = networkObject.gameObject;
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void NewItemSelectedRpc(int inventoryIndex)
+    private void RequestServerToDestroyUseableItemRpc()
+    {
+        if (currentUseableItem == null) return;
+
+        if (currentUseableItem.TryGetComponent<NetworkObject>(out var netObj))
+        {
+            if (netObj.IsSpawned)
+            {
+                netObj.Despawn(true);
+            }
+        }
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void OwnerSetsCurrentHeldItemRpc(NetworkObjectReference networkObjectReference)
+    {
+        if (networkObjectReference.TryGet(out NetworkObject networkObject) && networkObject != null)
+        {
+            currentUseableItem = networkObject.gameObject;
+            
+            currentUseableItem.transform.localPosition = Vector3.zero;
+            currentUseableItem.transform.rotation = Quaternion.identity;
+        }
+    }
+
+    void Update()
+    {
+
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestServerToSelectNewItemRpc(int inventoryIndex)
     {
         if (inventoryIndex >= syncedInventory.Count)
             return;
@@ -199,12 +235,16 @@ public class PlayerInventory : NetworkBehaviour
         // If slot contains a valid item, spawn it
         if (selectedItem.id != -1)
         {
-            HideItem();
-            SpawnHeldItem(selectedItem);
+            RequestServerToDestroyUseableItemRpc();
+            DestroyVisualItemRpc();
+
+            RequestToSpawnUseableItemRpc(selectedItem);
+            SpawnVisualItemRpc(selectedItem);
         }
         else
         {
-            HideItem();
+            RequestServerToDestroyUseableItemRpc();
+            DestroyVisualItemRpc();
         }
 
     }
@@ -216,51 +256,38 @@ public class PlayerInventory : NetworkBehaviour
 
 
     [Rpc(SendTo.Server)]
-    private void RequestServerToDropItemRpc(Vector3 dropPosition, float throwForce)
+    private void RequestServerToDropItemRpc(Vector3 dropDirection, float throwForce)
     {
-        ItemData emptyItem = new ItemData
-        {
-            id = -1,
-            itemCharge = 0,
-            usesRemaining = 0
-        };
+        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0 };
+
         if (syncedInventory[currentInventoryIndex].id != -1)
         {
-            HideItem();
-            GameObject itemToThrow = Instantiate(ItemDatabase.Get(currentHeldItemData.id).droppablePrefab, itemTransform.position, Quaternion.identity);
-            itemToThrow.GetComponent<NetworkObject>().Spawn(true);
-            itemToThrow.GetComponent<InteractableItemBase>().InitializeItemData(currentHeldItemData);
-              
-            itemToThrow.GetComponent<InteractableItemBase>().ThrowItem(dropPosition, throwForce);
-            OwnerRemovesSpriteRpc();
-            currentHeldItemObject = null;
-            currentHeldItemData = emptyItem;
+            // Clean visual + networked object
+            RequestServerToDestroyUseableItemRpc();
+            DestroyVisualItemRpc();
+
+            // Spawn drop in world
+            var dropPrefab = ItemDatabase.Get(syncedInventory[currentInventoryIndex].id).droppablePrefab;
+            var droppedItem = Instantiate(dropPrefab, itemTransform.position, Quaternion.identity);
+            droppedItem.GetComponent<NetworkObject>().Spawn(true);
+            droppedItem.GetComponent<InteractableItemBase>().InitializeItemData(currentHeldItemData);
+            droppedItem.GetComponent<InteractableItemBase>().ThrowItem(dropDirection, throwForce);
+
+            // Clear inventory
             syncedInventory[currentInventoryIndex] = emptyItem;
+            currentUseableItem = null;
+            currentHeldItemData = emptyItem;
             lastInventoryIndex = -1;
+
+            // Notify client to remove sprite
+            OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
     }
-    
     [Rpc(SendTo.Owner)]
-    private void OwnerRemovesSpriteRpc()
+    private void OwnerRemovesSpriteRpc(int slot)
     {
-        onDropItem?.Invoke(currentInventoryIndex);
+        onDropItem?.Invoke(slot);
     }
 
-    private void HideItem()
-    {
-        if (currentHeldItemObject != null && currentHeldItemObject.GetComponent<NetworkObject>() != null)
-        {
-            currentHeldItemObject.GetComponent<NetworkObject>().Despawn(true);
-        }
-        else
-        {
-            OwnerDestroysHeldObjRpc();
-        }
-    }
 
-    [Rpc(SendTo.Everyone)]
-    private void OwnerDestroysHeldObjRpc()
-    {
-        Destroy(currentHeldItemObject);
-    }
 }

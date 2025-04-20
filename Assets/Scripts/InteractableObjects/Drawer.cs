@@ -22,7 +22,8 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
                 GameObject drawerBoxObj = Instantiate(drawerBoxPrefab, drawerBoxTransform.position, drawerBoxTransform.rotation);
                 drawerBox = drawerBoxObj.GetComponent<NetworkObject>();
                 drawerBox.Spawn(true);
-                drawerBox.TrySetParent(gameObject);
+                //drawerBox.TrySetParent(gameObject);
+                drawerBoxObj.GetComponent<DrawerBox>().SetDrawerDirection(drawerBoxTransform.forward);
             }
 
         }

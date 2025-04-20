@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 5929155747620279171}
   - component: {fileID: 4637797688586026763}
   - component: {fileID: 5491212900296856415}
+  - component: {fileID: 3348423173140216139}
+  - component: {fileID: 3694292834818978824}
   m_Layer: 7
   m_Name: KeyParent
   m_TagString: Untagged
@@ -77,18 +79,8 @@ MonoBehaviour:
   objectRb: {fileID: 4637797688586026763}
   col: {fileID: 5491212900296856415}
   itemScriptableObject: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
-  itemSOList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
   isStored:
     m_InternalValue: 0
-  isUsingItem:
-    m_InternalValue: 0
-  itemData:
-    m_InternalValue:
-      type: 0
-      id: 0
-      itemCharge: 0
-      usesRemaining: 0
-  itemType: 8
 --- !u!54 &4637797688586026763
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -137,6 +129,59 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.038231466, y: 0.013003163, z: 0.0052972585}
   m_Center: {x: 0.0011933248, y: -0.00004448742, z: -0.000018795332}
+--- !u!114 &3348423173140216139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2849634166944264067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 0
+  AuthorityMode: 0
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
+--- !u!114 &3694292834818978824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2849634166944264067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
 --- !u!1001 &4765305831250480841
 PrefabInstance:
   m_ObjectHideFlags: 0

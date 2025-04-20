@@ -8,6 +8,8 @@ public class HouseMapDifficultySettingsSO : ScriptableObject
     public Vector3Int mapSize;
     public int levelsUntilHarderDifficulty;
     public int floors;
+    [Tooltip("Lower number means more lights, higher number means less lights")]
+    public int hallwayLightSpawnSpacing; //How many ceiling tiles to build before trying to spawn a light there
     public List<GameObject> specialRoomPrefabsList = new List<GameObject>();
     public List<GameObject> roomPrefabsList = new List<GameObject>();
     [Tooltip("Warning: Too many for a small map size and rooms may begin to overlap!")]

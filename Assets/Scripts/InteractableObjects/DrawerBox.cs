@@ -7,7 +7,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     [SerializeField] private float extendAmount;
     [SerializeField] private Transform itemPosition;
     [SerializeField] private float drawerOpenSmoothTime;
-    private float defaultZPosition;
+    private Vector3 closedPosition;
     private float targetZPosition;
     private bool isOpen;
     [SerializeField] private List<ItemScriptableObject> itemList = new List<ItemScriptableObject>();
@@ -17,6 +17,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     [SerializeField] private float interactCooldown = 1f;
     private float interactCooldownTimer;
     private Coroutine hideRoutine;
+    private Vector3 drawerForward;
 
     public override void OnNetworkSpawn()
     {
@@ -27,6 +28,13 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
             GameObject item = Instantiate(randomItemSO.droppablePrefab, itemPosition.position, Quaternion.identity);
             itemScript = item.GetComponent<InteractableItemBase>();
+            item.GetComponent<NetworkObject>().Spawn(true);
+            // Lock rigidbody on spawn
+            if (item.TryGetComponent(out Rigidbody rb))
+            {
+                rb.isKinematic = true;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+            }   
 
             ItemData newItemData = new ItemData
             {
@@ -35,9 +43,14 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
                 usesRemaining = randomItemSO.usesRemaining
             };
 
-            item.GetComponent<NetworkObject>().Spawn(true); 
+            
+            item.GetComponent<NetworkObject>().TrySetParent(GetComponent<NetworkObject>());
             StartCoroutine(InitItemDelayed(item.GetComponent<NetworkObject>(), newItemData));
         }
+    }
+    public void SetDrawerDirection(Vector3 forward)
+    {
+        drawerForward = forward.normalized;
     }
 
     [Rpc(SendTo.Everyone)]
@@ -64,7 +77,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     void Start()
     {
-        if (IsServer) defaultZPosition = transform.localPosition.z;
+        if (IsServer) closedPosition = transform.position;
 
     }
 
@@ -72,12 +85,18 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (IsServer)
         {
-            Vector3 currentLocalPos = transform.localPosition;
-            Vector3 targetLocalPos = new Vector3(currentLocalPos.x, currentLocalPos.y, defaultZPosition - targetZPosition);
-            transform.localPosition = Vector3.Lerp(currentLocalPos, targetLocalPos, drawerOpenSmoothTime * Time.deltaTime);
-            if (item != null) item.transform.position = itemPosition.transform.position;
+            Vector3 targetWorldPos = closedPosition + (drawerForward * targetZPosition);
+            transform.position = Vector3.Lerp(transform.position, targetWorldPos, drawerOpenSmoothTime * Time.deltaTime);
+            // if (item != null && itemScript != null && itemScript.isStored.Value)
+            // {
+            //     item.transform.position = itemPosition.position;
+            //     item.transform.rotation = itemPosition.rotation;
+            // }
             if (item != null && item.activeSelf == false)
+            {
                 item = null;
+            }
+
             HandleInteractCooldown();
         }
 
@@ -139,7 +158,6 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (item != null)
         {
-
             MeshRenderer meshRenderer = item.GetComponent<MeshRenderer>() != null ? item.GetComponent<MeshRenderer>() : item.GetComponentInChildren<MeshRenderer>();
             Collider col = item.GetComponent<Collider>() != null ? item.GetComponent<Collider>() : item.GetComponentInChildren<Collider>();
             meshRenderer.enabled = false;
@@ -156,6 +174,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
             Collider col = item.GetComponent<Collider>() != null ? item.GetComponent<Collider>() : item.GetComponentInChildren<Collider>();
             meshRenderer.enabled = true;
             col.enabled = true;
+            col.isTrigger = true;
         }
     }
 

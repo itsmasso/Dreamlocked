@@ -134,7 +134,7 @@ public class HouseMapGenerator : NetworkBehaviour
 	            normalRoomsPrefabList.Add(normalRoom);
 	        }
 	        roomsPerFloor = currentDifficultySetting.roomsPerFloor;
-	        
+	        propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 	    }
 	}
 
@@ -513,7 +513,6 @@ public class HouseMapGenerator : NetworkBehaviour
 		}
 	}
 
-
 	private void Triangulate(int currentFloor)
 	{
 		List<Vector2> roomPoints = new List<Vector2>();
@@ -602,10 +601,8 @@ public class HouseMapGenerator : NetworkBehaviour
 		part.transform.rotation = rotation;
 		return part;
 	}
-
 	private void TrySpawnDoorProp(Node node, Vector3 propPosition)
 	{
-
 		var offsetsAndRotations = new (Vector3 offset, Quaternion rotation)[]
 		{
 		(-Vector3.right * nodeDiameter, Quaternion.Euler(0, -90, 0)),
@@ -751,8 +748,6 @@ public class HouseMapGenerator : NetworkBehaviour
 	}
 	private void OnDrawGizmos()
 	{
-
-
 		if (Application.isPlaying && drawGizmos)
 		{
 			if (grid != null)

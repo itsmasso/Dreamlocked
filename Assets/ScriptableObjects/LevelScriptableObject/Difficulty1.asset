@@ -15,13 +15,16 @@ MonoBehaviour:
   mapSize: {x: 200, y: 200, z: 200}
   levelsUntilHarderDifficulty: 2
   floors: 1
+  hallwayLightSpawnSpacing: 7
   specialRoomPrefabsList:
   - {fileID: 4367447932712270340, guid: d5cd6f412bf28664ca76b0a7d2587cba, type: 3}
   - {fileID: 4367447932712270340, guid: a885274777859e14191d30d75056c3b6, type: 3}
   roomPrefabsList:
   - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
   - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
-  roomsPerFloor: 10
+  - {fileID: 4367447932712270340, guid: a388b4dda312535448f579ae01365e28, type: 3}
+  - {fileID: 4367447932712270340, guid: 498dcd71c7000094696b36ff761a5dcb, type: 3}
+  roomsPerFloor: 15
   chanceToSpawnLurker: 0
   lurkerSpawnDelay: 0
   lurkerSpawnAmount: 0

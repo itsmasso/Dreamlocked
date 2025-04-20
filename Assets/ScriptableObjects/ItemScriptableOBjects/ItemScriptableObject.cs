@@ -6,10 +6,12 @@ public class ItemScriptableObject : ScriptableObject
 {
 	public int id;
 	public string itemName;
+	public bool isUseable;
 	public float itemCharge;
 	public int usesRemaining;
-	public GameObject heldPrefab;
+	public GameObject visualPrefab;
 	public GameObject droppablePrefab;
+	public GameObject useablePrefab;
 	public Sprite icon;
 }
 

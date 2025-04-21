@@ -22,7 +22,7 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] private Transform itemTransform;
     [SerializeField] private GameObject currentUseableItem;
     private GameObject currentVisualItem;
-    private ItemData currentHeldItemData;
+    public ItemData currentHeldItemData;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
 
@@ -314,6 +314,16 @@ public class PlayerInventory : NetworkBehaviour
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
 
+    }
+
+    public GameObject GetCurrentUsableItem()
+    {
+        return currentUseableItem;
+    }
+
+    public GameObject GetCurrentVisualItem()
+    {
+        return currentVisualItem;
     }
 
 

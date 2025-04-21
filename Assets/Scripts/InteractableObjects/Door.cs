@@ -100,7 +100,17 @@ public class Door : NetworkBehaviour, IInteractable
                 RequestServerToToggleDoorRpc(playerObject.transform.position);
             }else
             {
-                Debug.Log("Door is locked");
+                if (playerObject.GetComponent<PlayerInventory>().GetCurrentVisualItem() != null && 
+                    playerObject.GetComponent<PlayerInventory>().GetCurrentVisualItem().name == "KeyVisual(Clone)")
+                {
+                    Debug.Log("Unlocked Door");
+                    isLocked = false;
+                    playerObject.GetComponent<PlayerInventory>().RequestServerToDestroyItemRpc();
+                }
+                else
+                {
+                    Debug.Log("Door is locked");
+                }
             }
         }
     }

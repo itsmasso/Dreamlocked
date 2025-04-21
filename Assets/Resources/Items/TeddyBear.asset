@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa9e842d7a2906e4898fd0d1b59f5276, type: 3}
   m_Name: TeddyBear
   m_EditorClassIdentifier: 
-  id: 0
+  id: 3
   itemName: 
   isUseable: 0
   itemCharge: 0

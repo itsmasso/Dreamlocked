@@ -42,7 +42,8 @@ public class GameManager : NetworkSingleton<GameManager>
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
 	private NetworkVariable<int> securityCode = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-	[SerializeField] private GameObject BookObject;
+	// [SerializeField] private GameObject BookObject;
+	// [SerializeField] private GameObject VisualBookObject;
 	protected override void Awake()
 	{
 		base.Awake();

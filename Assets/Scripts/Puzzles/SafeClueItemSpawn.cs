@@ -4,9 +4,11 @@ using TMPro;
 
 public class SafeClueItemSpawn : NetworkBehaviour
 {
+    private GameObject item;
     [SerializeField] private Transform SafeClueTransform;
     [SerializeField] private ItemScriptableObject SafeClueScriptableObject;
     [SerializeField] private GameObject SafeClueObject;
+    [SerializeField] private GameObject VisualSafeClueObject;
     private InteractableItemBase safeClueScript;
     private int safeCode;
 
@@ -18,11 +20,12 @@ public class SafeClueItemSpawn : NetworkBehaviour
             // Set the clue of the object BEFORE SPAWNING
             safeCode = GameManager.Instance.GetSafeCode().Value;
             SafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
+            VisualSafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
             
             // Spawn the object
-            SafeClueObject = Instantiate(SafeClueScriptableObject.droppablePrefab, SafeClueTransform.position, SafeClueTransform.rotation);
-            SafeClueObject.GetComponent<NetworkObject>().Spawn(true);
-            safeClueScript = SafeClueObject.GetComponent<InteractableItemBase>();
+            item = Instantiate(SafeClueScriptableObject.droppablePrefab, SafeClueTransform.position, SafeClueTransform.rotation);
+            item.GetComponent<NetworkObject>().Spawn(true);
+            safeClueScript = item.GetComponent<InteractableItemBase>();
 
             ItemData newItemData = new ItemData
             {
@@ -32,8 +35,6 @@ public class SafeClueItemSpawn : NetworkBehaviour
             };
             safeClueScript.InitializeItemData(newItemData);
             safeClueScript.isStored.Value = true;
-
-            Debug.Log("Safe Clue Spawned");
         }
     }
 

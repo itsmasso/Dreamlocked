@@ -15,7 +15,7 @@ public enum LurkerState
 	Chasing,
 	Attacking
 }
-public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffectedByLight
+public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffectedByLight, IAffectedByBear
 {
 	[Header("Scriptable Object")]
 	public MonsterScriptableObject lurkerScriptableObj;
@@ -88,7 +88,6 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			roamSpeed = lurkerScriptableObj.baseSpeed;
 			canStalk = true;
 			canAttack = true;
-
 			SwitchState(LurkerState.Roaming);
 		}
 	}
@@ -104,7 +103,6 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			SwitchState(LurkerState.Roaming);
 		}
 	}
-
 
 	public void SwitchState(LurkerState newState)
 	{
@@ -322,4 +320,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		currentTarget = null;
 	}
 
+    public void ActivateBearItemEffect()
+    {
+        StartStalkCooldown();
+		SwitchState(LurkerState.Roaming);
+    }
 }

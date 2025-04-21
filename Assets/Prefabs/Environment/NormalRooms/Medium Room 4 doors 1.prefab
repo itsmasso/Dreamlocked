@@ -972,7 +972,7 @@ GameObject:
   - component: {fileID: 2034378400268218833}
   - component: {fileID: 4012220719375766048}
   m_Layer: 0
-  m_Name: Medium Room 4 doors
+  m_Name: Medium Room 4 doors 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -16,18 +16,20 @@ public class PlayerInventory : NetworkBehaviour
     //private ItemScriptableObject currentActiveItem;
     [SerializeField] private int currentInventoryIndex;
     [SerializeField] private int lastInventoryIndex = -1;
+    private bool isInventoryLocked;
 
     [Header("Item Properties")]
     [SerializeField] private GameObject itemParent;
     [SerializeField] private Transform itemTransform;
     [SerializeField] private GameObject currentUseableItem;
-    private GameObject currentVisualItem;
+    [SerializeField] private GameObject currentVisualItem;
     public ItemData currentHeldItemData;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
 
     void Start()
     {
+        isInventoryLocked = false;
         currentInventoryIndex = 0;
         if (IsServer)
         {
@@ -51,7 +53,7 @@ public class PlayerInventory : NetworkBehaviour
 
     public void UseItem(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && currentUseableItem != null)
+        if (ctx.performed && currentUseableItem != null && !isInventoryLocked)
         {
             if (currentUseableItem.TryGetComponent(out IUseableItem<ItemData> activatableItem))
             {
@@ -62,7 +64,7 @@ public class PlayerInventory : NetworkBehaviour
 
     public void OnSlot1(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && !isInventoryLocked)
         {
             RequestServerToSelectNewItemRpc(0);
         }
@@ -70,7 +72,7 @@ public class PlayerInventory : NetworkBehaviour
     }
     public void OnSlot2(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && !isInventoryLocked)
         {
             RequestServerToSelectNewItemRpc(1);
         }
@@ -78,7 +80,7 @@ public class PlayerInventory : NetworkBehaviour
     }
     public void OnSlot3(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && !isInventoryLocked)
         {
             RequestServerToSelectNewItemRpc(2);
         }
@@ -86,7 +88,7 @@ public class PlayerInventory : NetworkBehaviour
     }
     public void OnSlot4(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && !isInventoryLocked)
         {
             RequestServerToSelectNewItemRpc(3);
         }
@@ -95,7 +97,7 @@ public class PlayerInventory : NetworkBehaviour
 
     public void OnDropItem(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && !isInventoryLocked)
         {
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
@@ -296,24 +298,37 @@ public class PlayerInventory : NetworkBehaviour
             // Clean visual + networked object
             RequestServerToDespawnUseableItemRpc();
             IHasDestroyAnimation hasDestroyAnimation = currentVisualItem.GetComponent<IHasDestroyAnimation>();
-            if(hasDestroyAnimation != null)
+            if (hasDestroyAnimation != null)
             {
                 hasDestroyAnimation.PlayDestroyAnimation();
-            }else
+            }
+            else
             {
                 DestroyVisualItemRpc();
             }
-            
+
             // Clear inventory
             syncedInventory[currentInventoryIndex] = emptyItem;
             currentUseableItem = null;
             currentHeldItemData = emptyItem;
             lastInventoryIndex = -1;
-
+            UnlockInventoryRpc();
             // Notify client to remove sprite
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
 
+    }
+
+
+    [Rpc(SendTo.Owner)]
+    private void UnlockInventoryRpc()
+    {
+        isInventoryLocked = false;
+    }
+
+    public void LockInventory()
+    {
+        isInventoryLocked = true;
     }
 
     public GameObject GetCurrentUsableItem()
@@ -324,6 +339,11 @@ public class PlayerInventory : NetworkBehaviour
     public GameObject GetCurrentVisualItem()
     {
         return currentVisualItem;
+    }
+    
+    public void SetCurrentVisualItemNull()
+    {
+        currentVisualItem = null;
     }
 
 

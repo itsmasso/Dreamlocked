@@ -161,7 +161,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
     - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: propScriptableObjList.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: 'propScriptableObjList.Array.data[0]'
@@ -170,7 +170,7 @@ PrefabInstance:
     - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: 'propScriptableObjList.Array.data[1]'
       value: 
-      objectReference: {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
+      objectReference: {fileID: 11400000, guid: 4d02a2cca79e90b45b42843861984752, type: 2}
     - target: {fileID: 1587450121930520918, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: houseMapPropScriptableObjs.Array.size
       value: 1
@@ -256,6 +256,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1288498009}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: defaultWallPrefab
+      value: 
+      objectReference: {fileID: 2602338538655731649, guid: ff0e79e57d101424ebf38356c34cab78, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: hallwayLightPrefab
       value: 
       objectReference: {fileID: 6844388644389274886, guid: a07d31e458f4f454ba8e4b690b350637, type: 3}
@@ -268,9 +272,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 9166041e5760a814eb6efd7e86f9e9b4, type: 2}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: altWallPrefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: 'specialRooms.Array.data[2]'
       value: 
       objectReference: {fileID: 4367447932712270340, guid: a885274777859e14191d30d75056c3b6, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'altWallPrefabs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2602338538655731649, guid: 4b134afd392fb864d875e172bfa5f632, type: 3}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: normalRoomsPrefabList.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: specialRoomPrefabList.Array.size
       value: 4

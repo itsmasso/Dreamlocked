@@ -9,6 +9,7 @@ public class ItemScriptableObject : ScriptableObject
 	public bool isUseable;
 	public float itemCharge;
 	public int usesRemaining;
+	public float spawnWeight;
 	public GameObject visualPrefab;
 	public GameObject droppablePrefab;
 	public GameObject useablePrefab;

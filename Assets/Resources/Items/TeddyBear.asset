@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: TeddyBear
   m_EditorClassIdentifier: 
   id: 3
-  itemName: 
-  isUseable: 0
+  itemName: Teddy Bear
+  isUseable: 1
   itemCharge: 0
-  usesRemaining: 0
-  visualPrefab: {fileID: 0}
-  droppablePrefab: {fileID: 0}
-  useablePrefab: {fileID: 0}
-  icon: {fileID: 0}
+  usesRemaining: 1
+  spawnWeight: 1
+  visualPrefab: {fileID: 8453504976738299003, guid: b8034ce02443ab64baa05be1a33a567c, type: 3}
+  droppablePrefab: {fileID: 8453504976738299003, guid: e528d6ca9614857478d4e9ed33c88c31, type: 3}
+  useablePrefab: {fileID: 4634629064485158093, guid: f20fc76be72cfb24289e36f86efa80bf, type: 3}
+  icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}

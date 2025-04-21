@@ -20,17 +20,6 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 	{
 		base.OnNetworkSpawn();
 	}
-	
-	public void EnablePhysics()
-	{
-	    objectRb.isKinematic = false;
-		GetComponent<Collider>().enabled = true;
-	}
-	public void DisablePhysics()
-	{
-	    objectRb.isKinematic = true;
-		GetComponent<Collider>().enabled = false;
-	}
 
     public void InitializeItemData(ItemData data)
 	{

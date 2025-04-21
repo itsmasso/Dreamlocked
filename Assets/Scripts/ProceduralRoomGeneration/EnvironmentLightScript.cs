@@ -34,7 +34,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 			if (isLightOn)
 			{
 				interactableLightScript.DetectEnemiesInLight();
-				interactableLightScript.CheckIfEnemyExitLight();
+				//interactableLightScript.CheckIfEnemyExitLight();
 			}
 
 

@@ -13,6 +13,7 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     [SerializeField] private List<ItemScriptableObject> itemList = new List<ItemScriptableObject>();
     private GameObject item;
     private InteractableItemBase itemScript;
+    [SerializeField] private float itemSpawnChance;
     [SerializeField] private NetworkVariable<bool> canInteract = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     [SerializeField] private float interactCooldown = 1f;
     private float interactCooldownTimer;
@@ -24,29 +25,61 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         base.OnNetworkSpawn();
         if (IsServer)
         {
-            ItemScriptableObject randomItemSO = itemList[Random.Range(0, itemList.Count)];
-
-            GameObject item = Instantiate(randomItemSO.droppablePrefab, itemPosition.position, Quaternion.identity);
-            itemScript = item.GetComponent<InteractableItemBase>();
-            item.GetComponent<NetworkObject>().Spawn(true);
-            // Lock rigidbody on spawn
-            if (item.TryGetComponent(out Rigidbody rb))
+            if (Random.value < itemSpawnChance)
             {
-                rb.isKinematic = true;
-                rb.constraints = RigidbodyConstraints.FreezeAll;
-            }   
+                ItemScriptableObject randomItemSO = GetRandomItem(itemList);
 
-            ItemData newItemData = new ItemData
+                GameObject item = Instantiate(randomItemSO.droppablePrefab, itemPosition.position, Quaternion.identity);
+                itemScript = item.GetComponent<InteractableItemBase>();
+                item.GetComponent<NetworkObject>().Spawn(true);
+                // Lock rigidbody on spawn
+                if (item.TryGetComponent(out Rigidbody rb))
+                {
+                    rb.isKinematic = true;
+                    rb.constraints = RigidbodyConstraints.FreezeAll;
+                }
+
+                ItemData newItemData = new ItemData
+                {
+                    id = randomItemSO.id,
+                    itemCharge = randomItemSO.itemCharge,
+                    usesRemaining = randomItemSO.usesRemaining
+                };
+
+
+                item.GetComponent<NetworkObject>().TrySetParent(GetComponent<NetworkObject>());
+                StartCoroutine(InitItemDelayed(item.GetComponent<NetworkObject>(), newItemData));
+            }
+            else
             {
-                id = randomItemSO.id,
-                itemCharge = randomItemSO.itemCharge,
-                usesRemaining = randomItemSO.usesRemaining
-            };
-
-            
-            item.GetComponent<NetworkObject>().TrySetParent(GetComponent<NetworkObject>());
-            StartCoroutine(InitItemDelayed(item.GetComponent<NetworkObject>(), newItemData));
+                item = null;
+            }
         }
+    }
+
+    private ItemScriptableObject GetRandomItem(List<ItemScriptableObject> itemList)
+    {
+        // get the total weight of props
+        float totalWeight = 0f;
+        foreach (ItemScriptableObject item in itemList)
+        {
+            totalWeight += item.spawnWeight;
+        }
+
+        // pick a random chance value
+        float chosenRandomValue = Random.Range(0, totalWeight);
+        // keep trying to pick a prop as pity builds up until it guarentees to pick a item
+        float cumulativeWeight = 0f;
+        foreach (ItemScriptableObject item in itemList)
+        {
+            cumulativeWeight += item.spawnWeight;
+            if (chosenRandomValue <= cumulativeWeight)
+            {
+                return item;
+            }
+        }
+        Debug.LogWarning("Failed to pick an item by weights! Spawning a random item without weights.");
+        return itemList[Random.Range(0, itemList.Count)];
     }
     public void SetDrawerDirection(Vector3 forward)
     {

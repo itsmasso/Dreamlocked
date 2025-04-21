@@ -52,6 +52,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
                 TurnOnRpc();
             }
             interactableLightsScript.DetectEnemiesInFlashLight();
+            //interactableLightsScript.CheckIfEnemyExitLight();
         }
         else
         {
@@ -59,6 +60,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
             {
                 TurnOffRpc();
             }
+            
         }
     }
     [Rpc(SendTo.Everyone)]

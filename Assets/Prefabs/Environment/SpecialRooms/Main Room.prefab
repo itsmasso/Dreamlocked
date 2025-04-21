@@ -301,7 +301,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d9f8a4f6aa422b34bb651344923c52c4, type: 2}
+  - {fileID: 2100000, guid: 74ae9dd1237766e4598efc4222793524, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -859,7 +859,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 66965aac0d71d2746b9e61fdd2e0f2d9, type: 2}
+  - {fileID: 2100000, guid: 47912efd261cbf34b9592cede1b022dd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -930,6 +930,37 @@ MonoBehaviour:
   includeInScan: 0
   surfaceID: 1
   mode: 1
+--- !u!1 &3723294172672301346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2064485234845181045}
+  m_Layer: 0
+  m_Name: TestItemPlacer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2064485234845181045
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3723294172672301346}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.45, y: 0.214, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2034378400268218833}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3838400650020549567
 GameObject:
   m_ObjectHideFlags: 0
@@ -1009,6 +1040,7 @@ Transform:
   - {fileID: 670291067946641247}
   - {fileID: 4815802873290786128}
   - {fileID: 3179841469778380977}
+  - {fileID: 2064485234845181045}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4012220719375766048
@@ -1041,9 +1073,12 @@ MonoBehaviour:
   - {fileID: 1739195732907166602}
   - {fileID: 6070791490999403387}
   isSpecialRoom: 0
+  roomLocked: 0
   roomPrefab: {fileID: 4367447932712270340}
-  interactableObjectTransforms: []
-  interactableObjectPrefabs: []
+  interactableObjectTransforms:
+  - {fileID: 2064485234845181045}
+  interactableObjectPrefabs:
+  - {fileID: 2666116218696400191, guid: 6ebf6cdbbfe4b67428d2256a33538b98, type: 3}
 --- !u!1 &7955357971837514555
 GameObject:
   m_ObjectHideFlags: 0

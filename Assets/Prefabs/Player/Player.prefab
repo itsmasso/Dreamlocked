@@ -207,7 +207,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7854647681729814684
 Transform:
   m_ObjectHideFlags: 0
@@ -1016,5 +1016,9 @@ MonoBehaviour:
   lastInventoryIndex: -1
   itemParent: {fileID: 4941982663017989936}
   itemTransform: {fileID: 4222349174482778473}
-  currentHeldItemObject: {fileID: 0}
+  currentUseableItem: {fileID: 0}
+  currentHeldItemData:
+    id: 0
+    itemCharge: 0
+    usesRemaining: 0
   throwForce: 3

@@ -46,24 +46,40 @@ public class DetectEnemyInLights : NetworkBehaviour
     public void DetectEnemiesInLight()
     {
         enemyColliders = Physics.OverlapSphere(lightSource.transform.position, lightSource.range, enemyLayer);
+        HashSet<NetworkObject> seenThisFrame = new();
+
         foreach (Collider enemyCollider in enemyColliders)
         {
             NetworkObject enemyNetObj = enemyCollider.GetComponent<NetworkObject>();
-            if (enemyNetObj != null && enemyNetObj.IsSpawned)
+            if (enemyNetObj == null || !enemyNetObj.IsSpawned) continue;
+
+            if (!IsDirectlyLit(enemyCollider.transform)) continue;
+
+            IAffectedByLight affected = enemyCollider.GetComponent<IAffectedByLight>();
+            if (affected == null) continue;
+
+            seenThisFrame.Add(enemyNetObj);
+
+            if (!enemiesInLight.Contains(enemyNetObj))
             {
-                IAffectedByLight monsterAffectedByLight = enemyCollider.GetComponent<IAffectedByLight>();
-                if (monsterAffectedByLight != null)
+                enemiesInLight.Add(enemyNetObj);
+                affected.AddLightSource(this);
+                ServerSeesEnemyEnteredLightRpc(enemyNetObj);
+            }
+        }
+
+        foreach (var enemy in enemiesInLight.ToList())
+        {
+            if (!seenThisFrame.Contains(enemy))
+            {
+                IAffectedByLight affected = enemy.GetComponent<IAffectedByLight>();
+                if (affected != null)
                 {
-                    if (!IsDirectlyLit(enemyCollider.transform)) continue;
-
-                    // This check could possibly lead to bugs
-                    // I think it check enemyNetObj not NetworkObject
-                    if (enemiesInLight.Contains(enemyNetObj)) continue;
-
-                    enemiesInLight.Add(enemyNetObj);
-                    monsterAffectedByLight.EnteredLight();
-                    ServerSeesEnemyEnteredLightRpc(enemyNetObj);
+                    affected.RemoveLightSource(this);
+                    ServerSeesEnemyExitLightRpc(enemy);
                 }
+
+                enemiesInLight.Remove(enemy);
             }
         }
     }
@@ -71,70 +87,81 @@ public class DetectEnemyInLights : NetworkBehaviour
     public void DetectEnemiesInFlashLight()
     {
         enemyColliders = Physics.OverlapSphere(lightSource.transform.position, lightSource.range, enemyLayer);
+        HashSet<NetworkObject> seenThisFrame = new();
+
         foreach (Collider enemyCollider in enemyColliders)
         {
             NetworkObject enemyNetObj = enemyCollider.GetComponent<NetworkObject>();
-            if (enemyNetObj != null && enemyNetObj.IsSpawned)
+            if (enemyNetObj == null || !enemyNetObj.IsSpawned) continue;
+
+            if (!IsInSpotlight(enemyNetObj.transform)) continue;
+            if (!IsDirectlyLit(enemyCollider.transform)) continue;
+
+            IAffectedByLight affected = enemyCollider.GetComponent<IAffectedByLight>();
+            if (affected == null) continue;
+
+            seenThisFrame.Add(enemyNetObj);
+
+            if (!enemiesInLight.Contains(enemyNetObj))
             {
-                if (IsInSpotlight(enemyNetObj.transform))
+                enemiesInLight.Add(enemyNetObj);
+                affected.AddLightSource(this);
+                ServerSeesEnemyEnteredLightRpc(enemyNetObj);
+            }
+        }
+
+        foreach (var enemy in enemiesInLight.ToList())
+        {
+            if (!seenThisFrame.Contains(enemy))
+            {
+                IAffectedByLight affected = enemy.GetComponent<IAffectedByLight>();
+                if (affected != null)
                 {
-                    IAffectedByLight monsterAffectedByLight = enemyCollider.GetComponent<IAffectedByLight>();
-                    if (monsterAffectedByLight != null)
-                    {
-                        if (!IsDirectlyLit(enemyCollider.transform)) continue;
-
-                        // This check could possibly lead to bugs
-                        // I think it check enemyNetObj not NetworkObject
-                        if (enemiesInLight.Contains(enemyNetObj)) continue;
-
-                        enemiesInLight.Add(enemyNetObj);
-                        monsterAffectedByLight.EnteredLight();
-                        ServerSeesEnemyEnteredLightRpc(enemyNetObj); //maybe add a bool where this line only calls once. not good to update rpc in update
-                    }
+                    affected.RemoveLightSource(this);
+                    ServerSeesEnemyExitLightRpc(enemy);
                 }
+
+                enemiesInLight.Remove(enemy);
             }
         }
     }
 
     private bool IsInSpotlight(Transform target)
     {
-        Vector3 dirToTarget = target.position - lightSource.transform.position;
-        float distance = dirToTarget.magnitude;
-
-        //check distance
+        Vector3 dirToTarget = (target.position - lightSource.transform.position).normalized;
+        float distance = Vector3.Distance(lightSource.transform.position, target.position);
 
         if (distance > lightSource.range)
             return false;
 
-        //check angle
-
-        float angleToTarget = Vector3.Angle(lightSource.transform.forward, dirToTarget);
-        if (angleToTarget > lightSource.spotAngle / 2f)
+        float angle = Vector3.Angle(lightSource.transform.forward, dirToTarget);
+        if (angle > lightSource.spotAngle / 2f)
             return false;
+
         return true;
     }
-    public void CheckIfEnemyExitLight()
-    {
-        foreach (NetworkObject enemy in enemiesInLight.ToList())
-        {
-            // Ensure the enemy is not null before processing
-            if (enemy == null)
-            {
-                enemiesInLight.Remove(enemy);
-                continue;
-            }
-            IAffectedByLight affectedByLight = enemy.GetComponent<IAffectedByLight>();
-            if (affectedByLight != null)
-            {
-                if (enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
-                {
-                    affectedByLight.ExitLight();
-                    enemiesInLight.Remove(enemy);
-                    ServerSeesEnemyExitLightRpc(enemy);
-                }
-            }
-        }
-    }
+    // public void CheckIfEnemyExitLight()
+    // {
+    //     foreach (NetworkObject enemy in enemiesInLight.ToList())
+    //     {
+    //         // Ensure the enemy is not null before processing
+    //         if (enemy == null)
+    //         {
+    //             enemiesInLight.Remove(enemy);
+    //             continue;
+    //         }
+    //         IAffectedByLight affectedByLight = enemy.GetComponent<IAffectedByLight>();
+    //         if (affectedByLight != null)
+    //         {
+    //             if (enemy != null && !IsDirectlyLit(enemy.transform) || Vector3.Distance(enemy.transform.position, lightSource.transform.position) >= lightSource.range)
+    //             {
+    //                 affectedByLight.ExitLight();
+    //                 enemiesInLight.Remove(enemy);
+    //                 ServerSeesEnemyExitLightRpc(enemy);
+    //             }
+    //         }
+    //     }
+    // }
 
     public bool IsDirectlyLit(Transform enemy)
     {

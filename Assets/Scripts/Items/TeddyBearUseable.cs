@@ -9,7 +9,7 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
     public event Action<ItemData> OnDataChanged;
     public ItemData itemData { private set; get; }
     private int usesRemaining;
-    private float timeBeforeDestroying;
+    [SerializeField] private float timeBeforeDestroying;
     [SerializeField] private float effectRadius;
     [SerializeField] private LayerMask enemyLayer;
     void Start()
@@ -39,7 +39,6 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
         {
             usesRemaining = 0;
             HandleItemEffect();
-            AllDestroyItemRpc();
             PlayerInventory playerInventory = GetComponentInParent<PlayerInventory>();
             if (playerInventory != null)
             {
@@ -49,14 +48,10 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
             {
                 Debug.LogError("Failed to get player inventory script!");
             }
+            PlayDestroyAnimationRpc();
         }
-        var data = itemData;
-        data.usesRemaining = usesRemaining;
-        itemData = data;
 
-        OnDataChanged?.Invoke(itemData);
     }
-    
     private void HandleItemEffect()
     {
         Collider[] colliders = Physics.OverlapSphere(transform.position, effectRadius, enemyLayer);
@@ -64,13 +59,14 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
         {
             IAffectedByBear affectedByBear = col.gameObject.GetComponent<IAffectedByBear>();
             if(affectedByBear != null){
+                Debug.Log("activating effect");
                 affectedByBear.ActivateBearItemEffect();
             }
         }
     }
 
     [Rpc(SendTo.Everyone)]
-    private void AllDestroyItemRpc()
+    private void PlayDestroyAnimationRpc()
     {
         onDestroyObject?.Invoke();
 
@@ -80,8 +76,15 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
         if (usesRemaining > 0)
         {
             RequestServerToActivateBearRpc();
+            LockOwnerInventoryRpc();
         }
 
+    }
+    [Rpc(SendTo.Owner)]
+    private void LockOwnerInventoryRpc()
+    {
+        PlayerInventory playerInventory= GetComponentInParent<PlayerInventory>();
+        playerInventory.LockInventory();
     }
 
     [Rpc(SendTo.Everyone)]
@@ -96,6 +99,11 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
     {
         AllActivateAnimationRpc();
         StartCoroutine(DelayUntilEffectActivation());
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
     }
 
 }

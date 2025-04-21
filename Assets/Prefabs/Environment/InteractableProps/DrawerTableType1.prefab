@@ -73,6 +73,7 @@ GameObject:
   - component: {fileID: 2913720795759404647}
   - component: {fileID: 3757979754212715178}
   - component: {fileID: 6398949915768828857}
+  - component: {fileID: 3685056577029931933}
   m_Layer: 0
   m_Name: DrawerTableType1
   m_TagString: Untagged
@@ -143,14 +144,27 @@ MonoBehaviour:
   - {fileID: 5085986686835291825}
   drawerPrefab: {fileID: 8834261440720233427, guid: 09f2ed99bdbb90e4e9c9679fd2ae8bec, type: 3}
   drawerBoxPrefab: {fileID: 8834261440720233427, guid: 09f2ed99bdbb90e4e9c9679fd2ae8bec, type: 3}
-  houseMapPropPlacer: {fileID: 0}
+--- !u!114 &3685056577029931933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4401446945340609735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c9b960b55aea3479a08e92d88a649a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   propTransforms:
   - {fileID: 3441729719880427138}
   - {fileID: 7194010069029318169}
   potentialProps:
   - {fileID: 11400000, guid: 0bde1073d9d0c334788592e2f6b87546, type: 2}
   - {fileID: 11400000, guid: 02bda4f7ab04dbc49ac02d8849c4f25f, type: 2}
-  chanceToSpawnProp: 0.35
+  - {fileID: 11400000, guid: 5e5e371f526a53e43a93635f6df019b3, type: 2}
+  chanceToSpawnProp: 0.5
   propSpawnRadius: 0.1
 --- !u!1 &4842255326133747806
 GameObject:

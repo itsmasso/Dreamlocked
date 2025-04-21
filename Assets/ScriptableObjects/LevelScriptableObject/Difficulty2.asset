@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
   - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
   - {fileID: 4367447932712270340, guid: a388b4dda312535448f579ae01365e28, type: 3}
-  roomsPerFloor: 15
+  roomsPerFloor: 20
   chanceToSpawnLurker: 100
   lurkerSpawnDelay: 1
   lurkerSpawnAmount: 1

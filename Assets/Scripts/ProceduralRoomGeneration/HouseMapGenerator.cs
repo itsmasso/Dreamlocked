@@ -47,7 +47,9 @@ public class HouseMapGenerator : NetworkBehaviour
 	[Header("Prefab Components")]
 	[SerializeField] private GameObject roomCeilingPrefab;
 	[SerializeField] private GameObject roomFloorPrefab;
-	[SerializeField] private GameObject wallPrefab;
+	[SerializeField] private GameObject defaultWallPrefab;
+	[SerializeField] private List<GameObject> altWallPrefabs = new List<GameObject>();
+	[SerializeField] private float chanceToSpawnAltWall = 0.2f;
 	[SerializeField] private List<GameObject> normalRoomsPrefabList;
 
 	[Header("Special Room Properties")]
@@ -676,7 +678,12 @@ public class HouseMapGenerator : NetworkBehaviour
 		CellType type = grid.GetNode(neighborNodePos).cellType;
 		if (type == CellType.None)
 		{
-			SpawnRoomPart(wallPrefab, wallPosition, wallRotation);
+			if(UnityEngine.Random.value <= chanceToSpawnAltWall){
+				SpawnRoomPart(altWallPrefabs[UnityEngine.Random.Range(0, altWallPrefabs.Count)], wallPosition, wallRotation);
+			}else
+			{
+			    SpawnRoomPart(defaultWallPrefab, wallPosition, wallRotation);
+			}
 		}
 	}
 

@@ -8,7 +8,6 @@ public class Dissolve : MonoBehaviour
     [SerializeField] private List<SkinnedMeshRenderer> skinnedRendererList = new List<SkinnedMeshRenderer>();
     [SerializeField] private float dissolveDuration;
     [SerializeField] private Material dissolveMat;
-    private List<Material[]> originalMaterials = new List<Material[]>();
     private List<Material[]> dissolveMaterials = new List<Material[]>();
 
     public float GetDissolveDuration()
@@ -17,67 +16,49 @@ public class Dissolve : MonoBehaviour
     }
     public void StartDissolvingSkinnedMesh()
     {
-        // Prepare dissolve materials
-        originalMaterials.Clear();
         dissolveMaterials.Clear();
-
         foreach (SkinnedMeshRenderer rend in skinnedRendererList)
         {
-            Material[] originals = rend.materials;
-            Material[] dissolved = new Material[originals.Length];
-
-            for (int i = 0; i < originals.Length; i++)
+             if (rend == null) continue;
+            Material[] newMats = new Material[rend.materials.Length];
+            for (int i = 0; i < rend.materials.Length; i++)
             {
                 Material newMat = new Material(dissolveMat);
-                Texture originalTex = originals[i].GetTexture("_MainTex");
-                if (originalTex != null)
-                {
-                    newMat.SetTexture("_MainTex", originalTex);
-                }
-                dissolved[i] = newMat;
+                Texture mainTex = rend.materials[i].GetTexture("_MainTex");
+                if (mainTex != null)
+                    newMat.SetTexture("_MainTex", mainTex);
+
+                newMats[i] = newMat;
             }
 
-            originalMaterials.Add(originals);
-            dissolveMaterials.Add(dissolved);
-
-            // Apply the dissolve materials
-            rend.materials = dissolved;
+            rend.materials = newMats;
+            dissolveMaterials.Add(newMats);
         }
 
-        StartCoroutine(StartDissolveCoroutine());
+        StartCoroutine(DissolveCoroutine());
     }
     public void StartDissolving()
     {
-        // Prepare dissolve materials
-        originalMaterials.Clear();
         dissolveMaterials.Clear();
-
         foreach (MeshRenderer rend in rendererList)
         {
-            Material[] originals = rend.materials;
-            Material[] dissolved = new Material[originals.Length];
-
-            for (int i = 0; i < originals.Length; i++)
+             if (rend == null) continue;
+            Material[] newMats = new Material[rend.materials.Length];
+            for (int i = 0; i < rend.materials.Length; i++)
             {
                 Material newMat = new Material(dissolveMat);
-                Texture originalTex = originals[i].GetTexture("_MainTex");
-                if (originalTex != null)
-                {
-                    newMat.SetTexture("_MainTex", originalTex);
-                }
-                dissolved[i] = newMat;
+                Texture mainTex = rend.materials[i].GetTexture("_MainTex");
+                if (mainTex != null)
+                    newMat.SetTexture("_MainTex", mainTex);
+
+                newMats[i] = newMat;
             }
 
-            originalMaterials.Add(originals);
-            dissolveMaterials.Add(dissolved);
-
-            // Apply the dissolve materials
-            rend.materials = dissolved;
+            rend.materials = newMats;
+            dissolveMaterials.Add(newMats);
         }
-
-        StartCoroutine(StartDissolveCoroutine());
     }
-    private IEnumerator StartDissolveCoroutine()
+    private IEnumerator DissolveCoroutine()
     {
         float elapsed = 0f;
 
@@ -90,7 +71,10 @@ public class Dissolve : MonoBehaviour
             {
                 foreach (Material mat in mats)
                 {
-                    mat.SetFloat("_DissolveStrength", dissolveStrength);
+                    if(mat != null)
+                    {
+                        mat.SetFloat("_DissolveStrength", dissolveStrength);
+                    }
                 }
             }
 
@@ -103,10 +87,16 @@ public class Dissolve : MonoBehaviour
         {
             foreach (Material mat in mats)
             {
-                mat.SetFloat("_DissolveStrength", 1f);
+                if(mat != null)
+                {
+                    mat.SetFloat("_DissolveStrength", 1f);
+                }
             }
         }
     }
 
-
+    void OnDestroy()
+    {
+        StopAllCoroutines();
+    }
 }

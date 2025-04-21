@@ -73,6 +73,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
 	[SerializeField] private float inDarkSpeed;
 	[SerializeField] private float inLightSpeed;
+	private HashSet<DetectEnemyInLights> activeLights = new();
 
 	[Header("Animation Properties")]
 	public Animator anim;
@@ -156,6 +157,21 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		}
 
 	}
+	public void AddLightSource(DetectEnemyInLights lightSource)
+	{
+		if (activeLights.Add(lightSource) && activeLights.Count == 1)
+		{
+			EnteredLight();
+		}
+	}
+
+	public void RemoveLightSource(DetectEnemyInLights lightSource)
+	{
+		if (activeLights.Remove(lightSource) && activeLights.Count == 0)
+		{
+			ExitLight();
+		}
+	}
 
 	public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
@@ -165,7 +181,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	[Rpc(SendTo.Server)]
 	private void RequestServerToChasePlayerRpc(NetworkObjectReference playerObjectRef)
 	{
-		if (canAttack)
+		if (canAttack && canStalk)
 		{
 			playerObjectRef.TryGet(out NetworkObject playerObject);
 			float distance = Vector2.Distance(playerObject.transform.position, transform.position);
@@ -180,7 +196,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 
 	public void SetRandomPlayerAsTarget()
 	{
-		if(!IsServer) return;
+		if (!IsServer) return;
 		NetworkObject playerNetworkObject = PlayerNetworkManager.Instance.GetRandomPlayer();
 		if (playerNetworkObject != null && playerNetworkObject.IsSpawned)
 		{
@@ -320,9 +336,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		currentTarget = null;
 	}
 
-    public void ActivateBearItemEffect()
-    {
-        StartStalkCooldown();
+	public void ActivateBearItemEffect()
+	{
+		StartStalkCooldown();
 		SwitchState(LurkerState.Roaming);
-    }
+	}
 }

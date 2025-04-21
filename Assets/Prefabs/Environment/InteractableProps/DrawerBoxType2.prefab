@@ -103,6 +103,7 @@ MonoBehaviour:
   itemList:
   - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
   - {fileID: 11400000, guid: 70b2cb77dd037504b80bad097e5a9afd, type: 2}
+  itemSpawnChance: 0.4
   canInteract:
     m_InternalValue: 1
   interactCooldown: 1

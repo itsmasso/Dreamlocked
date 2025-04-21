@@ -301,7 +301,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d9f8a4f6aa422b34bb651344923c52c4, type: 2}
+  - {fileID: 2100000, guid: 74ae9dd1237766e4598efc4222793524, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -797,7 +797,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 66965aac0d71d2746b9e61fdd2e0f2d9, type: 2}
+  - {fileID: 2100000, guid: 47912efd261cbf34b9592cede1b022dd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -940,6 +940,7 @@ MonoBehaviour:
   - {fileID: 249609452694020903}
   - {fileID: 3729854914233530905}
   isSpecialRoom: 0
+  roomLocked: 0
   roomPrefab: {fileID: 4367447932712270340}
   interactableObjectTransforms: []
   interactableObjectPrefabs: []

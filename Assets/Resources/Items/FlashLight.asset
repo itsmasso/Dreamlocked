@@ -17,6 +17,7 @@ MonoBehaviour:
   isUseable: 1
   itemCharge: 100
   usesRemaining: 0
+  spawnWeight: 0.3
   visualPrefab: {fileID: 2046112204093151828, guid: 881e8b7f53d5d784db6efc8b318bfa14, type: 3}
   droppablePrefab: {fileID: 3573178721968461015, guid: 61af4c3258a2ddc4fa1e8e91c239f834, type: 3}
   useablePrefab: {fileID: 6637630465635234271, guid: 851a9a4ea7a0b3c4898616ee9d4db619, type: 3}

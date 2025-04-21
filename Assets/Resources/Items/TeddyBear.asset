@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa9e842d7a2906e4898fd0d1b59f5276, type: 3}
+  m_Name: TeddyBear
+  m_EditorClassIdentifier: 
+  id: 0
+  itemName: 
+  isUseable: 0
+  itemCharge: 0
+  usesRemaining: 0
+  visualPrefab: {fileID: 0}
+  droppablePrefab: {fileID: 0}
+  useablePrefab: {fileID: 0}
+  icon: {fileID: 0}

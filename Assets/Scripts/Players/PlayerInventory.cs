@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Steamworks.Ugc;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -182,7 +184,7 @@ public class PlayerInventory : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void RequestServerToDestroyUseableItemRpc()
+    private void RequestServerToDespawnUseableItemRpc()
     {
         if (currentUseableItem == null) return;
 
@@ -201,7 +203,7 @@ public class PlayerInventory : NetworkBehaviour
         if (networkObjectReference.TryGet(out NetworkObject networkObject) && networkObject != null)
         {
             currentUseableItem = networkObject.gameObject;
-            
+
             currentUseableItem.transform.localPosition = Vector3.zero;
             currentUseableItem.transform.rotation = Quaternion.identity;
         }
@@ -235,7 +237,7 @@ public class PlayerInventory : NetworkBehaviour
         // If slot contains a valid item, spawn it
         if (selectedItem.id != -1)
         {
-            RequestServerToDestroyUseableItemRpc();
+            RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemRpc();
 
             RequestToSpawnUseableItemRpc(selectedItem);
@@ -243,7 +245,7 @@ public class PlayerInventory : NetworkBehaviour
         }
         else
         {
-            RequestServerToDestroyUseableItemRpc();
+            RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemRpc();
         }
 
@@ -263,7 +265,7 @@ public class PlayerInventory : NetworkBehaviour
         if (syncedInventory[currentInventoryIndex].id != -1)
         {
             // Clean visual + networked object
-            RequestServerToDestroyUseableItemRpc();
+            RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemRpc();
 
             // Spawn drop in world
@@ -283,6 +285,38 @@ public class PlayerInventory : NetworkBehaviour
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
     }
+
+    [Rpc(SendTo.Server)]
+    public void RequestServerToDestroyItemRpc()
+    {
+        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0 };
+
+        if (syncedInventory[currentInventoryIndex].id != -1)
+        {
+            // Clean visual + networked object
+            RequestServerToDespawnUseableItemRpc();
+            IHasDestroyAnimation hasDestroyAnimation = currentVisualItem.GetComponent<IHasDestroyAnimation>();
+            if(hasDestroyAnimation != null)
+            {
+                hasDestroyAnimation.PlayDestroyAnimation();
+            }else
+            {
+                DestroyVisualItemRpc();
+            }
+            
+            // Clear inventory
+            syncedInventory[currentInventoryIndex] = emptyItem;
+            currentUseableItem = null;
+            currentHeldItemData = emptyItem;
+            lastInventoryIndex = -1;
+
+            // Notify client to remove sprite
+            OwnerRemovesSpriteRpc(currentInventoryIndex);
+        }
+
+    }
+
+
     [Rpc(SendTo.Owner)]
     private void OwnerRemovesSpriteRpc(int slot)
     {

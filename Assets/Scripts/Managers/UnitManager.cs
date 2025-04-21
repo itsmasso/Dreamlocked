@@ -15,7 +15,6 @@ public class UnitManager : NetworkBehaviour
 	[SerializeField] private HouseMapGenerator houseMapGenerator;
 	[SerializeField] private float minSpawnDistFromPlayers;
 	[SerializeField] private float maxSpawnDistFromPlayers;
-	[SerializeField] private float whenToSpawnEnemies = 5f;
 	private bool canSpawnEnemies = false;
 	[SerializeField] private string defaultScene;
 	private HouseMapDifficultySettingsSO currentDifficultySetting;

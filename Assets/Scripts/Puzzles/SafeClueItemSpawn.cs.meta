@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: aff2453a4839b7740ad084fcd2178411
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - SafeClueTransform: {instanceID: 0}
+  - SafeClueScriptableObject: {fileID: 11400000, guid: 8f26a9a54026d5f45b3c42f21bee5005, type: 2}
+  - SafeClueObject: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

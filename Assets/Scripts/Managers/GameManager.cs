@@ -5,6 +5,7 @@ using Steamworks;
 using Unity.Netcode;
 using Netcode.Transports.Facepunch;
 using UnityEngine.SceneManagement;
+using TMPro;
 using System;
 
 
@@ -37,6 +38,11 @@ public class GameManager : NetworkSingleton<GameManager>
 	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private float gameOverTimer;
 	[SerializeField] private float gameOverScreenDuration = 4f;
+
+	// Safe Puzzle Combination
+	private int[] securityCodeArray = new int[4];
+	private NetworkVariable<int> securityCode = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	[SerializeField] private GameObject BookObject;
 	protected override void Awake()
 	{
 		base.Awake();
@@ -62,7 +68,17 @@ public class GameManager : NetworkSingleton<GameManager>
 
 	void Start()
 	{
+		if (IsServer)
+		{
+			for (int i = 0; i < securityCodeArray.Length; i++)
+			{
+				securityCodeArray[i] = UnityEngine.Random.Range(1, 10);
+			}
+			securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
+			Debug.Log("Security Code Generated: " + securityCode.Value);
 
+			//BookObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(securityCode.Value.ToString());
+		}
 	}
     void Update()
     {
@@ -223,6 +239,11 @@ public class GameManager : NetworkSingleton<GameManager>
 	public bool IsFinalDreamLayer()
 	{
 		return currentDreamLayer.Value >= MAX_DREAM_LAYERS;
+	}
+
+	public NetworkVariable<int> GetSafeCode()
+	{
+		return securityCode;
 	}
 
 }

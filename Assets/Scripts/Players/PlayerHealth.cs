@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class PlayerHealth : NetworkBehaviour
 {
     [SerializeField] private PlayerScriptable playerScriptable;
-    public event Action onDeath;
+    public static event Action onDeath;
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(
         100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public static event Action<int> onUpdateHealth;
@@ -78,7 +78,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         if (playerNetworkObjRef.TryGet(out NetworkObject playerNetworkObj))
         {
-            playerNetworkObj.GetComponentInChildren<MeshRenderer>().enabled = false;
+            playerNetworkObj.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
             playerNetworkObj.GetComponent<CapsuleCollider>().enabled = false;
         }
     }

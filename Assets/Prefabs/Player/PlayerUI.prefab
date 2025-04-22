@@ -464,6 +464,7 @@ GameObject:
   - component: {fileID: 7583232034745720027}
   - component: {fileID: 349476213852889188}
   - component: {fileID: 5868464017652785503}
+  - component: {fileID: 6496934129917857610}
   m_Layer: 5
   m_Name: PlayerUI
   m_TagString: Untagged
@@ -555,6 +556,19 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &6496934129917857610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2495896612000000318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a757abbca3a7dc49b74ad8add41c95f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerUI: {fileID: 2495896612000000318}
 --- !u!1 &3472721747211364584
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,6 +653,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 25765419229778190}
+  - component: {fileID: 8448421809300314224}
   - component: {fileID: 1231029376815414922}
   m_Layer: 5
   m_Name: HealthBar
@@ -669,6 +684,31 @@ RectTransform:
   m_AnchoredPosition: {x: 86, y: -37}
   m_SizeDelta: {x: 624.2338, y: 53.5944}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &8448421809300314224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3854183778200759346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2092614553
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &1231029376815414922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -970,7 +1010,6 @@ MonoBehaviour:
   - {fileID: 211653462328381804}
   - {fileID: 8331627186158471293}
   - {fileID: 361703959923914727}
-  itemScriptableObjList: {fileID: 11400000, guid: 0bd049660bc83c54386083b98a936f3b, type: 2}
 --- !u!1 &6850991823296563649
 GameObject:
   m_ObjectHideFlags: 0
@@ -1324,7 +1363,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -1350,7 +1389,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 6096865791231979176}
   m_HandleRect: {fileID: 0}
@@ -1361,4 +1400,16 @@ MonoBehaviour:
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1231029376815414922}
+        m_TargetAssemblyTypeName: PlayerHealthUI, Assembly-CSharp
+        m_MethodName: VisualHealthBarChanged
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

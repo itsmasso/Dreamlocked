@@ -75,7 +75,7 @@ MonoBehaviour:
   itemTransforms:
   - {fileID: 2112433800036340579}
   potentialitems:
-  - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
+  - {fileID: 11400000, guid: 95d0b472ca8389f4799d33389a2de903, type: 2}
   chanceToSpawnItem: 1
   itemSpawnRadius: 0.1
 --- !u!1 &6814470125220729219

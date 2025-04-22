@@ -26,6 +26,8 @@ public class PlayerInventory : NetworkBehaviour
     public ItemData currentHeldItemData;
     [Header("Drop Item Properties")]
     [SerializeField] private float throwForce;
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
 
     void Start()
     {
@@ -105,7 +107,7 @@ public class PlayerInventory : NetworkBehaviour
     public bool AddItems(ItemData itemData)
     {
         if (!IsServer) return false;
-
+        PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
 
         for (int i = 0; i < syncedInventory.Count; i++)
@@ -127,6 +129,18 @@ public class PlayerInventory : NetworkBehaviour
 
         return false;
     }
+    [Rpc(SendTo.Owner)]
+    private void PickUpAnimationRpc()
+    {
+        animator.Play("PickUp", animator.GetLayerIndex("HoldingLayer"));
+        StartCoroutine(SetHoldingAfterDelay(1f));
+    }
+    private IEnumerator SetHoldingAfterDelay(float time)
+    {
+        yield return new WaitForSeconds(time);
+        animator.SetBool("isHoldingItem", true);
+    }
+
 
     [Rpc(SendTo.Owner)]
     private void OwnerUpdatesSpriteRpc(int slotNumber, int id)
@@ -161,15 +175,16 @@ public class PlayerInventory : NetworkBehaviour
             if (hasDestroyAnimation != null)
             {
                 hasDestroyAnimation.PlayDestroyAnimation();
-            }else
+            }
+            else
             {
                 Destroy(currentVisualItem);
             }
-           
+
             currentVisualItem = null;
         }
     }
-    
+
     [Rpc(SendTo.Everyone)]
     private void DestroyVisualItemWithoutAnimRpc()
     {
@@ -234,7 +249,8 @@ public class PlayerInventory : NetworkBehaviour
 
     void Update()
     {
-
+        int holdingLayerIndex = animator.GetLayerIndex("HoldingLayer");
+        animator.SetLayerWeight(holdingLayerIndex, currentVisualItem != null ? 1f : 0f);
     }
 
     [Rpc(SendTo.Server)]
@@ -265,14 +281,24 @@ public class PlayerInventory : NetworkBehaviour
 
             RequestToSpawnUseableItemRpc(selectedItem);
             SpawnVisualItemRpc(selectedItem);
+            SetHoldItemRpc(true);
         }
         else
         {
             RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemWithoutAnimRpc();
+            SetHoldItemRpc(false);
         }
 
     }
+    
+    [Rpc(SendTo.Owner)]
+    private void SetHoldItemRpc(bool isHoldingItem)
+    {
+        animator.SetBool("isHoldingItem", isHoldingItem);
+    }
+
+
     [Rpc(SendTo.Owner)]
     private void OwnerHighlightsNewSlotRpc(int inventoryIndex)
     {

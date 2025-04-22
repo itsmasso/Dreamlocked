@@ -10,6 +10,7 @@ using System.Linq;
 public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 {
 	public const int MAX_PLAYERS = 4;
+	private int currentSpectateIndex = 0;
 	[SerializeField] private GameObject playerPrefab;
 	public List<NetworkObject> alivePlayers = new List<NetworkObject>();
 	public NetworkVariable<int> alivePlayersCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -30,7 +31,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	{
 		base.OnNetworkSpawn();
 	}
-	[ClientRpc]
+	[Rpc(SendTo.Everyone)]
 	public void RegisterPlayerClientRpc(NetworkObjectReference playerRef)
 	{
 		if (playerRef.TryGet(out NetworkObject player))
@@ -38,28 +39,28 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			if (!alivePlayers.Contains(player))
 			{
 				alivePlayers.Add(player);
-				if(IsServer) alivePlayersCount.Value++;
+				if (IsServer) alivePlayersCount.Value++;
 			}
 		}
 	}
 
-	[ServerRpc]
+	[Rpc(SendTo.Server)]
 	public void UnregisterPlayerServerRpc(NetworkObjectReference playerRef)
 	{
 		UnregisterPlayerClientRpc(playerRef);
+		alivePlayersCount.Value--;
 	}
 
-	[ClientRpc]
+	[Rpc(SendTo.Everyone)]
 	public void UnregisterPlayerClientRpc(NetworkObjectReference playerRef)
 	{
 		if (playerRef.TryGet(out NetworkObject player))
 		{
-			if(player.IsOwner)
+			if (player.IsOwner)
 			{
-			    alivePlayers.Remove(player);
-			    Debug.Log(alivePlayersCount.Value);
+				alivePlayers.Remove(player);
+				Debug.Log(alivePlayersCount.Value);
 			}
-			if(IsServer) alivePlayersCount.Value--;
 		}
 		if (IsServer && alivePlayersCount.Value <= 0)
 		{
@@ -92,7 +93,13 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			return null;
 		}
 	}
+	public void SpectatePlayers()
+	{
+		if (alivePlayers.Count > 0)
+		{
 
+		}
+	}
 
 	public void RespawnPlayers()
 	{
@@ -160,20 +167,45 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		}
 
 	}
-	//use this function if we need logic to move players if they are out of bounds for example or something
-	[ClientRpc]
-	private void MovePlayerToSpawnPositionClientRpc(NetworkObjectReference playerObjRef, Vector3 spawnPos)
+	public NetworkObject GetNextPlayerToSpectate(bool reset = false)
 	{
-		if (playerObjRef.TryGet(out NetworkObject playerObj))
+		if (alivePlayers.Count == 0)
 		{
-			if (playerObj != null && playerObj.IsOwner)
-			{
-				// If this player object is owned by the client, move it to the spawn position
-				playerObj.transform.position = spawnPos;
-			}
-
+			Debug.LogWarning("No alive players to spectate.");
+			return null;
 		}
+
+		if (reset)
+			currentSpectateIndex = 0;
+		else
+			currentSpectateIndex = (currentSpectateIndex + 1) % alivePlayers.Count;
+
+		NetworkObject selectedPlayer = alivePlayers[currentSpectateIndex];
+
+		if (selectedPlayer == null)
+		{
+			Debug.LogError($"Spectate player at index {currentSpectateIndex} is null!");
+			return null;
+		}
+
+		Debug.Log($"Spectating player at index {currentSpectateIndex}: {selectedPlayer.name} (IsSpawned: {selectedPlayer.IsSpawned})");
+
+		return selectedPlayer;
 	}
+	// //use this function if we need logic to move players if they are out of bounds for example or something
+	// [ClientRpc]
+	// private void MovePlayerToSpawnPositionClientRpc(NetworkObjectReference playerObjRef, Vector3 spawnPos)
+	// {
+	// 	if (playerObjRef.TryGet(out NetworkObject playerObj))
+	// 	{
+	// 		if (playerObj != null && playerObj.IsOwner)
+	// 		{
+	// 			// If this player object is owned by the client, move it to the spawn position
+	// 			playerObj.transform.position = spawnPos;
+	// 		}
+
+	// 	}
+	// }
 
 	public void SpawnPlayers(Vector3 position)
 	{
@@ -186,6 +218,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
 				player.GetComponent<PlayerHealth>().ResetHealth();
+
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
 			}
 		}
@@ -199,7 +232,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			{
 				if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
 				{
-					 NetworkObject playerObject = client.PlayerObject;
+					NetworkObject playerObject = client.PlayerObject;
 
 					if (playerObject != null)
 					{
@@ -211,11 +244,11 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			}
 		}
 	}
-	
+
 	[ClientRpc]
 	private void ClearAlivePlayersClientRpc()
 	{
-	    alivePlayers.Clear();
+		alivePlayers.Clear();
 	}
 
 	private Vector3 DetermineSpawnPosition(Vector3 pos)

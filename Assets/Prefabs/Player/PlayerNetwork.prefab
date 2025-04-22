@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2928858726
+  GlobalObjectIdHash: 3182692800
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -72,5 +72,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   playerPrefab: {fileID: 0}
+  alivePlayers: []
+  alivePlayersCount:
+    m_InternalValue: 0
   spawnIndex:
     m_InternalValue: 0
+  screenManager: {fileID: 0}
+  spectatorTransformPrefab: {fileID: 2560227883963748026, guid: c3b6022aa89d6d340bc6de6b981973f4, type: 3}

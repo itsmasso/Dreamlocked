@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,6 +40,7 @@ public class KeypadScript : MonoBehaviour
         keypad.enabled = false;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     // These function handle the keypad button clicks

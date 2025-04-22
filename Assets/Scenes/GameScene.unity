@@ -565,6 +565,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1051990373}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: VisualHealthBarChanged
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PlayerHealthUI, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7741654487282926814, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -603,6 +639,17 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &1051990373 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1231029376815414922, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+  m_PrefabInstance: {fileID: 1051990370}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051990371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b87b6ae3ae5894f8734c279d930b0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1099277310
 GameObject:
   m_ObjectHideFlags: 0

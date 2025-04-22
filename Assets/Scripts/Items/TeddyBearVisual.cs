@@ -9,30 +9,32 @@ public class TeddyBearVisual : MonoBehaviour, IHasDestroyAnimation
 
     void Start()
     {
-        TeddyBearUseable.onActivateAnimation += PlayActivateAnimation;
-        TeddyBearUseable.onDestroyObject += PlayDestroyAnimation;
+        TeddyBearUseable.onPlayAnimation += PlayAnimation;
     }
-
-    public void PlayActivateAnimation()
-    {
-        if (anim != null)
-        {
-            Debug.Log("play animation");
-            anim.Play("TeddyBearActivated");
-        }
-    }
+    
     public void PlayDestroyAnimation()
     {
         if (dissolveScript != null)
         {
             dissolveScript.StartDissolvingSkinnedMesh();
-            PlayerInventory playerInventory = GetComponentInParent<PlayerInventory>();
-            if (playerInventory != null)
-            {
-                playerInventory.SetCurrentVisualItemNull();
-            }
+            StartCoroutine(DelayedDestroy());
+            
         }
     }
-
+    
+    public void PlayAnimation(bool canActivate)
+    {
+        anim?.SetBool("Activate", canActivate);
+    }
+    private IEnumerator DelayedDestroy()
+    {
+        yield return new WaitForSeconds(dissolveScript.GetDissolveDuration());
+        Destroy(gameObject);
+    }
+    void OnDestroy()
+    {
+        TeddyBearUseable.onPlayAnimation -= PlayAnimation;
+    }
+    
 
 }

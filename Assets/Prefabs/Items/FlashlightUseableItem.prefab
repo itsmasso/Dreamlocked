@@ -198,7 +198,7 @@ MonoBehaviour:
   batteryLevel: 100
   spotLight: {fileID: 9070394446626249861}
   batteryDrainRate: 5
-  interactableLightsScript: {fileID: 295240960199913343}
+  lightScript: {fileID: 295240960199913343}
 --- !u!114 &295240960199913343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,6 +226,7 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  isFlashlight: 1
 --- !u!114 &3436728449696333791
 MonoBehaviour:
   m_ObjectHideFlags: 0

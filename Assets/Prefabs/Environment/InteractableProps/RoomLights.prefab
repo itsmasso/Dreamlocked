@@ -208,7 +208,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
-  interactableLightScript: {fileID: 7978976873083772709}
+  lightScript: {fileID: 7978976873083772709}
 --- !u!114 &7978976873083772709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,6 +236,7 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  isFlashlight: 0
 --- !u!1 &7185308735021249038
 GameObject:
   m_ObjectHideFlags: 0

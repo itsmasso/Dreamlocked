@@ -18,6 +18,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
     [SerializeField] private float propSpawnInterval;
     public float hallwayLightSpawnInterval;
     [SerializeField] private float chanceToSpawnHallwayProp = 0.5f;
+  
     void Start()
     {
 

@@ -550,7 +550,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 45
+  m_SlopeLimit: 55
   m_StepOffset: 0.4
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -1017,6 +1017,7 @@ MonoBehaviour:
   itemParent: {fileID: 4941982663017989936}
   itemTransform: {fileID: 4222349174482778473}
   currentUseableItem: {fileID: 0}
+  currentVisualItem: {fileID: 0}
   currentHeldItemData:
     id: 0
     itemCharge: 0

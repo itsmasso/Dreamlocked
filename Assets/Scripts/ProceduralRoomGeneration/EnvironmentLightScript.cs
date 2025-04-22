@@ -15,14 +15,19 @@ public class EnvironmentLightScript : NetworkBehaviour
 	private bool isLightOn;
 	private bool playerSeesLight;
 
-	[SerializeField] private DetectEnemyInLights interactableLightScript;
+	[SerializeField] private DetectEnemyInLights lightScript;
 	private float Timer;
 
+	public override void OnNetworkSpawn()
+	{
+		base.OnNetworkSpawn();
+	}
 	void Start()
 	{
-
 		// The comment out line would make the flickering all different and random
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
+
+
 		Timer = MIN_FLICKER_TIME;
 		TurnLightsOn();
 	}
@@ -33,27 +38,23 @@ public class EnvironmentLightScript : NetworkBehaviour
 		{
 			if (isLightOn)
 			{
-				interactableLightScript.DetectEnemiesInLight();
-				//interactableLightScript.CheckIfEnemyExitLight();
+				lightScript.TrackEnemiesInLight(false);
+			}
+			CheckLightStatus();
+			if (IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
+			{
+				playerSeesLight = true;
+
+			}
+			else
+			{
+				playerSeesLight = false;
+				lightSource.enabled = false;
+				TurnOffMaterialLight();
 			}
 
-
 		}
-		CheckLightStatus();
-		if (IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
-		{
-			playerSeesLight = true;
-
-		}
-		else
-		{
-			playerSeesLight = false;
-			lightSource.enabled = false;
-			TurnOffMaterialLight();
-		}
-
 	}
-
 	private void TurnOnMaterialLight()
 	{
 		foreach (Renderer renderer in lightMaterialList)
@@ -193,3 +194,4 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 
 }
+

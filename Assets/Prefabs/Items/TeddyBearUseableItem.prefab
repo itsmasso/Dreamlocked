@@ -72,8 +72,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  timeBeforeDestroying: 3
-  effectRadius: 5
+  effectRadius: 8
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512

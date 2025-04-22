@@ -56,6 +56,8 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     // This variable will ensure that the monster stops moving if it is in light
     public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
     private HashSet<DetectEnemyInLights> activeLights = new();
+	private bool isInLightThisFrame = false;
+	private bool wasInLightLastFrame = false;
 
     [Header("Optimization Properties")]
     private float callTimer;
@@ -87,12 +89,18 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             callTimer = 0;
         }
 
-        // if (inLight.Value)
-        // {
-        //     Debug.Log("In Light");
-        // } else {
-        //     Debug.Log("Out of Light");
-        // }
+        if (isInLightThisFrame && !wasInLightLastFrame)
+        {
+            EnteredLight();
+        }
+
+        if (!isInLightThisFrame && wasInLightLastFrame)
+        {
+            ExitLight();
+        }
+
+        wasInLightLastFrame = isInLightThisFrame;
+        isInLightThisFrame = false;
 
         // Basics of Movement
         switch (threatLevelNetworkState.Value)
@@ -226,6 +234,11 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         {
             ExitLight();
         }
+    }
+
+    public void SetInLight(bool isInLight)
+    {
+        isInLightThisFrame = isInLight;
     }
 }
 

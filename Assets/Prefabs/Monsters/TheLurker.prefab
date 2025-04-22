@@ -338,8 +338,8 @@ MonoBehaviour:
   pauseBeforeChasingDuration: 5
   aggressionDistance: 15
   chasingStoppingDistance: 1.25
-  stopChasingDistance: 17
-  minimumChaseTime: 5
+  stopChasingDistance: 22
+  minimumChaseTime: 8
   groundLayer:
     serializedVersion: 2
     m_Bits: 8

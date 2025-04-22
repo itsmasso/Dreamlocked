@@ -9,7 +9,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     private bool isOn;
     [SerializeField] private Light spotLight;
     [SerializeField] private float batteryDrainRate;
-    [SerializeField] private DetectEnemyInLights interactableLightsScript;
+    [SerializeField] private DetectEnemyInLights lightScript;
     private bool isDead;
     public ItemData itemData { private set; get; }
     private bool visuallyTurnedOff;
@@ -30,7 +30,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
             HandleFlashLightLogic();
             HandleBatteryLife();
         }
-        if(IsOwner && transform.parent != null)
+        if (IsOwner && transform.parent != null)
         {
             transform.position = transform.parent.position;
             transform.rotation = transform.parent.rotation;
@@ -47,20 +47,19 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     {
         if (isOn && !isDead && batteryLevel > 0f)
         {
-            if(visuallyTurnedOff)
+            if (visuallyTurnedOff)
             {
                 TurnOnRpc();
             }
-            interactableLightsScript.DetectEnemiesInFlashLight();
-            //interactableLightsScript.CheckIfEnemyExitLight();
+            lightScript.TrackEnemiesInLight(true);
         }
         else
         {
-            if(!visuallyTurnedOff)
+            if (!visuallyTurnedOff)
             {
                 TurnOffRpc();
             }
-            
+
         }
     }
     [Rpc(SendTo.Everyone)]
@@ -76,6 +75,8 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
         spotLight.enabled = false;
         onFlashLightToggle?.Invoke(false);
         visuallyTurnedOff = true;
+
+
     }
 
     private void HandleBatteryLife()
@@ -105,11 +106,18 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
 
     public void UseItem()
     {
-        AllSeeFlashlightSwitchRpc();
+        RequestServerToToggleRpc();
     }
     public ItemData GetData()
     {
         return itemData;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestServerToToggleRpc()
+    {
+        AllSeeFlashlightSwitchRpc();
+        lightScript.enabled = isOn;
     }
 
     [Rpc(SendTo.Everyone)]

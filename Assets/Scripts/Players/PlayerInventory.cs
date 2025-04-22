@@ -157,6 +157,24 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (currentVisualItem != null)
         {
+            IHasDestroyAnimation hasDestroyAnimation = currentVisualItem.GetComponent<IHasDestroyAnimation>();
+            if (hasDestroyAnimation != null)
+            {
+                hasDestroyAnimation.PlayDestroyAnimation();
+            }else
+            {
+                Destroy(currentVisualItem);
+            }
+           
+            currentVisualItem = null;
+        }
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    private void DestroyVisualItemWithoutAnimRpc()
+    {
+        if (currentVisualItem != null)
+        {
             Destroy(currentVisualItem);
             currentVisualItem = null;
         }
@@ -194,7 +212,10 @@ public class PlayerInventory : NetworkBehaviour
         {
             if (netObj.IsSpawned)
             {
-                netObj.Despawn(true);
+
+                IUseableItem<ItemData> useableItem = currentUseableItem.GetComponent<IUseableItem<ItemData>>();
+                useableItem.OnDataChanged -= HandleHeldItemDataChanged;
+                netObj.Despawn(true); //you could optimize this so that we only hide these objects not destroy them
             }
         }
     }
@@ -240,7 +261,7 @@ public class PlayerInventory : NetworkBehaviour
         if (selectedItem.id != -1)
         {
             RequestServerToDespawnUseableItemRpc();
-            DestroyVisualItemRpc();
+            DestroyVisualItemWithoutAnimRpc();
 
             RequestToSpawnUseableItemRpc(selectedItem);
             SpawnVisualItemRpc(selectedItem);
@@ -248,7 +269,7 @@ public class PlayerInventory : NetworkBehaviour
         else
         {
             RequestServerToDespawnUseableItemRpc();
-            DestroyVisualItemRpc();
+            DestroyVisualItemWithoutAnimRpc();
         }
 
     }
@@ -297,15 +318,7 @@ public class PlayerInventory : NetworkBehaviour
         {
             // Clean visual + networked object
             RequestServerToDespawnUseableItemRpc();
-            IHasDestroyAnimation hasDestroyAnimation = currentVisualItem.GetComponent<IHasDestroyAnimation>();
-            if (hasDestroyAnimation != null)
-            {
-                hasDestroyAnimation.PlayDestroyAnimation();
-            }
-            else
-            {
-                DestroyVisualItemRpc();
-            }
+            DestroyVisualItemRpc();
 
             // Clear inventory
             syncedInventory[currentInventoryIndex] = emptyItem;
@@ -339,11 +352,6 @@ public class PlayerInventory : NetworkBehaviour
     public GameObject GetCurrentVisualItem()
     {
         return currentVisualItem;
-    }
-    
-    public void SetCurrentVisualItemNull()
-    {
-        currentVisualItem = null;
     }
 
 

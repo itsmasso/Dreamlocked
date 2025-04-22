@@ -118,6 +118,7 @@ public class UnitManager : NetworkBehaviour
 		Vector3 spawnPosition = GetPositionInRangeOfPlayers();
 	    GameObject lurker = Instantiate(lurkerPrefab, new Vector3(spawnPosition.x, spawnPosition.y + lurkerPrefab.GetComponent<FollowerEntity>().height/2, spawnPosition.z), Quaternion.identity);
 	    lurker.GetComponent<LurkerMonsterScript>().houseMapGenerator = houseMapGenerator;
+
 		spawnedEnemies.Add(lurker.GetComponent<NetworkObject>());
 		lurker.GetComponent<NetworkObject>().Spawn(true);
 	    lurkerSpawnCount++;
@@ -128,6 +129,7 @@ public class UnitManager : NetworkBehaviour
 		GameObject monsterObject = Instantiate(monsterPrefab, position, rotation);
 		spawnedEnemies.Add(monsterObject.GetComponent<NetworkObject>());
 		monsterObject.GetComponent<NetworkObject>().Spawn(true);
+
 		
 	}
 	/*****************************************************************

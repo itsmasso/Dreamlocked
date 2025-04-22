@@ -73,7 +73,8 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
 	[SerializeField] private float inDarkSpeed;
 	[SerializeField] private float inLightSpeed;
-	private HashSet<DetectEnemyInLights> activeLights = new();
+	private bool isInLightThisFrame = false;
+	private bool wasInLightLastFrame = false;
 
 	[Header("Animation Properties")]
 	public Animator anim;
@@ -139,7 +140,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		// if (inLight.Value)
 		// {
 		// 	UnityEngine.Debug.Log("Lurker is in Light");
-		// } else {
+		// }
+		// else
+		// {
 		// 	UnityEngine.Debug.Log("Lurker is NOT in Light");
 		// }
 		currentState.UpdateState(this);
@@ -155,24 +158,20 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			// Freeze animation if not moving
 			animationManager.PlayIdleAnimation();
 		}
-
-	}
-	public void AddLightSource(DetectEnemyInLights lightSource)
-	{
-		if (activeLights.Add(lightSource) && activeLights.Count == 1)
+		if(isInLightThisFrame && !wasInLightLastFrame)
 		{
-			EnteredLight();
+		    EnteredLight();
 		}
-	}
-
-	public void RemoveLightSource(DetectEnemyInLights lightSource)
-	{
-		if (activeLights.Remove(lightSource) && activeLights.Count == 0)
+		
+		if(!isInLightThisFrame && wasInLightLastFrame)
 		{
-			ExitLight();
+		    ExitLight();
 		}
-	}
+		
+		wasInLightLastFrame = isInLightThisFrame;
+		isInLightThisFrame = false;
 
+	}
 	public void ReactToPlayerGaze(NetworkObjectReference playerObjectRef)
 	{
 		RequestServerToChasePlayerRpc(playerObjectRef);
@@ -317,6 +316,10 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		}
 
 	}
+	public void SetInLight(bool isInLight)
+	{
+		isInLightThisFrame = true;
+	}
 
 	public void EnteredLight()
 	{
@@ -341,4 +344,6 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 		StartStalkCooldown();
 		SwitchState(LurkerState.Roaming);
 	}
+
+
 }

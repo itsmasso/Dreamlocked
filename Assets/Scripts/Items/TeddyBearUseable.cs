@@ -54,26 +54,18 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
             {
                 Debug.Log("activating effect");
                 affectedByBear.ActivateBearItemEffect();
-                PlayDestroyAnimationRpc();
+                if (usesRemaining > 0)
+                {
+                    PlayerInventory playerInventory = GetComponentInParent<PlayerInventory>();
+                    playerInventory?.RequestServerToDestroyItemRpc();
+                    usesRemaining--;
+                    if (usesRemaining <= 0)
+                        usesRemaining = 0;
+                }
                 activatedEffect = true;
             }
         }
     }
-
-
-    [Rpc(SendTo.Everyone)]
-    private void PlayDestroyAnimationRpc()
-    {
-        if (usesRemaining > 0)
-        {
-            PlayerInventory playerInventory = GetComponentInParent<PlayerInventory>();
-            playerInventory?.RequestServerToDestroyItemRpc();
-            usesRemaining--;
-            if (usesRemaining <= 0)
-                usesRemaining = 0;
-        }
-    }
-
 
     public void UseItem()
     {
@@ -89,12 +81,13 @@ public class TeddyBearUseable : NetworkBehaviour, IUseableItem<ItemData>
     [Rpc(SendTo.Everyone)]
     private void ActivateAnimationRpc()
     {
-        if(isActive)
+        if (isActive)
         {
             onPlayAnimation(true);
-        }else
+        }
+        else
         {
-             onPlayAnimation(false);
+            onPlayAnimation(false);
         }
     }
 

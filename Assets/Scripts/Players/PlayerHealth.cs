@@ -22,11 +22,11 @@ public class PlayerHealth : NetworkBehaviour
     
     public void ResetHealth()
     {
-        RestoreHealthRpc(playerScriptable.health);
+        RequestServerToRestoreHealthRpc(playerScriptable.health);
     }
     
     [Rpc(SendTo.Server)]
-    public void RestoreHealthRpc(int amount)
+    public void RequestServerToRestoreHealthRpc(int amount)
     {
         if (!IsServer) return;
 

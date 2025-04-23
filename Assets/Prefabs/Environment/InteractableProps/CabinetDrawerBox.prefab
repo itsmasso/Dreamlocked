@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 6457019783820100260}
   - component: {fileID: 2248123815919333147}
   - component: {fileID: 8095399780983777240}
+  - component: {fileID: 7699440766488157342}
   - component: {fileID: 227419184293648229}
   - component: {fileID: 3828767753466170035}
   m_Layer: 7
@@ -112,10 +113,28 @@ MonoBehaviour:
   drawerOpenSmoothTime: 5
   itemList:
   - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
-  itemSpawnChance: 0.65
+  - {fileID: 11400000, guid: fe629c8638517684aa71907a02e5d019, type: 2}
+  - {fileID: 11400000, guid: 1e4b9cc4c1b6123498ff43a6fe0c4278, type: 2}
+  - {fileID: 11400000, guid: 4f2838519e479414c9929af2434f515a, type: 2}
   canInteract:
     m_InternalValue: 1
   interactCooldown: 1
+  itemPlacer: {fileID: 7699440766488157342}
+--- !u!114 &7699440766488157342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7601275284613506327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d10a0c3f57d885e4fa681805d7661672, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  chanceToSpawnItem: 0.75
+  itemSpawnRadius: 0.02
 --- !u!65 &227419184293648229
 BoxCollider:
   m_ObjectHideFlags: 0

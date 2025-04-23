@@ -51,26 +51,34 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     [SerializeField] private float attackCooldown;
     private bool canAttack;
     private Coroutine attackCoroutine;
+    [SerializeField] private float aggroRadius = 10f;
 
     [Header("Light Properties")]
     // This variable will ensure that the monster stops moving if it is in light
     public NetworkVariable<bool> inLight = new NetworkVariable<bool>(false);
     private HashSet<DetectEnemyInLights> activeLights = new();
-	private bool isInLightThisFrame = false;
-	private bool wasInLightLastFrame = false;
+    private bool isInLightThisFrame = false;
+    private bool wasInLightLastFrame = false;
 
     [Header("Optimization Properties")]
     private float callTimer;
+    [Header("Animation")]
+    [SerializeField] private MannequinAnimationManager mannequinAnimationManager;
+
 
     private void Start()
     {
         if (!IsServer) return;
         manager = GFClockManager.Instance;
-        threatLevelNetworkState.Value = manager.GetMQThreatLevel();
+        canAttack = true;
         agent.stopDistance = STOPPING_DISTANCE;
         callTimer = 0;
     }
-
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (manager != null) threatLevelNetworkState.Value = manager.GetMQThreatLevel();
+    }
     private void Update()
     {
         //only server can run this code
@@ -81,20 +89,12 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             threatLevelNetworkState.Value = manager.GetMQThreatLevel();
         }
 
-        // Select a target if there is no target already
-        callTimer += Time.deltaTime;
-        if (callTimer > 1f)
-        {
-            SetClosestPlayerAsTarget();
-            callTimer = 0;
-        }
-
-        if (isInLightThisFrame && !wasInLightLastFrame)
+        if (isInLightThisFrame && !wasInLightLastFrame && threatLevelNetworkState.Value != MQThreatLevel.PASSIVE)
         {
             EnteredLight();
         }
 
-        if (!isInLightThisFrame && wasInLightLastFrame)
+        if (!isInLightThisFrame && wasInLightLastFrame && threatLevelNetworkState.Value != MQThreatLevel.PASSIVE)
         {
             ExitLight();
         }
@@ -108,23 +108,30 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             case MQThreatLevel.PASSIVE:
                 // Debug.Log("Mannequin Threat Level is now: " + threatLevelNetworkState.Value);
                 // No moving for you
+                mannequinAnimationManager.PlayIdleAnimation();
                 agent.canMove = false;
                 break;
             case MQThreatLevel.ACTIVATING:
                 // Debug.Log("Mannequin Threat Level is now: " + threatLevelNetworkState.Value);
                 // Chase currentTarget at ACTIVATING_SPEED
+
                 if (!inLight.Value)
                 {
                     MoveToPlayer(ACTIVATING_MOVE_SPEED);
+
+                    mannequinAnimationManager.SetAnimationSpeed(0.5f);
                 }
                 AttackPlayer();
                 break;
             case MQThreatLevel.AWAKENED:
                 // Debug.Log("Mannequin Threat Level is now: " + threatLevelNetworkState.Value);
                 // Chase currentTarget at AWAKENED_SPEED
+
                 if (!inLight.Value)
                 {
                     MoveToPlayer(mannequinScriptable.baseSpeed);
+
+                    mannequinAnimationManager.SetAnimationSpeed(1f);
                 }
                 AttackPlayer();
                 break;
@@ -137,22 +144,45 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         }
     }
 
-    private void SetClosestPlayerAsTarget()
+    // private void SetClosestPlayerAsTarget()
+    // {
+    //     if (!IsServer) return;
+
+    //     if (PlayerNetworkManager.Instance.alivePlayers.Count > 0)
+    //     {
+    //         currentTarget = PlayerNetworkManager.Instance.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
+    //         .OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
+
+    //         if (currentTarget == null)
+    //         {
+    //             Debug.Log("no target on same floor");
+
+    //             currentTarget = PlayerNetworkManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
+    //         }
+    //     }
+    // }
+
+    private void FindPlayersInRadius()
     {
-        if (!IsServer) return;
+        Collider[] colliders = Physics.OverlapSphere(transform.position, aggroRadius, playerLayer);
+        float closestDistance = Mathf.Infinity;
+        Transform closestTarget = null;
 
-        if (PlayerNetworkManager.Instance.alivePlayers.Count > 0)
+        foreach (Collider collider in colliders)
         {
-            currentTarget = PlayerNetworkManager.Instance.alivePlayers.Where(p => Mathf.Abs(p.GetComponent<PlayerController>().GetPlayerGroundedPosition().y - transform.position.y) < 1)
-            .OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
+            float verticalDifference = Mathf.Abs(transform.position.y - collider.transform.position.y);
+            if (verticalDifference > 2f)
+                continue; // skip if not on the same floor
 
-            if (currentTarget == null)
+            float distance = Vector3.Distance(transform.position, collider.transform.position);
+            if (distance < closestDistance)
             {
-                Debug.Log("no target on same floor");
-
-                currentTarget = PlayerNetworkManager.Instance.alivePlayers.OrderBy(p => Vector3.Distance(p.GetComponent<PlayerController>().GetPlayerGroundedPosition(), transform.position)).FirstOrDefault().transform;
+                closestDistance = distance;
+                closestTarget = collider.transform;
             }
         }
+
+        currentTarget = closestTarget;
     }
 
     // [Rpc(SendTo.Everyone)]
@@ -165,10 +195,23 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     // }
     private void MoveToPlayer(float speed)
     {
+        // Select a target if there is no target already
+        callTimer += Time.deltaTime;
+        if (callTimer > 1f)
+        {
+            //SetClosestPlayerAsTarget();
+            FindPlayersInRadius();
+            callTimer = 0;
+        }
         agent.canMove = true;
+
         agent.maxSpeed = speed;
-        agent.destination = currentTarget.position;
-        agent.SearchPath();
+        if (currentTarget != null)
+        {
+            agent.destination = currentTarget.position;
+            mannequinAnimationManager.PlayWalkAnimation();
+            agent.SearchPath();
+        }
 
     }
 
@@ -178,6 +221,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         {
             if (canAttack && Vector3.Distance(currentTarget.position, transform.position) <= attackRange)
             {
+                mannequinAnimationManager.PlayAttackAnimation();
                 PlayerHealth playerHealth = currentTarget.GetComponent<PlayerHealth>();
                 playerHealth.RequestServerTakeDamageRpc(mannequinScriptable.damage);
                 StartAttackCooldown();
@@ -206,6 +250,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         {
             inLight.Value = true;
             agent.canMove = false;
+            mannequinAnimationManager.SetAnimationSpeed(0);
             agent.SetPath(null);
         }
 
@@ -216,6 +261,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         {
             inLight.Value = false;
             agent.canMove = true;
+            mannequinAnimationManager.SetAnimationSpeed(1);
         }
 
     }

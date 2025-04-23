@@ -206,6 +206,21 @@ public class HouseMapGenerator : NetworkBehaviour
 		}
 		return roomPositions;
 	}
+	
+	public List<Room> GetNormalRoomComponents()
+	{
+	    List<Room> roomComponents = new List<Room>();
+		
+		foreach (GameObject roomObj in rooms)
+		{
+			Room room = roomObj.GetComponent<Room>();
+			if (!room.isSpecialRoom && !room.isStairs)
+			{
+				roomComponents.Add(room);
+			}
+		}
+		return roomComponents;
+	}
 
 	public Vector3 GetPlayerSpawnPosition()
 	{

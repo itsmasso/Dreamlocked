@@ -180,7 +180,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	[Rpc(SendTo.Server)]
 	private void RequestServerToChasePlayerRpc(NetworkObjectReference playerObjectRef)
 	{
-		if (canAttack && canStalk)
+		if (canAttack)
 		{
 			playerObjectRef.TryGet(out NetworkObject playerObject);
 			float distance = Vector2.Distance(playerObject.transform.position, transform.position);
@@ -342,6 +342,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public void ActivateBearItemEffect()
 	{
 		StartStalkCooldown();
+		StartAttackCooldown();
 		SwitchState(LurkerState.Roaming);
 	}
 

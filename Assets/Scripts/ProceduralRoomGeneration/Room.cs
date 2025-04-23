@@ -18,6 +18,8 @@ public class Room : MonoBehaviour
 	// This will hold the positions where interactable objects will be spawned in rooms
 	[SerializeField] public List<Transform> interactableObjectTransforms;
     [SerializeField] public List<GameObject> interactableObjectPrefabs;
+    [Header("Known Monster Spawn Positions")]
+    public List<Transform> monsterTransforms;
 	
 	public Vector3Int Min => position;
 	public Vector3Int Max => position + size;

@@ -112,6 +112,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SpectateNext",
+                    "type": "Button",
+                    "id": "1e77b129-e556-42a7-a97b-c85d2cb0adff",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -453,6 +462,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "UseItem",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ba711469-a3a2-4ecf-972f-f62f07218afe",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SpectateNext",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

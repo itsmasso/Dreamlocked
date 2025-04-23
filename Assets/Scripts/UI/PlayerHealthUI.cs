@@ -1,30 +1,30 @@
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
+
 using UnityEngine.UI;
-public class PlayerHealthUI : NetworkBehaviour
+public class PlayerHealthUI : MonoBehaviour
 {
     [SerializeField] private Slider healthBar;
     [SerializeField] private PlayerScriptable playerScriptable;
     private int maxHealth;
-
+ 
     void Start()
     {
         PlayerHealth.onUpdateHealth += UpdateHealthBar;
         maxHealth = playerScriptable.health;
-        UpdateHealthBar(maxHealth); 
+        UpdateHealthBar(maxHealth);
     }
 
     private void UpdateHealthBar(int currentHealth)
     {
         float val = Mathf.Clamp01((float)currentHealth / maxHealth);
 
-        //Debug.Log($"HealthBar Value: {val}");
         healthBar.value = val;
         if (currentHealth <= 0) healthBar.value = 0;
-
+        Debug.Log($"[Health UI] Slider reference ID: {healthBar.GetInstanceID()}, name: {healthBar.name}");
     }
 
-    public override void OnDestroy()
+    public void OnDestroy()
     {
         PlayerHealth.onUpdateHealth -= UpdateHealthBar;
     }

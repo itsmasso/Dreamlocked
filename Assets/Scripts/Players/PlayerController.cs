@@ -63,6 +63,9 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	public float floorPosition;
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
+	//player effects
+	private Coroutine speedUpCoroutine;
+	private int currentSpeedBoost = 0;
 	void Awake()
 	{
 		//start character controller disabled
@@ -226,7 +229,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			switch (currentState)
 			{
 				case PlayerState.Walking:
-					moveSpeed = baseMoveSpeed;
+					moveSpeed = baseMoveSpeed + currentSpeedBoost;
 					if (enabledSprinting)
 						currentState = PlayerState.Running;
 					else if (enabledCrouching)
@@ -235,7 +238,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 					}
 					break;
 				case PlayerState.Running:
-					moveSpeed = baseMoveSpeed + addedSprintSpeed;
+					moveSpeed = baseMoveSpeed + addedSprintSpeed + currentSpeedBoost;
 					if (enabledCrouching)
 					{
 						enabledSprinting = false;
@@ -247,7 +250,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 					break;
 				case PlayerState.Crouching:
 
-					moveSpeed = baseMoveSpeed * crouchSpeedMultiplier;
+					moveSpeed = baseMoveSpeed * crouchSpeedMultiplier + currentSpeedBoost;
 					if (enabledSprinting)
 					{
 						enabledCrouching = false;
@@ -302,6 +305,27 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		canMove = false;
 		yield return new WaitForSeconds(lockTime);
 		canMove = true;
+	}
+
+	public void SpeedUp(float duration, int speedBoost)
+	{
+		if (speedUpCoroutine != null)
+		{
+			moveSpeed -= currentSpeedBoost;
+			StopCoroutine(speedUpCoroutine);
+		}
+		currentSpeedBoost = speedBoost;
+		GetComponent<PlayerCamera>().currentFOVSpeedBoost = 25f;
+
+		speedUpCoroutine = StartCoroutine(StartSpeedUp(duration));
+	}
+
+	private IEnumerator StartSpeedUp(float duration)
+	{
+		yield return new WaitForSeconds(duration);
+		GetComponent<PlayerCamera>().currentFOVSpeedBoost = 0f;
+		currentSpeedBoost = 0;
+		speedUpCoroutine = null;
 	}
 
 	public override void OnDestroy()

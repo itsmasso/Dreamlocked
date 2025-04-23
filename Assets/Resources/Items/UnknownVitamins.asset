@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa9e842d7a2906e4898fd0d1b59f5276, type: 3}
+  m_Name: UnknownVitamins
+  m_EditorClassIdentifier: 
+  id: 7
+  itemName: Unknown Vitamins
+  isUseable: 1
+  itemCharge: 0
+  usesRemaining: 1
+  spawnWeight: 1
+  visualPrefab: {fileID: 3974813361182231001, guid: 697003d066d540a438ea1e1d46bfc2b1, type: 3}
+  droppablePrefab: {fileID: 8871716715302978650, guid: 5886c52fb17a0184fa34077ab03e329a, type: 3}
+  useablePrefab: {fileID: 4321417120564621162, guid: 82c18d88cfa26d144a79095fc52bce08, type: 3}
+  icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}

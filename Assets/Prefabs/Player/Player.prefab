@@ -592,6 +592,7 @@ MonoBehaviour:
   defaultFOV: {x: 0, y: 60}
   zoomSmoothTime: 8
   spectatorCam: {fileID: 0}
+  spectatorTransform: {fileID: 0}
   idleBobAmplitude: 0.3
   idleBobFrequency: 0.4
   walkBobSpeed: 12
@@ -614,6 +615,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   peripheralAngle: 60
+  sprintFOV: {x: 0, y: 70}
+  currentFOVSpeedBoost: 0
+  fovTransitionSpeed: 5
 --- !u!114 &5310495392972413353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -871,6 +875,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: b1282377-d803-4cad-9043-662f6ac5bbfa
     m_ActionName: 'Player/UseItem[/Keyboard/f]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8281037400485576814}
+        m_TargetAssemblyTypeName: PlayerCamera, Assembly-CSharp
+        m_MethodName: OnSpectateNext
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1e77b129-e556-42a7-a97b-c85d2cb0adff
+    m_ActionName: 'Player/SpectateNext[/Keyboard/space]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -938,6 +958,7 @@ MonoBehaviour:
     id: 0
     itemCharge: 0
     usesRemaining: 0
+    uniqueId: 0
   throwForce: 3
   animator: {fileID: 7526211728315977900}
 --- !u!114 &4454347209125263803

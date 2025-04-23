@@ -35,8 +35,6 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	[SerializeField] private CinemachineCamera spectatorCam;
 	public Transform spectatorTransform;
 	private Transform currentPlayerToSpectate;
-	private int currentSpectateIndex = 0;
-	private List<Transform> spectateTargets = new List<Transform>();
 
 	[Header("Head Sway")]
 	private CinemachineBasicMultiChannelPerlin camNoiseChannel;
@@ -59,7 +57,10 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	[SerializeField] private LayerMask obstacleLayer;
 	[SerializeField] private LayerMask interactableMoveablesLayer;
 	[SerializeField] private float peripheralAngle; //max angle that determines how wide the field of view extends around the player. If angle is 90 degrees, it means the view is limited to 45 to the left and right
-
+	[Header("FOV Effects")]
+	[SerializeField] private Vector2 sprintFOV;
+	public float currentFOVSpeedBoost = 0f;
+	[SerializeField] private float fovTransitionSpeed = 5f;
 	void Start()
 	{
 		if (!IsOwner)
@@ -99,6 +100,14 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
+	}
+	
+	public void OnSpectateNext(InputAction.CallbackContext ctx)
+	{
+	    if(ctx.performed && isDead)
+	    {
+	        currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
+	    }
 	}
 	public Transform GetSpectatorTransform()
 	{
@@ -282,7 +291,17 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		}
 
 		inputAxisController.enabled = canMove;
-		followZoom.FovRange = canMove ? Vector2.Lerp(followZoom.FovRange, defaultFOV, zoomSmoothTime * Time.deltaTime) : Vector2.Lerp(followZoom.FovRange, jumpScareFOV, zoomSmoothTime * Time.deltaTime);
+		if(canMove && playerController.currentState == PlayerState.Walking)
+		{
+		    followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, defaultFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed * Time.deltaTime);
+		}else if(canMove && playerController.currentState == PlayerState.Running){
+			followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, sprintFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed  * Time.deltaTime);
+		}
+		else if(!canMove)
+		{
+		    followZoom.FovRange =  Vector2.Lerp(followZoom.FovRange, jumpScareFOV, zoomSmoothTime * Time.deltaTime);
+		}
+		
 
 	}
 

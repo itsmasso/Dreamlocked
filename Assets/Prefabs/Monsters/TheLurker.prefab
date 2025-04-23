@@ -353,7 +353,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   attackRange: 1.5
-  attackCooldown: 3
+  attackCooldown: 7
   canAttack: 0
   inLight:
     m_InternalValue: 0

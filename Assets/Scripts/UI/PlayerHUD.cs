@@ -1,10 +1,10 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerHUD : MonoBehaviour
 {
     [SerializeField] private GameObject playerUI;
-    
-    
+
     private void HideUI()
     {
         playerUI.SetActive(false);
@@ -16,12 +16,13 @@ public class PlayerHUD : MonoBehaviour
     void Start()
     {
         GameManager.Instance.onGameStart += ShowUI;
-        PlayerHealth.onDeath += HideUI;
+    
+       PlayerHealth.onDeath += HideUI;
     }
     void OnDestroy()
     {
         GameManager.Instance.onGameStart -= ShowUI;
-        PlayerHealth.onDeath -= HideUI;
+       PlayerHealth.onDeath -= HideUI;
     }
 
 }

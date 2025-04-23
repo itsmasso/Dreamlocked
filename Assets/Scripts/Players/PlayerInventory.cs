@@ -11,8 +11,10 @@ public class PlayerInventory : NetworkBehaviour
 {
     public static event Action<int> onNewSlotSelected;
     public static event Action<int> onDropItem;
-    public static event Action<int, int> onAddItem;
+    public static event Action<int, int, ItemData> onAddItem;
+    public static event Action<int, float> onUpdateChargeBar;
     [SerializeField] private NetworkList<ItemData> syncedInventory = new NetworkList<ItemData>();
+    public NetworkList<ItemData> SyncedInventory => syncedInventory;
     //private ItemScriptableObject currentActiveItem;
     [SerializeField] private int currentInventoryIndex;
     [SerializeField] private int lastInventoryIndex = -1;
@@ -39,7 +41,8 @@ public class PlayerInventory : NetworkBehaviour
             {
                 id = -1,
                 itemCharge = 0,
-                usesRemaining = 0
+                usesRemaining = 0,
+                uniqueId = -1
             };
 
             while (syncedInventory.Count < 4)
@@ -120,7 +123,7 @@ public class PlayerInventory : NetworkBehaviour
                     RequestToSpawnUseableItemRpc(itemData);
 
                 }
-                OwnerUpdatesSpriteRpc(i, itemData.id);
+                OwnerUpdatesSpriteRpc(i, itemData.id, itemData);
 
                 syncedInventory[i] = itemData;
                 return true;
@@ -143,16 +146,44 @@ public class PlayerInventory : NetworkBehaviour
 
 
     [Rpc(SendTo.Owner)]
-    private void OwnerUpdatesSpriteRpc(int slotNumber, int id)
+    private void OwnerUpdatesSpriteRpc(int slotNumber, int id, ItemData itemData)
     {
-        onAddItem?.Invoke(slotNumber, id);
+        onAddItem?.Invoke(slotNumber, id, itemData);
     }
-    private void HandleHeldItemDataChanged(ItemData newData)
+    private void UpdateItemDataOnChange(ItemData newData)
     {
         if (!IsServer) return;
-        syncedInventory[currentInventoryIndex] = newData;
-        currentHeldItemData = newData;
+
+        for (int i = 0; i < syncedInventory.Count; i++)
+        {
+            if (syncedInventory[i].uniqueId == newData.uniqueId)
+            {
+                syncedInventory[i] = newData;
+                OwnerUpdatesChargeBarRpc(i, newData);
+                if (currentHeldItemData.uniqueId == newData.uniqueId)
+                {
+                    currentHeldItemData = newData;
+                }
+                break;
+            }
+        }
     }
+    [Rpc(SendTo.Owner)]
+    private void OwnerUpdatesChargeBarRpc(int slotNumber, ItemData newData)
+    {
+        onUpdateChargeBar?.Invoke(slotNumber, newData.itemCharge);
+    }
+
+    public ItemData GetItemDataByUniqueId(int uniqueId)
+    {
+        foreach (var item in syncedInventory)
+        {
+            if (item.uniqueId == uniqueId)
+                return item;
+        }
+        return default;
+    }
+
 
     [Rpc(SendTo.Everyone)]
     private void SpawnVisualItemRpc(ItemData itemData)
@@ -212,7 +243,7 @@ public class PlayerInventory : NetworkBehaviour
             if (useableItem != null)
             {
                 useableItem.InitializeData(itemData);
-                useableItem.OnDataChanged += HandleHeldItemDataChanged;
+                useableItem.OnDataChanged += UpdateItemDataOnChange;
                 currentHeldItemData = itemData;
             }
         }
@@ -229,7 +260,7 @@ public class PlayerInventory : NetworkBehaviour
             {
 
                 IUseableItem<ItemData> useableItem = currentUseableItem.GetComponent<IUseableItem<ItemData>>();
-                useableItem.OnDataChanged -= HandleHeldItemDataChanged;
+                useableItem.OnDataChanged -= UpdateItemDataOnChange;
                 netObj.Despawn(true); //you could optimize this so that we only hide these objects not destroy them
             }
         }
@@ -291,13 +322,12 @@ public class PlayerInventory : NetworkBehaviour
         }
 
     }
-    
+
     [Rpc(SendTo.Owner)]
     private void SetHoldItemRpc(bool isHoldingItem)
     {
         animator.SetBool("isHoldingItem", isHoldingItem);
     }
-
 
     [Rpc(SendTo.Owner)]
     private void OwnerHighlightsNewSlotRpc(int inventoryIndex)
@@ -309,19 +339,20 @@ public class PlayerInventory : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void RequestServerToDropItemRpc(Vector3 dropDirection, float throwForce)
     {
-        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0 };
+        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
 
         if (syncedInventory[currentInventoryIndex].id != -1)
         {
             // Clean visual + networked object
             RequestServerToDespawnUseableItemRpc();
-            DestroyVisualItemRpc();
+            DestroyVisualItemWithoutAnimRpc();
 
             // Spawn drop in world
             var dropPrefab = ItemDatabase.Get(syncedInventory[currentInventoryIndex].id).droppablePrefab;
             var droppedItem = Instantiate(dropPrefab, itemTransform.position, Quaternion.identity);
             droppedItem.GetComponent<NetworkObject>().Spawn(true);
-            droppedItem.GetComponent<InteractableItemBase>().InitializeItemData(currentHeldItemData);
+            var itemDataToDrop = syncedInventory[currentInventoryIndex];
+            droppedItem.GetComponent<InteractableItemBase>().InitializeItemData(itemDataToDrop);
             droppedItem.GetComponent<InteractableItemBase>().ThrowItem(dropDirection, throwForce);
 
             // Clear inventory
@@ -338,7 +369,7 @@ public class PlayerInventory : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestServerToDestroyItemRpc()
     {
-        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0 };
+        ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
 
         if (syncedInventory[currentInventoryIndex].id != -1)
         {
@@ -379,6 +410,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         return currentVisualItem;
     }
+
 
 
     [Rpc(SendTo.Owner)]

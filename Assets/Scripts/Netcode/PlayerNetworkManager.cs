@@ -31,6 +31,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	{
 		base.OnNetworkSpawn();
 	}
+
 	[Rpc(SendTo.Everyone)]
 	public void RegisterPlayerClientRpc(NetworkObjectReference playerRef)
 	{
@@ -218,7 +219,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
 				player.GetComponent<PlayerHealth>().ResetHealth();
-
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
 			}
 		}

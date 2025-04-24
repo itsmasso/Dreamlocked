@@ -59,10 +59,17 @@ public class PlayerInteractScript : NetworkBehaviour
 			{
 				//NetworkObject networkObj = obj.gameObject.GetComponent<NetworkObject>();
 				IInteractable interactable = obj.gameObject.GetComponent<IInteractable>();
-
+				IInteractable interactableParent = obj.gameObject.GetComponentInParent<IInteractable>();
 				if (interactable != null && pressedInteract)
 				{
 					interactable.Interact(gameObject.GetComponent<NetworkObject>());
+
+					pressedInteract = false;
+					break;
+				}
+				else if (interactableParent != null && pressedInteract)
+				{
+					interactableParent.Interact(gameObject.GetComponent<NetworkObject>());
 
 					pressedInteract = false;
 					break;

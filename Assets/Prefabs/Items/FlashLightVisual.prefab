@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 25903317558248048}
   - component: {fileID: 1323323788575869109}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FlashLightVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131,6 +131,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: afe04511f0c5c9741b8fcc87dd87c8a2, type: 3}
       propertyPath: m_Name
       value: Flashlight
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: afe04511f0c5c9741b8fcc87dd87c8a2, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

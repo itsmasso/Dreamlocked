@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Pathfinding;
+using System.Collections.Generic;
 public class Door : NetworkBehaviour, IInteractable
 {
     [SerializeField] private float targetYRotation;
@@ -8,9 +9,10 @@ public class Door : NetworkBehaviour, IInteractable
     public float defaultYRotation;
     [SerializeField] private Transform pivot;
     [SerializeField] private float maxDoorAngle;
-    [SerializeField] private NavmeshCut navmeshCut;
     [SerializeField] private bool isOpen;
     public bool isLocked;
+    [SerializeField] private ItemScriptableObject requiredKeySO;
+    [SerializeField] private ItemScriptableObject lockpickSO;
     void Start()
     {
         isOpen = false;
@@ -95,22 +97,37 @@ public class Door : NetworkBehaviour, IInteractable
     {
         if (playerObjectRef.TryGet(out NetworkObject playerObject))
         {
-            if(!isLocked)
+            if (!isLocked)
             {
                 RequestServerToToggleDoorRpc(playerObject.transform.position);
-            }else
+            }
+            else
             {
-                if (playerObject.GetComponent<PlayerInventory>().GetCurrentVisualItem() != null && 
-                    playerObject.GetComponent<PlayerInventory>().GetCurrentVisualItem().name == "KeyVisual(Clone)")
+                if (playerObject.GetComponent<PlayerInventory>().currentHeldItemData.id != -1 &&
+                     playerObject.GetComponent<PlayerInventory>().GetCurrentHeldItemID() == requiredKeySO.id)
                 {
                     Debug.Log("Unlocked Door");
                     isLocked = false;
+                    playerObject.GetComponent<PlayerInventory>().RequestServerToDestroyItemRpc();
+                }
+                else if(playerObject.GetComponent<PlayerInventory>().currentHeldItemData.id != -1 &&
+                playerObject.GetComponent<PlayerInventory>().GetCurrentHeldItemID() == lockpickSO.id)
+                {
+                    float rand = Random.value;
+                    if(rand <= 0.5f)//crochet needle (lock pick) has a 50 chance of opening any locked door
+                    {
+                        isLocked = false;
+                    }else
+                    {
+                        Debug.Log("Failed to lock pick door.");
+                    }
                     playerObject.GetComponent<PlayerInventory>().RequestServerToDestroyItemRpc();
                 }
                 else
                 {
                     Debug.Log("Door is locked");
                 }
+
             }
         }
     }

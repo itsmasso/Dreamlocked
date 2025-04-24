@@ -21,12 +21,12 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 		base.OnNetworkSpawn();
 	}
 
-    public void InitializeItemData(ItemData data)
+	public void InitializeItemData(ItemData data)
 	{
 		if (!IsServer) return;
 		itemData = data;
 	}
-	
+
 	public virtual void Interact(NetworkObjectReference playerNetworkObjRef)
 	{
 		RequestServerToInteractRpc(playerNetworkObjRef);
@@ -59,12 +59,15 @@ public abstract class InteractableItemBase : NetworkBehaviour, IInteractable
 	protected virtual void AllSeeClientThrowItemRpc(Vector3 direction, float throwForce)
 	{
 		Debug.Log("throwing item");
-		
+		if (IsServer)
+		{
+			objectRb.isKinematic = false;
+			GetComponent<Collider>().enabled = true;
+			GetComponent<Collider>().isTrigger = false;
+		}
 		GetComponent<NetworkObject>().TrySetParent((Transform)null, true);
 		transform.parent = null;
-		objectRb.isKinematic = false;
-		GetComponent<Collider>().enabled = true;
-		GetComponent<Collider>().isTrigger = false;
+
 		objectRb.AddForce(direction.normalized * throwForce, ForceMode.VelocityChange);
 	}
 

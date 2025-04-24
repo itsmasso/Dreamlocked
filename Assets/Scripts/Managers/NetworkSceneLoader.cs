@@ -40,6 +40,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
     {
         if (IsServer)
         {
+            //this need to go on game start
             LoadSceneAdditively("GameScene");
             SetActiveScene("GameScene");
         }

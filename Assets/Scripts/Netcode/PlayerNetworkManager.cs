@@ -18,6 +18,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	public static event Action onRespawnPlayer;
 	[SerializeField] private ScreenManager screenManager;
 	private NetworkVariable<Vector3> currentSpawnPos = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	private Dictionary<ulong, List<ItemData>> savedInventories = new();
 	void Start()
 	{
 		if (IsServer)
@@ -219,6 +220,13 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
 				player.GetComponent<PlayerHealth>().ResetHealth();
+				var inventory = LoadInventory(playerNetworkObject.OwnerClientId);
+				player.GetComponent<PlayerInventory>().EnsureEmptyInventorySlots(4);
+				foreach (var itemData in inventory)
+				{
+					player.GetComponent<PlayerInventory>().RepopulateItem(itemData);
+				}
+				player.GetComponent<PlayerInventory>().RequestServerToSelectNewItemRpc(0);
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
 			}
 		}
@@ -236,6 +244,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 
 					if (playerObject != null)
 					{
+						SaveInventory(playerObject.OwnerClientId, playerObject.GetComponent<PlayerInventory>().SyncedInventory);
 						playerObject.Despawn(true);
 						ClearAlivePlayersClientRpc();
 						Debug.Log($"Despawned {clientId}: {playerObject.name}");
@@ -243,6 +252,52 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				}
 			}
 		}
+	}
+	public void SaveInventory(ulong clientId, NetworkList<ItemData> inventoryList)
+	{
+		List<ItemData> copy = new List<ItemData>();
+		foreach (var item in inventoryList)
+		{
+			copy.Add(item);
+		}
+
+		savedInventories[clientId] = copy;
+		Debug.Log($"[SaveInventory] Saved {copy.Count} items for clientId: {clientId}");
+		foreach (var item in copy)
+		{
+			Debug.Log($"[SaveInventory] Item saved - ID: {item.id}, UID: {item.uniqueId}, Charge: {item.itemCharge}, Uses: {item.usesRemaining}");
+		}
+	}
+
+	public List<ItemData> LoadInventory(ulong clientId)
+	{
+		if (!savedInventories.ContainsKey(clientId))
+		{
+			Debug.Log($"[LoadInventory] No saved inventory found for clientId: {clientId}, returning empty inventory.");
+			ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
+			List<ItemData> newEmptyInventory = new List<ItemData>();
+			while (newEmptyInventory.Count < 4)
+				newEmptyInventory.Add(emptyItem);
+			return newEmptyInventory;
+		}
+
+		List<ItemData> copy = new List<ItemData>();
+		foreach (var item in savedInventories[clientId])
+		{
+			copy.Add(item);
+		}
+
+		Debug.Log($"[LoadInventory] Loaded {copy.Count} items for clientId: {clientId}");
+		foreach (var item in copy)
+		{
+			Debug.Log($"[LoadInventory] Item loaded - ID: {item.id}, UID: {item.uniqueId}, Charge: {item.itemCharge}, Uses: {item.usesRemaining}");
+		}
+
+		return copy;
+	}
+	public void ClearInventory(ulong clientId)
+	{
+		savedInventories.Remove(clientId); // Safe even if key doesn't exist
 	}
 
 	[ClientRpc]

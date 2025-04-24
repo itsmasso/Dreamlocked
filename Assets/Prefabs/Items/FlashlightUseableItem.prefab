@@ -43,11 +43,11 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1.5
-  m_Range: 23.902142
+  m_Color: {r: 0.99905366, g: 1, b: 0.9292453, a: 1}
+  m_Intensity: 5
+  m_Range: 45
   m_SpotAngle: 61.252724
-  m_InnerSpotAngle: 50.27172
+  m_InnerSpotAngle: 45.90587
   m_CookieSize: 10
   m_Shadows:
     m_Type: 0
@@ -112,7 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Version: 3
   m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
+  m_AdditionalLightsShadowResolutionTier: 0
   m_LightLayerMask: 1
   m_RenderingLayers: 1
   m_CustomShadowLayers: 0

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 795006385883036952}
   - component: {fileID: 6276088548482546421}
   - component: {fileID: 1657931203826026784}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 2487241678903829349}
   - component: {fileID: 6756458042817143436}
   - component: {fileID: 7844759751333542235}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 5461075714043115382}
   - component: {fileID: 1329206840614773351}
   - component: {fileID: 4109811989660732074}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Subdivision_Surface
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 6797076511177999061}
   - component: {fileID: 6259579713520803089}
   - component: {fileID: 5549665092664267168}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule.1_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 5511543109124561066}
   - component: {fileID: 2336738663595002314}
   - component: {fileID: 3723821017388335083}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule.1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -441,7 +441,7 @@ GameObject:
   - component: {fileID: 4480489615104915130}
   - component: {fileID: 5834468331965291448}
   - component: {fileID: 5575171344117072315}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -527,7 +527,7 @@ GameObject:
   - component: {fileID: 6880903828608730445}
   - component: {fileID: 386426688983447785}
   - component: {fileID: 637161564150655083}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule.1_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -613,7 +613,7 @@ GameObject:
   - component: {fileID: 7303721155930208907}
   - component: {fileID: 7700598143791201502}
   - component: {fileID: 6039353721916071205}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pills
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -714,7 +714,7 @@ GameObject:
   - component: {fileID: 7760032738712408143}
   - component: {fileID: 1975946952372470342}
   - component: {fileID: 6745237129133133370}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -800,7 +800,7 @@ GameObject:
   - component: {fileID: 193596818562653499}
   - component: {fileID: 8508915270699183589}
   - component: {fileID: 4135118011938724542}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -886,7 +886,7 @@ GameObject:
   - component: {fileID: 3342506474764973011}
   - component: {fileID: 7943953173594279761}
   - component: {fileID: 2956858547248242807}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -972,7 +972,7 @@ GameObject:
   - component: {fileID: 1758041707793501219}
   - component: {fileID: 1034196941290855549}
   - component: {fileID: 4012712692534771054}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1058,7 +1058,7 @@ GameObject:
   - component: {fileID: 1679810579557722712}
   - component: {fileID: 5632404096426684619}
   - component: {fileID: 9099129101222036943}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1142,7 +1142,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6613094729819784445}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: UnknownPillsVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1176,7 +1176,7 @@ GameObject:
   - component: {fileID: 3553089327158760277}
   - component: {fileID: 317367890654139516}
   - component: {fileID: 601177658611918977}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1262,7 +1262,7 @@ GameObject:
   - component: {fileID: 5542334631096783421}
   - component: {fileID: 1530378187401772826}
   - component: {fileID: 8538064478162810848}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Capsule_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1348,7 +1348,7 @@ GameObject:
   - component: {fileID: 1599386718042702979}
   - component: {fileID: 7447177650312420259}
   - component: {fileID: 4458883101248042093}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: oblojka.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

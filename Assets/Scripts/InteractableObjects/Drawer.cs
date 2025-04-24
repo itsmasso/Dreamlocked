@@ -7,7 +7,7 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
     public List<Transform> drawerBoxTransforms = new List<Transform>();
     public GameObject drawerPrefab;
     public GameObject drawerBoxPrefab;
-    private NetworkObject drawerBox;
+    private List<GameObject> drawerBoxes = new List<GameObject>();
 
 
     public override void OnNetworkSpawn()
@@ -19,8 +19,8 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
             foreach (Transform drawerBoxTransform in drawerBoxTransforms)
             {
                 GameObject drawerBoxObj = Instantiate(drawerBoxPrefab, drawerBoxTransform.position, drawerBoxTransform.rotation);
-                drawerBox = drawerBoxObj.GetComponent<NetworkObject>();
-                drawerBox.Spawn(true);
+                drawerBoxes.Add(drawerBoxObj);
+                drawerBoxObj.GetComponent<NetworkObject>().Spawn(true);
                 //drawerBox.TrySetParent(gameObject);
                 drawerBoxObj.GetComponent<DrawerBox>().SetDrawerDirection(drawerBoxTransform.forward);
             }
@@ -35,18 +35,16 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
 
     public void DestroyNetworkChildren()
     {
-        foreach (Transform child in transform)
+
+        foreach (GameObject drawerBox in drawerBoxes)
         {
-            NetworkObject childNetObj = child.GetComponent<NetworkObject>();
-            if (childNetObj != null)
+            NetworkObject drawerBoxNetObj = drawerBox.GetComponent<NetworkObject>();
+            //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
+            if (drawerBoxNetObj.IsSpawned)
             {
-                //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
-                if (childNetObj.IsSpawned)
-                {
-                    if (childNetObj.GetComponent<IHasNetworkChildren>() != null)
-                        childNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
-                    childNetObj.Despawn(true); // Despawn child
-                }
+                if (drawerBoxNetObj.GetComponent<IHasNetworkChildren>() != null)
+                    drawerBoxNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
+                drawerBoxNetObj.Despawn(true); // Despawn child
             }
         }
     }

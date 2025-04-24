@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 148733496199988735}
   - component: {fileID: 1048841292143540883}
   - component: {fileID: 2497699331932207576}
-  - component: {fileID: 7215078602742532982}
   - component: {fileID: 8293724975994744544}
+  - component: {fileID: 5029505436496936086}
   m_Layer: 3
   m_Name: Floor
   m_TagString: Untagged
@@ -331,28 +331,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 891600654603860321}
   m_Mesh: {fileID: 0}
---- !u!64 &7215078602742532982
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 891600654603860321}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!114 &8293724975994744544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,6 +350,27 @@ MonoBehaviour:
   includeInScan: 0
   surfaceID: 2
   mode: 4
+--- !u!65 &5029505436496936086
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891600654603860321}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8, y: 0.1, z: 4}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3286224633064905065
 GameObject:
   m_ObjectHideFlags: 0
@@ -439,10 +438,12 @@ MonoBehaviour:
   - {fileID: 1600277396688168796}
   - {fileID: 4226640467273867398}
   isSpecialRoom: 1
+  isSmallRoom: 0
   roomLocked: 0
   roomPrefab: {fileID: 3286224633064905065}
   interactableObjectTransforms: []
   interactableObjectPrefabs: []
+  monsterTransforms: []
 --- !u!1 &3481952434125928853
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8531544964263618859}
   - component: {fileID: 4864280533448311703}
   - component: {fileID: 4845319375944850672}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: UnknownVitamins
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2638700966231039443}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: UnknownVitaminsVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}

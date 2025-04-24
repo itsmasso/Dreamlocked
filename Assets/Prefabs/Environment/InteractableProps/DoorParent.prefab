@@ -75,11 +75,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  targetYRotation: 0
   smoothTime: 10
   defaultYRotation: 0
   pivot: {fileID: 5352197759227034436}
   maxDoorAngle: 90
-  navmeshCut: {fileID: 4841633251380932712}
+  isOpen: 0
+  isLocked: 0
+  requiredKeySO: {fileID: 11400000, guid: 2eabad4a410032349aeb9740ade36ab8, type: 2}
+  lockpickSO: {fileID: 11400000, guid: bdaab5e968d58f4498124f6025d4026a, type: 2}
 --- !u!114 &2384058059443450814
 MonoBehaviour:
   m_ObjectHideFlags: 0

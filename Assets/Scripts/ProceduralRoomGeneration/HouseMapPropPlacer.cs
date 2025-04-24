@@ -18,7 +18,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
     [SerializeField] private float propSpawnInterval;
     public float hallwayLightSpawnInterval;
     [SerializeField] private float chanceToSpawnHallwayProp = 0.5f;
-  
+
     void Start()
     {
 
@@ -124,7 +124,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
             if (hallwaySpawnIndex % propSpawnInterval == 0)
             {
                 float rand = Random.value;
-                if(rand < chanceToSpawnHallwayProp)
+                if (rand < chanceToSpawnHallwayProp)
                 {
                     HouseMapPropScriptableObj propScriptableObj = PickRandomProp(propScriptableObjList);
                     GameObject prop = Instantiate(propScriptableObj.prefab, position, rotation);
@@ -169,9 +169,9 @@ public class HouseMapPropPlacer : NetworkBehaviour
             {
                 if (prop != null && prop.TryGetComponent(out NetworkObject netObj))
                 {
-                    if(prop.GetComponent<IHasNetworkChildren>() != null)
+                    foreach (var hasNetworkChildren in prop.GetComponents<IHasNetworkChildren>())
                     {
-                        prop.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
+                        hasNetworkChildren.DestroyNetworkChildren();
                     }
                     netObj.Despawn(true);
                 }
@@ -225,5 +225,6 @@ public class HouseMapPropPlacer : NetworkBehaviour
             }
         }
     }
+
 
 }

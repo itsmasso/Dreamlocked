@@ -10,8 +10,8 @@ using UnityEngine.InputSystem;
 public class PlayerInventory : NetworkBehaviour
 {
     public static event Action<int> onNewSlotSelected;
-    public static event Action<int> onDropItem;
-    public static event Action<int, int, ItemData> onAddItem;
+    public static event Action<int> onRemoveSprite;
+    public static event Action<int, int, ItemData> onAddSprite;
     public static event Action<int, float> onUpdateChargeBar;
     [SerializeField] private NetworkList<ItemData> syncedInventory = new NetworkList<ItemData>();
     public NetworkList<ItemData> SyncedInventory => syncedInventory;
@@ -35,18 +35,16 @@ public class PlayerInventory : NetworkBehaviour
     {
         isInventoryLocked = false;
         currentInventoryIndex = 0;
-        if (IsServer)
-        {
-            ItemData emptyItem = new ItemData
-            {
-                id = -1,
-                itemCharge = 0,
-                usesRemaining = 0,
-                uniqueId = -1
-            };
 
-            while (syncedInventory.Count < 4)
-                syncedInventory.Add(emptyItem); //adding empty slots
+        if (IsOwner)
+        {
+            syncedInventory.OnListChanged += OnInventoryChanged;
+
+            for (int i = 0; i < syncedInventory.Count; i++)
+            {
+                if (syncedInventory[i].id != -1)
+                    onAddSprite?.Invoke(i, syncedInventory[i].id, syncedInventory[i]);
+            }
         }
 
     }
@@ -54,6 +52,7 @@ public class PlayerInventory : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
     }
 
     public void UseItem(InputAction.CallbackContext ctx)
@@ -107,6 +106,19 @@ public class PlayerInventory : NetworkBehaviour
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
+    public void EnsureEmptyInventorySlots(int count)
+    {
+        while (syncedInventory.Count < count)
+        {
+            syncedInventory.Add(new ItemData
+            {
+                id = -1,
+                itemCharge = 0,
+                usesRemaining = 0,
+                uniqueId = -1
+            });
+        }
+    }
     public bool AddItems(ItemData itemData)
     {
         if (!IsServer) return false;
@@ -132,6 +144,22 @@ public class PlayerInventory : NetworkBehaviour
 
         return false;
     }
+
+    public void RepopulateItem(ItemData itemData)
+    {
+        if (!IsServer) return;
+
+        for (int i = 0; i < syncedInventory.Count; i++)
+        {
+            if (syncedInventory[i].id == -1)
+            {
+                syncedInventory[i] = itemData;
+                return;
+            }
+        }
+    }
+
+
     [Rpc(SendTo.Owner)]
     private void PickUpAnimationRpc()
     {
@@ -148,7 +176,7 @@ public class PlayerInventory : NetworkBehaviour
     [Rpc(SendTo.Owner)]
     private void OwnerUpdatesSpriteRpc(int slotNumber, int id, ItemData itemData)
     {
-        onAddItem?.Invoke(slotNumber, id, itemData);
+        onAddSprite?.Invoke(slotNumber, id, itemData);
     }
     private void UpdateItemDataOnChange(ItemData newData)
     {
@@ -247,23 +275,26 @@ public class PlayerInventory : NetworkBehaviour
                 currentHeldItemData = itemData;
             }
         }
+
     }
 
     [Rpc(SendTo.Server)]
     private void RequestServerToDespawnUseableItemRpc()
     {
-        if (currentUseableItem == null) return;
-
-        if (currentUseableItem.TryGetComponent<NetworkObject>(out var netObj))
+        if (currentUseableItem != null)
         {
-            if (netObj.IsSpawned)
+            if (currentUseableItem.TryGetComponent<NetworkObject>(out var netObj))
             {
+                if (netObj.IsSpawned)
+                {
 
-                IUseableItem<ItemData> useableItem = currentUseableItem.GetComponent<IUseableItem<ItemData>>();
-                useableItem.OnDataChanged -= UpdateItemDataOnChange;
-                netObj.Despawn(true); //you could optimize this so that we only hide these objects not destroy them
+                    IUseableItem<ItemData> useableItem = currentUseableItem.GetComponent<IUseableItem<ItemData>>();
+                    useableItem.OnDataChanged -= UpdateItemDataOnChange;
+                    netObj.Despawn(true); //you could optimize this so that we only hide these objects not destroy them
+                }
             }
         }
+
     }
 
     [Rpc(SendTo.Owner)]
@@ -285,7 +316,7 @@ public class PlayerInventory : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void RequestServerToSelectNewItemRpc(int inventoryIndex)
+    public void RequestServerToSelectNewItemRpc(int inventoryIndex)
     {
         if (inventoryIndex >= syncedInventory.Count)
             return;
@@ -312,12 +343,15 @@ public class PlayerInventory : NetworkBehaviour
 
             RequestToSpawnUseableItemRpc(selectedItem);
             SpawnVisualItemRpc(selectedItem);
+            currentHeldItemData = selectedItem;
             SetHoldItemRpc(true);
         }
         else
         {
             RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemWithoutAnimRpc();
+            ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
+            currentHeldItemData = emptyItem;
             SetHoldItemRpc(false);
         }
 
@@ -388,7 +422,23 @@ public class PlayerInventory : NetworkBehaviour
         }
 
     }
-
+    private void OnInventoryChanged(NetworkListEvent<ItemData> changeEvent)
+    {
+        if (IsOwner)
+        {
+            if (changeEvent.Type == NetworkListEvent<ItemData>.EventType.Value)
+            {
+                if (changeEvent.Value.id != -1)
+                {
+                    onAddSprite?.Invoke(changeEvent.Index, changeEvent.Value.id, changeEvent.Value);
+                }
+                else
+                {
+                    onRemoveSprite?.Invoke(changeEvent.Index);
+                }
+            }
+        }
+    }
 
     [Rpc(SendTo.Owner)]
     private void UnlockInventoryRpc()
@@ -411,12 +461,15 @@ public class PlayerInventory : NetworkBehaviour
         return currentVisualItem;
     }
 
-
+    public int GetCurrentHeldItemID()
+    {
+        return currentHeldItemData.id;
+    }
 
     [Rpc(SendTo.Owner)]
     private void OwnerRemovesSpriteRpc(int slot)
     {
-        onDropItem?.Invoke(slot);
+        onRemoveSprite?.Invoke(slot);
     }
 
 

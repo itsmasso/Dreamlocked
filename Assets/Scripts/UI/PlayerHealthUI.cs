@@ -21,7 +21,7 @@ public class PlayerHealthUI : MonoBehaviour
 
         healthBar.value = val;
         if (currentHealth <= 0) healthBar.value = 0;
-        Debug.Log($"[Health UI] Slider reference ID: {healthBar.GetInstanceID()}, name: {healthBar.name}");
+        
     }
 
     public void OnDestroy()

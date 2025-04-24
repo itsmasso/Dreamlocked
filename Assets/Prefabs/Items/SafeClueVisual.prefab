@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7379959296924766180}
   - component: {fileID: 4153680710424573058}
   - component: {fileID: 7416076657527010491}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: BookTitle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,7 +191,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5843103420964074881}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: SafeClueVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 8759764229423165037}
   - component: {fileID: 5557987302169337143}
   - component: {fileID: 394202109068077566}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Year
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -318,7 +318,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1987
+  m_text: 5741
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -440,9 +440,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -60
       objectReference: {fileID: 0}
+    - target: {fileID: -5704782046960166232, guid: 42cb781d0da72c845a7b4a47dbaebd31, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -4763787868798261218, guid: 42cb781d0da72c845a7b4a47dbaebd31, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 42cb781d0da72c845a7b4a47dbaebd31, type: 3}
       propertyPath: m_Name
       value: book
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 42cb781d0da72c845a7b4a47dbaebd31, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -900,10 +900,12 @@ MonoBehaviour:
   doorTransforms:
   - {fileID: 249609452694020903}
   isSpecialRoom: 0
+  isSmallRoom: 0
   roomLocked: 0
   roomPrefab: {fileID: 4367447932712270340}
   interactableObjectTransforms: []
   interactableObjectPrefabs: []
+  monsterTransforms: []
 --- !u!1001 &2899114567623859432
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1166,9 +1168,25 @@ PrefabInstance:
       value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 6718760478395965214, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6718760478395965214, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6718760478395965214, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 836f177e963f8ff429b6f8710e80d3c9, type: 2}
+    - target: {fileID: 6753467987136682042, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753467987136682042, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6753467987136682042, guid: 6eef9877adf557c4c8fa0ee13916fce0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

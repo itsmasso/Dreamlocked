@@ -12,6 +12,7 @@ public class Room : MonoBehaviour
 	public List<Transform> lightsTransforms;
 	public List<Transform> doorTransforms;
 	public bool isSpecialRoom;
+	public bool isSmallRoom;
 	[SerializeField] public bool roomLocked;
 	public GameObject roomPrefab;
 	[Header("Interactable Items")]

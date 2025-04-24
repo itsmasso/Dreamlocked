@@ -298,7 +298,7 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 74ae9dd1237766e4598efc4222793524, type: 2}
@@ -905,10 +905,12 @@ MonoBehaviour:
   doorTransforms:
   - {fileID: 249609452694020903}
   isSpecialRoom: 0
+  isSmallRoom: 0
   roomLocked: 0
   roomPrefab: {fileID: 4367447932712270340}
   interactableObjectTransforms: []
   interactableObjectPrefabs: []
+  monsterTransforms: []
 --- !u!1001 &607553854561509820
 PrefabInstance:
   m_ObjectHideFlags: 0

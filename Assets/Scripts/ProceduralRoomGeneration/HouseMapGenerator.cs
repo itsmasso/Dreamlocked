@@ -91,7 +91,7 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	private void Awake()
 	{
-	
+
 		nodeDiameter = Mathf.RoundToInt(nodeRadius * 2);
 		mapSize.y = Mathf.RoundToInt(FLOOR_HEIGHT * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
@@ -102,7 +102,7 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	void Start()
 	{
-		if(IsServer)
+		if (IsServer)
 		{
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
 			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
@@ -111,7 +111,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		Generate();
 
 	}
-	
+
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
 	{
 		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
@@ -119,25 +119,25 @@ public class HouseMapGenerator : NetworkBehaviour
 	[Rpc(SendTo.Everyone)]
 	private void AllSetDifficultySORpc(int difficultySOIndex)
 	{
-	    currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
+		currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
 	}
 	private void SetDifficulty()
 	{
-	    if(currentDifficultySetting != null)
-	    {
-	        mapSize = currentDifficultySetting.mapSize;
-	        floors = currentDifficultySetting.floors;
-	        foreach(GameObject specialRoom in currentDifficultySetting.specialRoomPrefabsList)
-	        {
-	            specialRoomPrefabList.Add(specialRoom);
-	        }
-	        foreach(GameObject normalRoom in currentDifficultySetting.roomPrefabsList)
-	        {
-	            normalRoomsPrefabList.Add(normalRoom);
-	        }
-	        roomsPerFloor = currentDifficultySetting.roomsPerFloor;
-	        propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
-	    }
+		if (currentDifficultySetting != null)
+		{
+			mapSize = currentDifficultySetting.mapSize;
+			floors = currentDifficultySetting.floors;
+			foreach (GameObject specialRoom in currentDifficultySetting.specialRoomPrefabsList)
+			{
+				specialRoomPrefabList.Add(specialRoom);
+			}
+			foreach (GameObject normalRoom in currentDifficultySetting.roomPrefabsList)
+			{
+				normalRoomsPrefabList.Add(normalRoom);
+			}
+			roomsPerFloor = currentDifficultySetting.roomsPerFloor;
+			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
+		}
 	}
 
 	public void Generate()
@@ -206,11 +206,11 @@ public class HouseMapGenerator : NetworkBehaviour
 		}
 		return roomPositions;
 	}
-	
+
 	public List<Room> GetNormalRoomComponents()
 	{
-	    List<Room> roomComponents = new List<Room>();
-		
+		List<Room> roomComponents = new List<Room>();
+
 		foreach (GameObject roomObj in rooms)
 		{
 			Room room = roomObj.GetComponent<Room>();
@@ -693,11 +693,13 @@ public class HouseMapGenerator : NetworkBehaviour
 		CellType type = grid.GetNode(neighborNodePos).cellType;
 		if (type == CellType.None)
 		{
-			if(UnityEngine.Random.value <= chanceToSpawnAltWall){
-				SpawnRoomPart(altWallPrefabs[UnityEngine.Random.Range(0, altWallPrefabs.Count)], wallPosition, wallRotation);
-			}else
+			if (UnityEngine.Random.value <= chanceToSpawnAltWall)
 			{
-			    SpawnRoomPart(defaultWallPrefab, wallPosition, wallRotation);
+				SpawnRoomPart(altWallPrefabs[UnityEngine.Random.Range(0, altWallPrefabs.Count)], wallPosition, wallRotation);
+			}
+			else
+			{
+				SpawnRoomPart(defaultWallPrefab, wallPosition, wallRotation);
 			}
 		}
 	}
@@ -714,7 +716,6 @@ public class HouseMapGenerator : NetworkBehaviour
 		{
 			TrySpawnHallwayProp(node, floor.GetComponent<Hallway>().hallwayObjectPosition.position, floor.GetComponent<Hallway>());
 		}
-
 
 		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - 0.05f, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, -90, 0));
 		TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, 90, 0));
@@ -736,7 +737,7 @@ public class HouseMapGenerator : NetworkBehaviour
 
 		SpawnRoomPart(roomCeilingPrefab, ceilingPosition, Quaternion.identity);
 		GameObject floor = SpawnRoomPart(roomFloorPrefab, floorPosition, Quaternion.identity);
-		if(IsServer) TrySpawnDoorProp(node, floor.GetComponent<Hallway>().hallwayObjectPosition.position);
+		if (IsServer) TrySpawnDoorProp(node, floor.GetComponent<Hallway>().hallwayObjectPosition.position);
 
 		TrySpawnHallwayWall(node.pos - Vector3.right * nodeDiameter, new Vector3(node.pos.x - nodeRadius - 0.05f, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, -90, 0));
 		TrySpawnHallwayWall(node.pos + Vector3.right * nodeDiameter, new Vector3(node.pos.x + nodeRadius, node.pos.y + 0.05f, node.pos.z), Quaternion.Euler(0, 90, 0));

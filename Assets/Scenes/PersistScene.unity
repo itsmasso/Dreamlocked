@@ -182,7 +182,6 @@ MonoBehaviour:
   screenManager: {fileID: 1550661919}
   levelLoader: {fileID: 2371649504844488818}
   gameOverScreenDuration: 4
-  BookObject: {fileID: 3573178721968461015, guid: 5ad8ef5925a132741b4f707c5170f0f1, type: 3}
 --- !u!4 &734020618
 Transform:
   m_ObjectHideFlags: 0

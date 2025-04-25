@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 326320386129582508}
-  - component: {fileID: 2951628371406891192}
   - component: {fileID: 9187001839942940889}
+  - component: {fileID: 2951628371406891192}
   m_Layer: 0
   m_Name: SmallRoundTable
   m_TagString: Untagged
@@ -35,26 +35,6 @@ Transform:
   - {fileID: 6676783042140813297}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2951628371406891192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3123666010994173607}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62c9b960b55aea3479a08e92d88a649a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  propTransforms:
-  - {fileID: 6676783042140813297}
-  potentialProps:
-  - {fileID: 11400000, guid: 02bda4f7ab04dbc49ac02d8849c4f25f, type: 2}
-  - {fileID: 11400000, guid: 02bda4f7ab04dbc49ac02d8849c4f25f, type: 2}
-  chanceToSpawnProp: 0.5
-  propSpawnRadius: 0.1
 --- !u!114 &9187001839942940889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,6 +60,26 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &2951628371406891192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123666010994173607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c9b960b55aea3479a08e92d88a649a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  propTransforms:
+  - {fileID: 6676783042140813297}
+  potentialProps:
+  - {fileID: 11400000, guid: 02bda4f7ab04dbc49ac02d8849c4f25f, type: 2}
+  - {fileID: 11400000, guid: 02bda4f7ab04dbc49ac02d8849c4f25f, type: 2}
+  chanceToSpawnProp: 0.5
+  propSpawnRadius: 0.1
 --- !u!1 &4473950967042456609
 GameObject:
   m_ObjectHideFlags: 0

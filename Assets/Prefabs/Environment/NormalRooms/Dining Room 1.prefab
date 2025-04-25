@@ -960,37 +960,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8957264924000506511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3927994469768033042
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8467314097531374923}
-  m_Layer: 0
-  m_Name: TableTransform
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8467314097531374923
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3927994469768033042}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: -5.937}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2034378400268218833}
-  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1 &4367447932712270340
 GameObject:
   m_ObjectHideFlags: 0
@@ -1043,7 +1012,6 @@ Transform:
   - {fileID: 1256856477907773337}
   - {fileID: 6431003118673680434}
   - {fileID: 3633380322173666960}
-  - {fileID: 8467314097531374923}
   - {fileID: 1735582236823155369}
   - {fileID: 5114848623041070394}
   - {fileID: 6148685955464194247}
@@ -1083,12 +1051,10 @@ MonoBehaviour:
   roomLocked: 0
   roomPrefab: {fileID: 4367447932712270340}
   interactableObjectTransforms:
-  - {fileID: 8467314097531374923}
   - {fileID: 1735582236823155369}
-  - {fileID: 8467314097531374923}
+  - {fileID: 5114848623041070394}
   - {fileID: 6148685955464194247}
   interactableObjectPrefabs:
-  - {fileID: 4401446945340609735, guid: 88abcd57b0ec36746bd78042558d72aa, type: 3}
   - {fileID: 7697188246204601482, guid: aef50132dec290f499004c2484142aa0, type: 3}
   - {fileID: 3123666010994173607, guid: c83e630e8c48140449af5973bdc1ed80, type: 3}
   - {fileID: 2666116218696400191, guid: 6ebf6cdbbfe4b67428d2256a33538b98, type: 3}

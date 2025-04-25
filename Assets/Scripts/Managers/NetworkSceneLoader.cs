@@ -8,7 +8,6 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
     [SerializeField] private string persistentScene = "PersistScene";
     [SerializeField] private string mainMenuScene = "MainMenu";
     [SerializeField] private string gameLevelScene = "GameScene";
-    [SerializeField] private string uiScene = "UIScene";
     [SerializeField] private string defaultActiveScene = "GameScene";
 
     private Scene currentActiveScene;
@@ -29,10 +28,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             if (!SceneManager.GetSceneByName(persistentScene).isLoaded)
             {
                 SceneManager.LoadScene(persistentScene, LoadSceneMode.Single);
-                currentActiveScene = SceneManager.GetSceneByName(persistentScene);
             }
-
-
         }
     }
 
@@ -40,7 +36,6 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
     {
         if (IsServer)
         {
-            //this need to go on game start
             LoadSceneAdditively("GameScene");
             SetActiveScene("GameScene");
         }

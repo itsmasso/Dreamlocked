@@ -72,4 +72,11 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # Cloned builds from parellelsync
+<<<<<<< Updated upstream
 *_clone_[0-9]*/
+=======
+*_clone_[0-9]*/
+
+# Ignore all Unity package metadata
+Assets/**/*.unitypackage.meta
+>>>>>>> Stashed changes

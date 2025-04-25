@@ -264,6 +264,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6844388644389274886, guid: a07d31e458f4f454ba8e4b690b350637, type: 3}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: stairRooms.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: specialRooms.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -271,6 +275,10 @@ PrefabInstance:
       propertyPath: difficultyListScriptable
       value: 
       objectReference: {fileID: 11400000, guid: 9166041e5760a814eb6efd7e86f9e9b4, type: 2}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: 'stairRooms.Array.data[0]'
+      value: 
+      objectReference: {fileID: 3286224633064905065, guid: 4a211cb806fb0c0449b1f73fc319186d, type: 3}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: altWallPrefabs.Array.size
       value: 1

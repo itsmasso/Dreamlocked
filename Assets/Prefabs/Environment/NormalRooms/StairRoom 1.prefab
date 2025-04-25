@@ -517,9 +517,7 @@ MonoBehaviour:
   isStairs: 1
   isMainRoom: 0
   yRotation: 0
-  doorNode:
-  - {fileID: 0}
-  - {fileID: 0}
+  doorNode: []
   lightsTransforms: []
   doorTransforms: []
   isSpecialRoom: 1
@@ -884,6 +882,7 @@ GameObject:
   - component: {fileID: 4190931952165005286}
   - component: {fileID: 7442704465642007256}
   - component: {fileID: 811688140598097804}
+  - component: {fileID: 6431039141243366920}
   m_Layer: 0
   m_Name: StairHandRail
   m_TagString: Untagged
@@ -959,6 +958,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &6431039141243366920
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6999912917903344227}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2619388632992588037, guid: 2fcf22bb9025349499c1ff3706557cd0, type: 3}
 --- !u!1 &7043201928223952512
 GameObject:
   m_ObjectHideFlags: 0

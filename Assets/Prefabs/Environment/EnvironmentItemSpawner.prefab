@@ -73,7 +73,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  chanceToSpawnItem: 1
+  chanceToSpawnItem: 0.65
   itemSpawnRadius: 0.1
 --- !u!114 &6108516567982480942
 MonoBehaviour:
@@ -93,6 +93,10 @@ MonoBehaviour:
   - {fileID: 2112433800036340579}
   potientialItems:
   - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
+  - {fileID: 11400000, guid: bdaab5e968d58f4498124f6025d4026a, type: 2}
+  - {fileID: 11400000, guid: 95d0b472ca8389f4799d33389a2de903, type: 2}
+  - {fileID: 11400000, guid: 4f2838519e479414c9929af2434f515a, type: 2}
+  - {fileID: 11400000, guid: 1e4b9cc4c1b6123498ff43a6fe0c4278, type: 2}
 --- !u!1 &6814470125220729219
 GameObject:
   m_ObjectHideFlags: 0

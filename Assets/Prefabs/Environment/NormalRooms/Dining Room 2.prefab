@@ -613,7 +613,7 @@ Transform:
   m_GameObject: {fileID: 3461736276905663469}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.71, y: 3.89, z: 0.99}
+  m_LocalPosition: {x: -0.71, y: 3.89, z: -4.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1162,6 +1162,7 @@ Transform:
   - {fileID: 3991281650282766229}
   - {fileID: 670291067946641247}
   - {fileID: 4815802873290786128}
+  - {fileID: 2250054207450604689}
   - {fileID: 3179841469778380977}
   - {fileID: 8467314097531374923}
   - {fileID: 1735582236823155369}
@@ -1200,6 +1201,7 @@ MonoBehaviour:
   - {fileID: 7727223893136465132}
   lightsTransforms:
   - {fileID: 4815802873290786128}
+  - {fileID: 2250054207450604689}
   doorTransforms:
   - {fileID: 249609452694020903}
   - {fileID: 3729854914233530905}
@@ -1251,6 +1253,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2034378400268218833}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &5479819893909216666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2250054207450604689}
+  m_Layer: 0
+  m_Name: LightsPosition (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2250054207450604689
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5479819893909216666}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.71, y: 3.89, z: 3.82}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2034378400268218833}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6948897411644169628
 GameObject:
   m_ObjectHideFlags: 0

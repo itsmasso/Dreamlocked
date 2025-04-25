@@ -30,6 +30,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	public event Action onGamePlaying;
 	public event Action onLevelGenerate;
 	public event Action onNextLevel;
+	private Coroutine _gameOverRoutine;
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.Lobby, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private ScreenManager screenManager;
@@ -37,7 +38,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	private const int MAX_DREAM_LAYERS = 10;
 	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private float gameOverTimer;
-	[SerializeField] private float gameOverScreenDuration = 4f;
+	[SerializeField] private float gameOverScreenDuration = 5f;
 
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
@@ -83,7 +84,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	}
     void Update()
     {
-		//debug for skipping levels
+		// DELETE THIS BEFORE SUBMITTING
         if(Input.GetKeyDown(KeyCode.L))
         {
             OnNextLevel();
@@ -111,12 +112,23 @@ public class GameManager : NetworkSingleton<GameManager>
 		{
 			onGameStateChanged?.Invoke();
 			netGameState.Value = newState;
+
+			// Stop any pending coroutine
+			if (_gameOverRoutine != null && newState != GameState.GameOver)
+			{
+				StopCoroutine(_gameOverRoutine);
+				_gameOverRoutine = null;
+			}
 			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
 					currentDreamLayer.Value = 1;
 					Debug.Log("Lobby");
-					screenManager.HideGameOverScreen();
+
+					// POSSIBLE BUG - Might need to call HideGameOverScreenToAllRPC, not screenManager.HideGameOverScreen();
+					// Uncomment and comment out HideGameOverScreenToAllRPC() if something breaks related to it
+					//screenManager.HideGameOverScreen();
+					HideGameOverScreenToAllRpc();
 					AllHandlesLobbyRpc();
 					break;
 				case GameState.GeneratingLevel:
@@ -142,19 +154,24 @@ public class GameManager : NetworkSingleton<GameManager>
 					AllHandlesGameOverRpc();
 					ShowGameOverScreenToAllRpc();
 					Debug.Log("Game over");
-					gameOverTimer += Time.deltaTime;
-					if(gameOverTimer >= gameOverScreenDuration)
-					{
-						HideGameOverScreenToAllRpc();
-					    ChangeGameState(GameState.Lobby);
-					    gameOverTimer = 0;
-					}
-					
+
+					// Start the timer to return to lobby
+					_gameOverRoutine = StartCoroutine(ReturnToLobbyAfterDelay());
 					break;
 				default:
 					break;
 			}
 		}
+	}
+
+	private IEnumerator ReturnToLobbyAfterDelay()
+	{
+		yield return new WaitForSeconds(gameOverScreenDuration);
+
+		Debug.Log("Returning to Lobby");
+		HideGameOverScreenToAllRpc();
+		_gameOverRoutine = null;
+		ChangeGameState(GameState.Lobby);
 	}
 
 	[Rpc(SendTo.Everyone)]

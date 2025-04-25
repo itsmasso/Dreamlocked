@@ -78,6 +78,12 @@ public class SteamManager : MonoBehaviour
     public async void JoinLobbyWithID()
     {
         ulong lobbyID;
+
+        // This is just to make sure that no errors happen when a user tries to join a lobby without entering a Lobby ID
+        if (LobbyIDInputField.text == "")
+        {
+            return;
+        }
         if(ulong.TryParse(LobbyIDInputField.text, out lobbyID))
         {
             return;

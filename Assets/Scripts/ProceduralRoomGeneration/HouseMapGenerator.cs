@@ -318,12 +318,6 @@ public class HouseMapGenerator : NetworkBehaviour
 				}
 				else
 				{
-					//spawn normal room
-					// Old Working Code (Uncomment if you break something)
-					// if(!spawnedMainRoom) 
-					// {
-					// 	newRoom = mainRoomPrefab;
-					// 	spawnedMainRoom = true;
 					if (specialRoomIndex < specialRoomPrefabList.Count)
 					{
 						newRoom = specialRoomPrefabList[specialRoomIndex];
@@ -748,6 +742,7 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	public void ClearMap()
 	{
+		UnityEngine.Debug.Log("Clearing Map");
 		propObjectPlacer.ClearObjects();
 		foreach (Transform child in transform)
 		{

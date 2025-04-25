@@ -91,12 +91,15 @@ public class UnitManager : NetworkBehaviour
 
 	private void CanSpawnEnemies()
 	{
-		canSpawnEnemies = true;
-		SpawnMannequinMonsters();
+		if (IsServer)
+		{
+			canSpawnEnemies = true;
+			SpawnMannequinMonsters();
+		}
 	}
 	void Update()
 	{
-		if (canSpawnEnemies && lurkerSpawnCount < currentDifficultySetting.lurkerSpawnAmount && canSpawnLurker)
+		if (IsServer && canSpawnEnemies && lurkerSpawnCount < currentDifficultySetting.lurkerSpawnAmount && canSpawnLurker)
 		{
 			HandleLurkerSpawnTimer();
 		}
@@ -169,20 +172,23 @@ public class UnitManager : NetworkBehaviour
 
 	public void DespawnAllEnemies()
 	{
-		if (spawnedEnemies.Count > 0)
+		if (IsServer)
 		{
-			foreach (var enemy in spawnedEnemies)
+			if (spawnedEnemies.Count > 0)
 			{
-				if (enemy != null && enemy.IsSpawned)
+				foreach (var enemy in spawnedEnemies)
 				{
-					enemy.Despawn(true);
-					//Destroy(enemy.gameObject);
+					if (enemy != null && enemy.IsSpawned)
+					{
+						enemy.Despawn(true);
+						//Destroy(enemy.gameObject);
+					}
 				}
 			}
+			spawnedEnemies.Clear();
+			canSpawnEnemies = false;
+			Debug.Log("All enemies despawned.");
 		}
-		spawnedEnemies.Clear();
-		canSpawnEnemies = false;
-		Debug.Log("All enemies despawned.");
 	}
 
 	public override void OnDestroy()

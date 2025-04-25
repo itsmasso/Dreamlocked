@@ -78,6 +78,7 @@ public class LevelLoader : NetworkBehaviour
     
     private void ResetSettings()
     {
+        Debug.Log("Resetting all Settings");
         //add all resets for all maps here
         currentHouseMapDifficultySetting = houseMapDifficultySettingList[0];
         nextDifficultyCheckpoint = currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;

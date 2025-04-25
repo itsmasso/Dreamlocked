@@ -19,7 +19,16 @@ public class PlayerHealth : NetworkBehaviour
         }
 
     }
-    
+
+    // DELETE THIS BEFORE SUBMITTING
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.P) && IsServer)
+		{
+			RequestServerTakeDamageRpc(25);
+		}
+    }
+
     public void ResetHealth()
     {
         RequestServerToRestoreHealthRpc(playerScriptable.health);
@@ -61,7 +70,8 @@ public class PlayerHealth : NetworkBehaviour
     private void Die()
     {
         Debug.Log($"{gameObject.name} | NetworkObjectId: {NetworkObjectId} has died.");
-        PlayerNetworkManager.Instance.UnregisterPlayerClientRpc(GetComponent<NetworkObject>());
+        //PlayerNetworkManager.Instance.UnregisterPlayerClientRpc(GetComponent<NetworkObject>());
+        PlayerNetworkManager.Instance.UnregisterPlayerServerRpc(GetComponent<NetworkObject>());
         gameObject.GetComponent<PlayerController>().enabled = false;
         HidePlayerFromAllRpc(GetComponent<NetworkObject>());
         OwnerDiesRpc();

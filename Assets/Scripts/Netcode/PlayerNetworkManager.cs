@@ -49,8 +49,8 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	[Rpc(SendTo.Server)]
 	public void UnregisterPlayerServerRpc(NetworkObjectReference playerRef)
 	{
-		UnregisterPlayerClientRpc(playerRef);
 		alivePlayersCount.Value--;
+		UnregisterPlayerClientRpc(playerRef);
 	}
 
 	[Rpc(SendTo.Everyone)]
@@ -60,12 +60,16 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		{
 			if (player.IsOwner)
 			{
+				//Debug.Log("Removing Player");
 				alivePlayers.Remove(player);
 				Debug.Log(alivePlayersCount.Value);
 			}
 		}
+		// Debug.Log(alivePlayersCount.Value + " players remaining");
+		// Debug.Log(alivePlayers.Count + " players in the alivePlayers list");
 		if (IsServer && alivePlayersCount.Value <= 0)
 		{
+			Debug.Log("The last player has died, the game is over");
 			alivePlayersCount.Value = 0;
 			GameManager.Instance.ChangeGameState(GameState.GameOver);
 		}

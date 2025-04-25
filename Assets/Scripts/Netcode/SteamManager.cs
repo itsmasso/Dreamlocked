@@ -9,7 +9,7 @@ using Netcode.Transports.Facepunch;
 using UnityEngine.SceneManagement;
 
 
-public class SteamManager : MonoBehaviour
+public class SteamManager : PersistentSingleton<SteamManager>
 {
     Lobby currentLobby;
 
@@ -20,10 +20,8 @@ public class SteamManager : MonoBehaviour
     private TextMeshProUGUI LobbyID;
 
     [SerializeField]
-    private GameObject MainMenu;
-
-    [SerializeField]
     private GameObject LobbyMenu;
+    [SerializeField] private GameObject mainMenu;
     
    
     void OnEnable()
@@ -45,7 +43,6 @@ public class SteamManager : MonoBehaviour
     {
         LobbySaver.instance.currentLobby = lobby;
         LobbyID.text = lobby.Id.ToString();
-        CheckUI();
 
         if(NetworkManager.Singleton.IsHost) return;
         NetworkManager.Singleton.GetComponent<FacepunchTransport>().targetSteamId = lobby.Owner.Id;
@@ -61,13 +58,21 @@ public class SteamManager : MonoBehaviour
             lobby.SetPublic();
             lobby.SetJoinable(true);
             NetworkManager.Singleton.StartHost();
-            GameManager.Instance.ChangeGameState(GameState.Lobby);
+            CheckUI();
         }
     }
 
     private async void GameLobbyJoinRequested(Lobby lobby, SteamId steamID)
     {
         await lobby.Join();
+    }
+    
+     private void CheckUI()
+    {
+        bool inLobby = LobbySaver.instance.currentLobby != null;
+
+        mainMenu.SetActive(!inLobby);
+        LobbyMenu.SetActive(inLobby);
     }
 
     public async void HostLobby()
@@ -107,38 +112,19 @@ public class SteamManager : MonoBehaviour
         te.SelectAll();
         te.Copy();
     }
-
+    public void StartGameServer()
+    {
+        if (NetworkManager.Singleton.IsHost)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("PersistScene", LoadSceneMode.Single);
+        }
+    }
     public void LeaveLobby()
     {
         LobbySaver.instance.currentLobby?.Leave();
         LobbySaver.instance.currentLobby = null;
         NetworkManager.Singleton.Shutdown();
         CheckUI();
-    }
-
-    private void CheckUI()
-    {
-        if(LobbySaver.instance.currentLobby == null)
-        {
-            MainMenu.SetActive(true);
-            LobbyMenu.SetActive(false);
-        }
-        else
-        {
-            MainMenu.SetActive(false);
-            LobbyMenu.SetActive(true);
-        }
-    }
-
-    public void StartGameServer()
-    {
-        if(NetworkManager.Singleton.IsHost)
-        {    
-            Scene scene = SceneManager.GetSceneByName("MenuScene");
-            NetworkManager.Singleton.SceneManager.UnloadScene(scene);
-            GameManager.Instance.ChangeGameState(GameState.GeneratingLevel);
-
-        }
     }
 
     public void QuitGame()

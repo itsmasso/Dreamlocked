@@ -77,6 +77,4 @@ crashlytics-build.properties
 =======
 *_clone_[0-9]*/
 
-# Ignore all Unity package metadata
-Assets/**/*.unitypackage.meta
 >>>>>>> Stashed changes

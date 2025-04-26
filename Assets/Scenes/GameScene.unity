@@ -1771,6 +1771,7 @@ GameObject:
   - component: {fileID: 7533377662210386458}
   - component: {fileID: 7533377662210386460}
   - component: {fileID: 7533377662210386462}
+  - component: {fileID: 7533377662210386463}
   m_Layer: 0
   m_Name: PlayerCamera
   m_TagString: MainCamera
@@ -1936,6 +1937,14 @@ MonoBehaviour:
   Width: 2
   Damping: 4
   FovRange: {x: 3, y: 60}
+--- !u!81 &7533377662210386463
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6683054306926277422}
+  m_Enabled: 1
 --- !u!114 &7930652320144647505
 MonoBehaviour:
   m_ObjectHideFlags: 0

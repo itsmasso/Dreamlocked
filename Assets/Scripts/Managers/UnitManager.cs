@@ -96,7 +96,7 @@ public class UnitManager : NetworkBehaviour
 	}
 	void Update()
 	{
-		if (canSpawnEnemies && lurkerSpawnCount < currentDifficultySetting.lurkerSpawnAmount && canSpawnLurker)
+		if (IsServer && canSpawnEnemies && lurkerSpawnCount < currentDifficultySetting.lurkerSpawnAmount && canSpawnLurker)
 		{
 			HandleLurkerSpawnTimer();
 		}

@@ -175,25 +175,51 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	}
 	private void HandleAnimations()
 	{
-		//animation
-		float speedMultiplier = currentState == PlayerState.Running ? 8f : 4f;
-		if (currentState == PlayerState.Crouching) speedMultiplier *= crouchSpeedMultiplier;
-		Vector2 finalInput = new Vector2(smoothedDirection.x, smoothedDirection.z) * speedMultiplier;
+		Vector2 rawInput = inputDir;
 
-		// Clamp small values to zero
-		if (Mathf.Abs(finalInput.x) < 0.01f) finalInput.x = 0f;
-		if (Mathf.Abs(finalInput.y) < 0.01f) finalInput.y = 0f;
-		animator.SetFloat("moveX", finalInput.x);
-		animator.SetFloat("moveY", finalInput.y);
+		// Normalize but keep diagonals softer
+		Vector2 normalizedInput = rawInput.normalized;
 
-		float moveMagnitude = new Vector2(finalInput.x, finalInput.y).sqrMagnitude;
+		float forwardAmount = normalizedInput.y;
+		float sidewaysAmount = normalizedInput.x;
+
+		if (rawInput.magnitude > 0.1f)
+		{
+			// Forward/back speed scaling
+			if (currentState == PlayerState.Running)
+				forwardAmount *= 1f;
+			else if (currentState == PlayerState.Walking)
+				forwardAmount *= 0.5f;
+			else if (currentState == PlayerState.Crouching)
+				forwardAmount *= 0.25f;
+
+			// Strafe scaling (keep -0.5 to 0.5 range for sideways)
+			sidewaysAmount = Mathf.Clamp(sidewaysAmount, -0.5f, 0.5f);
+		}
+		else
+		{
+			forwardAmount = 0f;
+			sidewaysAmount = 0f;
+		}
+
+		// Smooth animation parameters
+		float lerpSpeed = 10f;
+		float moveX = Mathf.Lerp(animator.GetFloat("moveX"), sidewaysAmount, Time.deltaTime * lerpSpeed);
+		float moveY = Mathf.Lerp(animator.GetFloat("moveY"), forwardAmount, Time.deltaTime * lerpSpeed);
+
+		if (Mathf.Abs(moveX) < 0.01f) moveX = 0f;
+		if (Mathf.Abs(moveY) < 0.01f) moveY = 0f;
+
+		animator.SetFloat("moveX", moveX);
+		animator.SetFloat("moveY", moveY);
+
+		float moveMagnitude = new Vector2(moveX, moveY).magnitude;
 		animator.SetFloat("moveMagnitude", moveMagnitude);
 
 		animator.SetFloat("crouchBlend", currentState == PlayerState.Crouching ? 1f : 0f);
-
-
-
 	}
+
+
 
 	void Update()
 	{

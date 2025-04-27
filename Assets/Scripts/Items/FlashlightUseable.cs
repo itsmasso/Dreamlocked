@@ -14,6 +14,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     public ItemData itemData { private set; get; }
     private bool visuallyTurnedOff;
     public static event Action<bool> onFlashLightToggle;
+    [SerializeField] private Sound3DSO flashlightSFX;
     public override void OnNetworkSpawn()
     {
 
@@ -107,6 +108,7 @@ public class FlashLightUseable : NetworkBehaviour, IUseableItem<ItemData>
     public void UseItem()
     {
         RequestServerToToggleRpc();
+        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(flashlightSFX), transform.position, true, 1f, 1f, 10f, false, GetComponent<NetworkObject>());
     }
     public ItemData GetData()
     {

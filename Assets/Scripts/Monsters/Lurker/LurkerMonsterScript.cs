@@ -406,6 +406,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	{
 		StartStalkCooldown();
 		StartAttackCooldown();
+		AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurkerChaseSFX));
 		SwitchState(LurkerState.Roaming);
 	}
 

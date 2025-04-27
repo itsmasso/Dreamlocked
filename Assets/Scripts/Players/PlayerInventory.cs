@@ -30,7 +30,7 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] private float throwForce;
     [Header("Animation")]
     [SerializeField] private Animator animator;
-
+    
     void Start()
     {
         isInventoryLocked = false;
@@ -124,7 +124,7 @@ public class PlayerInventory : NetworkBehaviour
         if (!IsServer) return false;
         PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
-
+        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("ItemPickup"), true);
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)

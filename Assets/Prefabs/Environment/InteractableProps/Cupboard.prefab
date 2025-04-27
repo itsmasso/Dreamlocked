@@ -481,6 +481,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
   - {fileID: 11400000, guid: 1e4b9cc4c1b6123498ff43a6fe0c4278, type: 2}
   - {fileID: 11400000, guid: 4f2838519e479414c9929af2434f515a, type: 2}
+  cupboardOpenSFX: {fileID: 11400000, guid: 19aa3ca7dfdb630448e2913ac2f248e1, type: 2}
+  cupboardCloseSFX: {fileID: 11400000, guid: 4b826a1ef6c4a1e42b0495acfee565d2, type: 2}
 --- !u!114 &8308086939380712950
 MonoBehaviour:
   m_ObjectHideFlags: 0

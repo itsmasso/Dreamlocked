@@ -5,7 +5,7 @@ public class LightFlicker : MonoBehaviour
 {
     [SerializeField] private float freezeAttemptInterval = 5f;
     [Tooltip("How long lights stay frozen.")]
-    [SerializeField] private float freezeDuration = 2f;
+    [SerializeField] private float freezeDuration = 1f;
     private float timer;
     private bool isFrozen = false;
     public bool IsFrozen => isFrozen;

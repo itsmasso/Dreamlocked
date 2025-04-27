@@ -19,11 +19,20 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
 {
     void Start()
     {
-        Debug.Log("Start Radio Manger");
+        //Debug.Log("Start Radio Manger");
     }
     void Update()
     {
-
+         // DELETE THIS BEFORE SUBMITTING
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            if (GameManager.Instance.IsFinalDreamLayer())
+            {
+                  StartExtractionProtocol();
+            } else {
+                  DescendDreamLevel();
+            }
+        }
     }
 
 /*****************************************************************
@@ -53,8 +62,12 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
  *****************************************************************/
     public void Interact(NetworkObjectReference playerObjectRef)
     {
-        Debug.Log("Interact called from RadioManager.cs");
-        DescendDreamLevel();
+        if (GameManager.Instance.IsFinalDreamLayer())
+        {
+            StartExtractionProtocol();
+        } else {
+            DescendDreamLevel();
+        }
     }
 
 /*****************************************************************
@@ -102,5 +115,12 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
     {
         Debug.Log("Starting Extraction Protocol...");
         PlaySong();
+        StartExtractionServerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void StartExtractionServerRpc()
+    {
+        GameManager.Instance.ChangeGameState(GameState.GameBeaten);
     }
 }

@@ -92,6 +92,8 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 			canMove = true;
 			defaultFOV = followZoom.FovRange;
 
+			// For End of Game Logic
+			GameManager.Instance.onLobby += HandleLobbyLoading;
 		}
 
 
@@ -327,6 +329,13 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		canMove = false;
 		yield return new WaitForSeconds(lockTime);
 		canMove = true;
+	}
+
+	private void HandleLobbyLoading()
+	{
+		Debug.Log("PlayerCamera.cs - Unlocking Cursor + Disabling Cameras");
+		Cursor.visible = true;
+		Cursor.lockState = CursorLockMode.None;
 	}
 
 }

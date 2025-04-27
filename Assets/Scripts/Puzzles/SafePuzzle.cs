@@ -29,6 +29,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         if (IsServer)
         {
             securityCode.Value = GameManager.Instance.GetSafeCode().Value;
+            isOpen.Value = false;
         }
     }
 
@@ -101,7 +102,10 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private void OpenSafe()
     {
         Debug.Log("Opening Safe");
-        isOpen.Value = true;
+        if (IsServer)
+        {
+            isOpen.Value = true;
+        }
         safeCollider.GetComponent<BoxCollider>().enabled = false;
         if (safeAnimator != null)
         {

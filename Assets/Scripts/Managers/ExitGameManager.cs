@@ -12,12 +12,14 @@ public class ExitGameManager : NetworkBehaviour
         if (IsHost)
         {
             KickClientsAndShutdown();
-        }
-        else if (IsClient)
-        {
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
+        // else if (IsClient)
+        // {
+        //     NetworkManager.Singleton.Shutdown();
+        //     SceneManager.LoadScene(menuSceneName);
+        // }
     }
 
     private void KickClientsAndShutdown()
@@ -26,10 +28,10 @@ public class ExitGameManager : NetworkBehaviour
         SendClientToMenuClientRpc();
 
         // Shut down host networking after delay
-        StartCoroutine(ShutdownAndLoadMenu());
+        // StartCoroutine(ShutdownAndLoadMenu());
     }
 
-    [ClientRpc]
+    [Rpc(SendTo.Everyone)]
     private void SendClientToMenuClientRpc()
     {
         if (!IsHost)
@@ -40,11 +42,11 @@ public class ExitGameManager : NetworkBehaviour
         }
     }
 
-    private System.Collections.IEnumerator ShutdownAndLoadMenu()
-    {
-        yield return new WaitForSeconds(0.5f); // Allow client RPCs to complete
+    // private System.Collections.IEnumerator ShutdownAndLoadMenu()
+    // {
+    //     yield return new WaitForSeconds(0.5f); // Allow client RPCs to complete
 
-        NetworkManager.Singleton.Shutdown();
-        SceneManager.LoadScene(menuSceneName);
-    }
+    //     NetworkManager.Singleton.Shutdown();
+    //     SceneManager.LoadScene(menuSceneName);
+    // }
 }

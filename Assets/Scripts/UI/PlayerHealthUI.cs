@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ public class PlayerHealthUI : MonoBehaviour
     [SerializeField] private Slider healthBar;
     [SerializeField] private PlayerScriptable playerScriptable;
     private int maxHealth;
+    [SerializeField] private TextMeshProUGUI healthNumber;
+    
  
     void Start()
     {
@@ -18,9 +21,10 @@ public class PlayerHealthUI : MonoBehaviour
     private void UpdateHealthBar(int currentHealth)
     {
         float val = Mathf.Clamp01((float)currentHealth / maxHealth);
-
+        
         healthBar.value = val;
         if (currentHealth <= 0) healthBar.value = 0;
+        healthNumber.text = currentHealth.ToString();
         
     }
 

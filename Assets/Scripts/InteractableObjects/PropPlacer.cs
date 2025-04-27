@@ -14,21 +14,25 @@ public class PropPlacer : NetworkBehaviour, IHasNetworkChildren
     {
         foreach (GameObject prop in props)
         {
-            NetworkObject propNetObj = prop.GetComponent<NetworkObject>();
-            //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
-            if (propNetObj != null)
+            if (prop != null)
             {
-                if (propNetObj.IsSpawned)
+                NetworkObject propNetObj = prop.GetComponent<NetworkObject>();
+                //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
+                if (propNetObj != null)
                 {
-                    if (propNetObj.GetComponent<IHasNetworkChildren>() != null)
-                        propNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
-                    propNetObj.Despawn(true); // Despawn child
+                    if (propNetObj.IsSpawned)
+                    {
+                        if (propNetObj.GetComponent<IHasNetworkChildren>() != null)
+                            propNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
+                        propNetObj.Despawn(true); // Despawn child
+                    }
                 }
-            }else
-            {
-                Destroy(prop);
+                else
+                {
+                    Destroy(prop);
+                }
             }
-            
+
         }
     }
 

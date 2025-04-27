@@ -504,16 +504,16 @@ AudioReverbZone:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2260819019555333869}
   m_Enabled: 1
-  m_MinDistance: 9.46
-  m_MaxDistance: 11.66
+  m_MinDistance: 3.7
+  m_MaxDistance: 8.92
   m_ReverbPreset: 27
-  m_Room: -1000
-  m_RoomHF: -300
+  m_Room: -2747
+  m_RoomHF: -410
   m_DecayTime: 1.49
   m_DecayHFRatio: 0.59
   m_Reflections: -1219
   m_ReflectionsDelay: 0.007
-  m_Reverb: 23
+  m_Reverb: -900
   m_ReverbDelay: 0.011
   m_HFReference: 5000
   m_Diffusion: 100

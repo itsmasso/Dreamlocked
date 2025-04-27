@@ -35,5 +35,5 @@ MonoBehaviour:
   lurkerSpawnDelay: 0
   lurkerSpawnAmount: 0
   mannequinSpawnAmount: 60
-  chanceToSpawnMannequin: 50
+  chanceToSpawnMannequin: 100
   chanceToSpawnGFClock: 0

@@ -13,9 +13,14 @@ public class Door : NetworkBehaviour, IInteractable
     public bool isLocked;
     [SerializeField] private ItemScriptableObject requiredKeySO;
     [SerializeField] private ItemScriptableObject lockpickSO;
+    [SerializeField] private Sounds3DSOList soundsSOList;
+    [SerializeField] private Sound3DSO doorOpenSO, doorCloseSO;
+    [SerializeField] private Transform soundTransform;
+
     void Start()
     {
         isOpen = false;
+
         defaultYRotation = pivot.eulerAngles.y;
     }
 
@@ -43,11 +48,12 @@ public class Door : NetworkBehaviour, IInteractable
         {
             Vector3 dir = pos - transform.position;
             targetYRotation = -Mathf.Sign(Vector3.Dot(transform.right, dir)) * maxDoorAngle;
-            //navmeshCut.enabled = false;
+            if (IsOwner) AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorOpenSO), soundTransform.position, true, 1f, 1, 30f);
+      
         }
         else
         {
-            //navmeshCut.enabled = true;
+            if (IsOwner) AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorCloseSO), soundTransform.position, true, 1f, 1, 30f);
             targetYRotation = 0f;
         }
     }
@@ -110,14 +116,15 @@ public class Door : NetworkBehaviour, IInteractable
                     isLocked = false;
                     playerObject.GetComponent<PlayerInventory>().RequestServerToDestroyItemRpc();
                 }
-                else if(playerObject.GetComponent<PlayerInventory>().currentHeldItemData.id != -1 &&
+                else if (playerObject.GetComponent<PlayerInventory>().currentHeldItemData.id != -1 &&
                 playerObject.GetComponent<PlayerInventory>().GetCurrentHeldItemID() == lockpickSO.id)
                 {
                     float rand = Random.value;
-                    if(rand <= 0.5f)//crochet needle (lock pick) has a 50 chance of opening any locked door
+                    if (rand <= 0.5f)//crochet needle (lock pick) has a 50 chance of opening any locked door
                     {
                         isLocked = false;
-                    }else
+                    }
+                    else
                     {
                         Debug.Log("Failed to lock pick door.");
                     }
@@ -130,5 +137,9 @@ public class Door : NetworkBehaviour, IInteractable
 
             }
         }
+    }
+    private int Get3DSoundFromList(Sound3DSO sound3DSO)
+    {
+        return soundsSOList.sound3DSOList.IndexOf(sound3DSO);
     }
 }

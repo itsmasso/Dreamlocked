@@ -9,7 +9,7 @@ using Unity.Netcode;
 using Netcode.Transports.Facepunch;
 
 
-public class SteamManager : PersistentSingleton<SteamManager>
+public class SteamManager : Singleton<SteamManager>
 {
     Lobby currentLobby;
     
@@ -132,7 +132,6 @@ public class SteamManager : PersistentSingleton<SteamManager>
 
             LobbySaver.instance.currentLobby = lobby;
             NetworkManager.Singleton.StartHost();
-            GameManager.Instance.ChangeGameState(GameState.Lobby);
 
             LobbyID.text = joinCode;
             CheckUI();

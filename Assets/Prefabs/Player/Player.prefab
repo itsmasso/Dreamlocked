@@ -398,6 +398,7 @@ GameObject:
   - component: {fileID: 8479931161177200237}
   - component: {fileID: 4454347209125263803}
   - component: {fileID: 8742919238630600357}
+  - component: {fileID: 648005582829037196}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -1103,6 +1104,35 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &648005582829037196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7062762779246524609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6919cfb6db1af314290cc3096670a303, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  audioSource: {fileID: 8742919238630600357}
+  obstacle:
+    serializedVersion: 2
+    m_Bits: 1024
+  groundCheck:
+    serializedVersion: 2
+    m_Bits: 8
+  interactableMoveable:
+    serializedVersion: 2
+    m_Bits: 2048
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  normalSnapshot: {fileID: 24500006, guid: c83088607955ca842b751de910f7450a, type: 2}
+  occludedSnapshot: {fileID: -2702325060614204279, guid: c83088607955ca842b751de910f7450a, type: 2}
+  blendTime: 0.25
 --- !u!1001 &4114297851744857405
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1177,13 +1207,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 4e870b32c6d68374ab914e2b88e479b4, type: 2}
     - target: {fileID: 5866666021909216657, guid: c2cee95420583694a9c98cef7ba5ac60, type: 3}
       propertyPath: m_WarningMessage
-      value: "\nBinding warning: Some generic clip(s) animate transforms that are
-        already bound by a Humanoid avatar. These transforms can only be changed
-        by Humanoid clips.\n\tTransform 'shoulder.R'\n\tTransform 'spine'\n\tTransform
-        'upper_arm.R'\n\tTransform 'shoulder.L'\n\tTransform 'forearm.R'\n\tTransform
-        'thigh.L'\n\tTransform 'upper_arm.L'\n\tTransform 'spine.006'\n\tTransform
-        'thumb.01.R'\n\tTransform 'f_ring.01.R'\n\tand more ...\n\tFrom animation
-        clip 'walk'"
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: c2cee95420583694a9c98cef7ba5ac60, type: 3}
       propertyPath: m_ApplyRootMotion

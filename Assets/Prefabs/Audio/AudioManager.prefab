@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 642607314
+  GlobalObjectIdHash: 2282381998
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -173,7 +173,7 @@ MonoBehaviour:
   sounds2DList: []
   audioSourceNetworkPrefab: {fileID: 7124692274902827920, guid: bbe59544cfe73734da303ba757ad2c12, type: 3}
   audioSourceLocalPrefab: {fileID: 3408143335965352733, guid: a5223bcb47ddabb45b4a5c232bed249f, type: 3}
-  sounds3DListSO: {fileID: 0}
+  sounds3DListSO: {fileID: 11400000, guid: 81898588e619e6845b55b4a9bde0d6a6, type: 2}
   audioMixer: {fileID: 24100000, guid: c83088607955ca842b751de910f7450a, type: 2}
   defaultSnapshot: {fileID: 24500006, guid: c83088607955ca842b751de910f7450a, type: 2}
   muffledSnapshot: {fileID: -2702325060614204279, guid: c83088607955ca842b751de910f7450a, type: 2}

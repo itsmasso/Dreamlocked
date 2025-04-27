@@ -1,15 +1,20 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerHotbarUI : MonoBehaviour
 {
     [SerializeField] private Image[] slotSprites;
-    [SerializeField] private GameObject[] highlightSlots;
+    [SerializeField] List<RectTransform> hotbarSlots = new List<RectTransform>();
     [SerializeField] private GameObject[] slotChargeBars;
     private Slider[] chargeBarSliders;
-
+    [SerializeField] private Sprite emptySlotImage;
+    [SerializeField] private float scaleSpeed = 5f;
+    [SerializeField] private float scaleAmount = 1.1f; // 1.1 = 10% bigger
     [SerializeField] private ItemScriptableObject flashlight;
+    private int currentSelectedSlot;
+    [SerializeField]private Vector2[] originalSizes;
     void Start()
     {
         PlayerInventory.onNewSlotSelected += NewSlotSelected;
@@ -17,7 +22,14 @@ public class PlayerHotbarUI : MonoBehaviour
         PlayerInventory.onRemoveSprite += RemoveSelectedSlotSprite;
         PlayerInventory.onUpdateChargeBar += UpdateChargeBar;
         GameManager.Instance.onNextLevel += ResetHotbar;
+        originalSizes = new Vector2[hotbarSlots.Count];
+        for (int i = 0; i < hotbarSlots.Count; i++)
+        {
 
+            originalSizes[i] = hotbarSlots[i].sizeDelta;
+            slotSprites[i].sprite = null;
+        }
+        
         foreach (GameObject chargeBar in slotChargeBars)
         {
             chargeBar.gameObject.SetActive(false);
@@ -32,10 +44,7 @@ public class PlayerHotbarUI : MonoBehaviour
 
     private void NewSlotSelected(int slotNumber)
     {
-        for (int i = 0; i < highlightSlots.Length; i++)
-        {
-            highlightSlots[i].SetActive(i == slotNumber); // Only set the selected one to true
-        }
+        currentSelectedSlot = slotNumber;
     }
 
     private void AddSelectedSlotSprite(int slotNumber, int id, ItemData itemData)
@@ -49,8 +58,8 @@ public class PlayerHotbarUI : MonoBehaviour
                 Debug.LogError($"ItemDatabase returned null for id: {id}");
                 return;
             }
-
             slotSprites[slotNumber].sprite = item.icon;
+            slotSprites[slotNumber].color = new Color(1, 1, 1, 1);
             //hard code this in for now but later on might want to add an item type
             if (id == flashlight.id)
             {
@@ -64,7 +73,8 @@ public class PlayerHotbarUI : MonoBehaviour
     {
         if (slotNumber >= 0 && slotNumber < slotSprites.Length)
         {
-            slotSprites[slotNumber].sprite = null;
+             slotSprites[slotNumber].sprite = null;
+             slotSprites[slotNumber].color = new Color(1, 1, 1, 0);
             slotChargeBars[slotNumber].gameObject.SetActive(false);
         }
     }
@@ -84,8 +94,8 @@ public class PlayerHotbarUI : MonoBehaviour
     {
         for (int i = 0; i < slotSprites.Length; i++)
         {
-            slotSprites[i].sprite = null;
-            highlightSlots[i].SetActive(false);
+             slotSprites[i].sprite = null;
+             slotSprites[i].color = new Color(1, 1, 1, 0);
             slotChargeBars[i].SetActive(false);
 
             if (chargeBarSliders[i] != null)
@@ -96,6 +106,18 @@ public class PlayerHotbarUI : MonoBehaviour
 
         NewSlotSelected(0);
     }
+
+    void Update()
+    {
+        for (int i = 0; i < hotbarSlots.Count; i++)
+        {
+            Vector2 targetSize = (i == currentSelectedSlot) ? originalSizes[i] * scaleAmount : originalSizes[i];
+            hotbarSlots[i].sizeDelta = Vector2.Lerp(hotbarSlots[i].sizeDelta, targetSize, Time.deltaTime * scaleSpeed);
+        }
+        
+    }
+
+
     void OnDestroy()
     {
         PlayerInventory.onNewSlotSelected -= NewSlotSelected;

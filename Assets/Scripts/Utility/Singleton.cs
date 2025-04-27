@@ -49,6 +49,16 @@ public abstract class NetworkSingleton<T> : NetworkBehaviour where T : NetworkBe
 
 }
 
+public abstract class PersistentNetworkSingleton<T> : NetworkSingleton<T> where T : NetworkBehaviour
+{
+	protected override void Awake()
+	{
+		base.Awake();
+		DontDestroyOnLoad(gameObject);
+	}
+
+}
+
 
 
 //singleton that won't be destroyed through scene loads. (useful for music that plays during load screens)

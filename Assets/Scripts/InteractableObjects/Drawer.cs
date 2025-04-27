@@ -35,17 +35,34 @@ public class Drawer : NetworkBehaviour, IHasNetworkChildren
 
     public void DestroyNetworkChildren()
     {
-
         foreach (GameObject drawerBox in drawerBoxes)
         {
-            NetworkObject drawerBoxNetObj = drawerBox.GetComponent<NetworkObject>();
-            //Debug.Log($"Child NetworkObject found: {child.gameObject.name}, IsSpawned: {childNetObj.IsSpawned}");
+            if (drawerBox == null)
+                continue;
+
+            var drawerBoxNetObj = drawerBox.GetComponent<NetworkObject>();
+            if (drawerBoxNetObj == null)
+                continue;
+
             if (drawerBoxNetObj.IsSpawned)
             {
-                if (drawerBoxNetObj.GetComponent<IHasNetworkChildren>() != null)
-                    drawerBoxNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
-                drawerBoxNetObj.Despawn(true); // Despawn child
+                var childNetworkHandler = drawerBoxNetObj.GetComponent<IHasNetworkChildren>();
+                if (childNetworkHandler != null)
+                {
+                    childNetworkHandler.DestroyNetworkChildren();
+                }
+
+                drawerBoxNetObj.Despawn(true);
+            }
+            else
+            {
+                // Optional: clean up in case it exists but isn’t spawned
+                Destroy(drawerBox);
             }
         }
+
+        // Optional: clear the list to avoid stale references
+        drawerBoxes.RemoveAll(x => x == null);
     }
+
 }

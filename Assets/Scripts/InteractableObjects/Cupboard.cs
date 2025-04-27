@@ -76,7 +76,11 @@ public class Cupboard : NetworkBehaviour, IInteractable, IHasNetworkChildren
         {
             if (IsServer && item != null)
             {
-                item.GetComponent<NetworkObject>().Despawn(true);
+                NetworkObject itemNetObj = item.GetComponent<NetworkObject>();
+                if(itemNetObj != null)
+                {
+                    itemNetObj.Despawn(true);
+                }
             }
         }
     }

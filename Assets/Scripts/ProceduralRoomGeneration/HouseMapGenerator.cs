@@ -759,10 +759,14 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	public override void OnDestroy()
 	{
-		base.OnDestroy();
-		ClearMap();
-		GameManager.Instance.onNextLevel -= ClearMap;
-		GameManager.Instance.onLobby -= ClearMap;
+		if (Application.isPlaying)
+		{
+			base.OnDestroy();
+			ClearMap();
+			GameManager.Instance.onNextLevel -= ClearMap;
+			GameManager.Instance.onLobby -= ClearMap;
+		}
+
 	}
 	private void OnDrawGizmos()
 	{

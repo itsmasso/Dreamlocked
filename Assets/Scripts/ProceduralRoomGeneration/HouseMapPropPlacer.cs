@@ -135,66 +135,78 @@ public class HouseMapPropPlacer : NetworkBehaviour
             }
         }
     }
-
     public void ClearObjects()
     {
-        // Despawn doors and lights before reloading the scene
+        // Despawn and clean up doors
         foreach (NetworkObject door in doorsInRoom)
         {
-            if (door.IsSpawned)
+            if (door != null && door.IsSpawned)
             {
-                // Despawn the networked object
                 door.Despawn(true);
-
-                // Destroy the local game object
+            }
+            else if (door != null)
+            {
                 Destroy(door.gameObject);
             }
         }
 
+        // Despawn and clean up lights in room
         foreach (NetworkObject light in lightsInRoom)
         {
-            if (light.IsSpawned)
+            if (light != null && light.IsSpawned)
             {
-                // Despawn the networked object
                 light.Despawn(true);
-
-                // Destroy the local game object
+            }
+            else if (light != null)
+            {
                 Destroy(light.gameObject);
             }
         }
 
-        if (propObjectList.Count != 0)
+        // Despawn and clean up props
+        if (propObjectList != null && propObjectList.Count > 0)
         {
             foreach (GameObject prop in propObjectList)
             {
-                if (prop != null && prop.TryGetComponent(out NetworkObject netObj))
+                if (prop == null) continue;
+
+                if (prop.TryGetComponent(out NetworkObject netObj))
                 {
                     foreach (var hasNetworkChildren in prop.GetComponents<IHasNetworkChildren>())
                     {
                         hasNetworkChildren.DestroyNetworkChildren();
                     }
-                    netObj.Despawn(true);
+
+                    if (netObj.IsSpawned)
+                    {
+                        netObj.Despawn(true);
+                    }
                 }
-                // Destroy the local game object
-                Destroy(prop.gameObject);
+
+                Destroy(prop); // Safe fallback regardless of network state
             }
         }
 
+        // Despawn and clean up hallway lights
         foreach (NetworkObject light in hallwayLights)
         {
-            if (light.IsSpawned)
+            if (light != null && light.IsSpawned)
             {
-                // Despawn the networked object
                 light.Despawn(true);
-
-                // Destroy the local game object
+            }
+            else if (light != null)
+            {
                 Destroy(light.gameObject);
             }
         }
-        // Clear the lists of networked objects
-        //doorsInRoom.Clear();
-        //lightsInRoom.Clear();
+
+        // Optionally clear the lists
+        doorsInRoom.Clear();
+        lightsInRoom.Clear();
+        hallwayLights.Clear();
+        propObjectList.Clear();
     }
+
     /*****************************************************************
      * SpawnInteractableObjectInRoom
      *****************************************************************

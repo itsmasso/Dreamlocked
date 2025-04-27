@@ -118,7 +118,6 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
                 if (!inLight.Value)
                 {
                     MoveToPlayer(ACTIVATING_MOVE_SPEED);
-
                     mannequinAnimationManager.SetAnimationSpeed(0.5f);
                 }
                 AttackPlayer();

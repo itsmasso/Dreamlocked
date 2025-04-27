@@ -49,8 +49,8 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	[Rpc(SendTo.Server)]
 	public void UnregisterPlayerServerRpc(NetworkObjectReference playerRef)
 	{
-		UnregisterPlayerClientRpc(playerRef);
 		alivePlayersCount.Value--;
+		UnregisterPlayerClientRpc(playerRef);
 	}
 
 	[Rpc(SendTo.Everyone)]
@@ -60,12 +60,16 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		{
 			if (player.IsOwner)
 			{
+				//Debug.Log("Removing Player");
 				alivePlayers.Remove(player);
 				Debug.Log(alivePlayersCount.Value);
 			}
 		}
+		// Debug.Log(alivePlayersCount.Value + " players remaining");
+		// Debug.Log(alivePlayers.Count + " players in the alivePlayers list");
 		if (IsServer && alivePlayersCount.Value <= 0)
 		{
+			Debug.Log("The last player has died, the game is over");
 			alivePlayersCount.Value = 0;
 			GameManager.Instance.ChangeGameState(GameState.GameOver);
 		}
@@ -251,6 +255,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 					}
 				}
 			}
+			alivePlayersCount.Value = 0;
 		}
 	}
 	public void SaveInventory(ulong clientId, NetworkList<ItemData> inventoryList)
@@ -262,10 +267,10 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		}
 
 		savedInventories[clientId] = copy;
-		Debug.Log($"[SaveInventory] Saved {copy.Count} items for clientId: {clientId}");
+		//Debug.Log($"[SaveInventory] Saved {copy.Count} items for clientId: {clientId}");
 		foreach (var item in copy)
 		{
-			Debug.Log($"[SaveInventory] Item saved - ID: {item.id}, UID: {item.uniqueId}, Charge: {item.itemCharge}, Uses: {item.usesRemaining}");
+			//Debug.Log($"[SaveInventory] Item saved - ID: {item.id}, UID: {item.uniqueId}, Charge: {item.itemCharge}, Uses: {item.usesRemaining}");
 		}
 	}
 
@@ -273,7 +278,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	{
 		if (!savedInventories.ContainsKey(clientId))
 		{
-			Debug.Log($"[LoadInventory] No saved inventory found for clientId: {clientId}, returning empty inventory.");
+			//Debug.Log($"[LoadInventory] No saved inventory found for clientId: {clientId}, returning empty inventory.");
 			ItemData emptyItem = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
 			List<ItemData> newEmptyInventory = new List<ItemData>();
 			while (newEmptyInventory.Count < 4)

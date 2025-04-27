@@ -224,6 +224,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 876975952470257624, guid: cab5adc78a7ac024ea1626f4720f6452, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1849236196056714921, guid: cab5adc78a7ac024ea1626f4720f6452, type: 3}
       propertyPath: m_text
       value: OPERATION FAILED

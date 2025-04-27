@@ -24,7 +24,7 @@ public class LevelLoader : NetworkBehaviour
         {
             GameManager.Instance.ChangeGameState(GameState.GeneratingLevel);
             ResetSettings();
-            GameManager.Instance.onLobby += ResetSettings;
+            GameManager.Instance.onLobby += HandleLobbyLoading;
         }
     }
     private IEnumerator WaitUntilGameSceneIsReady(string sceneName, Map level)
@@ -75,9 +75,34 @@ public class LevelLoader : NetworkBehaviour
             nextDifficultyCheckpoint += currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;
         }
     }
-    
+    private void HostQuit()
+    {
+        if (IsHost)
+        {
+            ClientQuitRpc();
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene("Bootstrapper");
+            Debug.Log("Host Quitting and Returning to Lobby");
+        }
+    }
+    [Rpc(SendTo.Everyone)]
+    private void ClientQuitRpc()
+    {
+        if (!IsHost)
+        {
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene("Bootstrapper");
+            Debug.Log("Client Quitting and Returning to Lobby");
+        }
+    }
+    private void HandleLobbyLoading()
+    {
+        ResetSettings();
+        HostQuit();
+    }
     private void ResetSettings()
     {
+        Debug.Log("Resetting all Settings");
         //add all resets for all maps here
         currentHouseMapDifficultySetting = houseMapDifficultySettingList[0];
         nextDifficultyCheckpoint = currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;

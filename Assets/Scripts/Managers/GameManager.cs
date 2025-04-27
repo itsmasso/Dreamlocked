@@ -26,18 +26,21 @@ public class GameManager : NetworkSingleton<GameManager>
 	//events
 	public event Action onLobby;
 	public event Action onGameStart;
+	public event Action onGameLose;
+	public event Action onGameWin;
 	public event Action onGameStateChanged;
 	public event Action onGamePlaying;
 	public event Action onLevelGenerate;
 	public event Action onNextLevel;
+	private Coroutine _gameOverRoutine;
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.Lobby, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private ScreenManager screenManager;
 	[SerializeField] private LevelLoader levelLoader;
-	private const int MAX_DREAM_LAYERS = 10;
+	private const int MAX_DREAM_LAYERS = 3;
 	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	private float gameOverTimer;
-	[SerializeField] private float gameOverScreenDuration = 4f;
+	[SerializeField] private float gameOverScreenDuration = 5f;
 
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
@@ -71,24 +74,16 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		if (IsServer)
 		{
-			for (int i = 0; i < securityCodeArray.Length; i++)
-			{
-				securityCodeArray[i] = UnityEngine.Random.Range(1, 10);
-			}
-			securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
-			Debug.Log("Security Code Generated: " + securityCode.Value);
+			// for (int i = 0; i < securityCodeArray.Length; i++)
+			// {
+			// 	securityCodeArray[i] = UnityEngine.Random.Range(1, 10);
+			// }
+			// securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
+			// Debug.Log("Security Code Generated: " + securityCode.Value);
 
 			//BookObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(securityCode.Value.ToString());
 		}
 	}
-    void Update()
-    {
-		//debug for skipping levels
-        if(Input.GetKeyDown(KeyCode.L))
-        {
-            OnNextLevel();
-        }
-    }
 
     public void OnNextLevel()
 	{
@@ -111,18 +106,37 @@ public class GameManager : NetworkSingleton<GameManager>
 		{
 			onGameStateChanged?.Invoke();
 			netGameState.Value = newState;
+
+			// Stop any pending coroutine
+			if (_gameOverRoutine != null && newState != GameState.GameOver)
+			{
+				StopCoroutine(_gameOverRoutine);
+				_gameOverRoutine = null;
+			}
+
+			// Stop any pending coroutine
+			if (_gameOverRoutine != null & newState != GameState.GameBeaten)
+			{
+				StopCoroutine(_gameOverRoutine);
+				_gameOverRoutine = null;
+			}
 			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
 				AudioManager.Instance.StopAmbience2D(AudioManager.Instance.Get2DSound("RoomAmbience"), 2f);
 					currentDreamLayer.Value = 1;
 					Debug.Log("Lobby");
-					screenManager.HideGameOverScreen();
+
+					// POSSIBLE BUG - Might need to call HideGameOverScreenToAllRPC, not screenManager.HideGameOverScreen();
+					// Uncomment and comment out HideGameOverScreenToAllRPC() if something breaks related to it
+					//screenManager.HideGameOverScreen();
+					HideGameOverScreenToAllRpc();
 					AllHandlesLobbyRpc();
 					break;
 				case GameState.GeneratingLevel:
 					seed.Value = UnityEngine.Random.Range(1, 999999);
 					Debug.Log("Current seed:" + seed.Value);
+					GenerateSecurityCode();
 					ShowSleepLoadingScreenToAllRpc();
 					AllHandlesGenerateLevelRpc();
 					levelLoader.LoadHouseMap();
@@ -138,24 +152,32 @@ public class GameManager : NetworkSingleton<GameManager>
 					break;
 				case GameState.GameBeaten:
 					AllHandlesGameBeatenRpc();
+					ShowGameWinScreenToAllRpc();
+					Debug.Log("Game Won");
+
+					_gameOverRoutine = StartCoroutine(ReturnToLobbyAfterDelay());
 					break;
 				case GameState.GameOver:
 					AllHandlesGameOverRpc();
 					ShowGameOverScreenToAllRpc();
-					Debug.Log("Game over");
-					gameOverTimer += Time.deltaTime;
-					if(gameOverTimer >= gameOverScreenDuration)
-					{
-						HideGameOverScreenToAllRpc();
-					    ChangeGameState(GameState.Lobby);
-					    gameOverTimer = 0;
-					}
-					
+					Debug.Log("Game Lost");
+
+					// Start the timer to return to lobby
+					_gameOverRoutine = StartCoroutine(ReturnToLobbyAfterDelay());
 					break;
 				default:
 					break;
 			}
 		}
+	}
+
+	private IEnumerator ReturnToLobbyAfterDelay()
+	{
+		yield return new WaitForSeconds(gameOverScreenDuration);
+
+		Debug.Log("Returning to Lobby");
+		_gameOverRoutine = null;
+		ChangeGameState(GameState.Lobby);
 	}
 
 	[Rpc(SendTo.Everyone)]
@@ -188,13 +210,13 @@ public class GameManager : NetworkSingleton<GameManager>
 	[Rpc(SendTo.Everyone)]
 	private void AllHandlesGameBeatenRpc()
 	{
-	    
+	    onGameWin?.Invoke();
 	}
 	
 	[Rpc(SendTo.Everyone)]
 	private void AllHandlesGameOverRpc()
 	{
-	    
+	    onGameLose?.Invoke();
 	}
 
 	[Rpc(SendTo.Everyone)]
@@ -210,6 +232,12 @@ public class GameManager : NetworkSingleton<GameManager>
 	
 	[Rpc(SendTo.Everyone)]
 	public void ShowGameOverScreenToAllRpc()
+	{
+	    screenManager.ShowGameOverScreen();
+	}
+
+	[Rpc(SendTo.Everyone)]
+	public void ShowGameWinScreenToAllRpc()
 	{
 	    screenManager.ShowGameOverScreen();
 	}
@@ -246,6 +274,16 @@ public class GameManager : NetworkSingleton<GameManager>
 	public NetworkVariable<int> GetSafeCode()
 	{
 		return securityCode;
+	}
+
+	private void GenerateSecurityCode()
+	{
+		for (int i = 0; i < securityCodeArray.Length; i++)
+		{
+			securityCodeArray[i] = UnityEngine.Random.Range(1, 10);
+		}
+		securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
+		Debug.Log("Security Code Generated: " + securityCode.Value);
 	}
 
 }

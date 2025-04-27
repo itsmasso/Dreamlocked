@@ -17,7 +17,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private float interactCooldownTimer;
 
     [Header("Safe Combinations")]
-    private int securityCode;
+    private NetworkVariable<int> securityCode = new NetworkVariable<int>(1987, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Network Variables")]
     private NetworkVariable<bool> isOpen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -28,7 +28,8 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         safeAnimator = GetComponentInChildren<Animator>();
         if (IsServer)
         {
-            securityCode = GameManager.Instance.GetSafeCode().Value;
+            securityCode.Value = GameManager.Instance.GetSafeCode().Value;
+            isOpen.Value = false;
         }
     }
 
@@ -101,7 +102,10 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private void OpenSafe()
     {
         Debug.Log("Opening Safe");
-        isOpen.Value = true;
+        if (IsServer)
+        {
+            isOpen.Value = true;
+        }
         safeCollider.GetComponent<BoxCollider>().enabled = false;
         if (safeAnimator != null)
         {
@@ -139,7 +143,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     {
         if (!isOpen.Value && canInteract.Value)
         {
-            if (CheckCode(KeypadScript.GetEnteredCode(), securityCode))
+            if (CheckCode(KeypadScript.GetEnteredCode(), securityCode.Value))
             {
                 Debug.Log("Code Accepted");
                 OpenSafeServerRpc();

@@ -1,7 +1,7 @@
 using System.Collections;
 using Pathfinding;
 using UnityEngine;
-
+using Unity.Netcode;
 public class LurkerChaseState : LurkerBaseState
 {
     //lurker component variables
@@ -39,7 +39,8 @@ public class LurkerChaseState : LurkerBaseState
         doorLayer = lurker.doorLayer;
         agent = lurker.agent;
         anim = lurker.animationManager;
-        
+        AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerPreChaseSFX));
+        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX), lurker.transform.position, false, 1f, 1f, 30f, true, lurker.GetComponent<NetworkObject>());
         //reset variables
         nextChangeTime = 0f;
         chaseTimer = 0;
@@ -58,7 +59,11 @@ public class LurkerChaseState : LurkerBaseState
     	
     	//open doors
     	CheckForDoor();
-		
+		if (agent.velocity.magnitude > 0.1f && agent.canMove && !agent.reachedEndOfPath && agent.hasPath)
+		{
+			lurker.HandleHeavyFootStepSFX();
+		}
+
 		//Set animations
 		anim.PlayRunningAnimation();
 		HandleTwitchAnimations();
@@ -75,6 +80,7 @@ public class LurkerChaseState : LurkerBaseState
 
 		if(IsTargetOutOfRange() && chaseTimer >= lurker.minimumChaseTime)
 		{
+            AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX));
 			lurker.StartStalkCooldown();
 			lurker.SwitchState(LurkerState.Roaming);
 		}

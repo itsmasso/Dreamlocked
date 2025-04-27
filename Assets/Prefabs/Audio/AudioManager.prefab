@@ -170,6 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   global2DAudioSource: {fileID: 2178002652762464223}
+  ambienceAudioSourcePrefab: {fileID: 3408143335965352733, guid: 3a71d56b5e78acc4387410edfcfb634c, type: 3}
   sounds2DList: []
   audioSourceNetworkPrefab: {fileID: 7124692274902827920, guid: bbe59544cfe73734da303ba757ad2c12, type: 3}
   audioSourceLocalPrefab: {fileID: 3408143335965352733, guid: a5223bcb47ddabb45b4a5c232bed249f, type: 3}

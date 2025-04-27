@@ -9,13 +9,13 @@ public class LurkerAttackState : LurkerBaseState
     public override void EnterState(LurkerMonsterScript lurker)
     {
         animator = lurker.anim;
-   
+        AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX));
         lurker.StartCoroutine(AttackPlayer(lurker));
     }
 
     public override void UpdateState(LurkerMonsterScript lurker)
     {
-
+        lurker.animationManager.PlayHeadTwitches();
     }
 
     private IEnumerator AttackPlayer(LurkerMonsterScript lurker)

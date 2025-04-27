@@ -11,6 +11,7 @@ public class ExitGameManager : NetworkBehaviour
     {
         if (IsHost)
         {
+            AudioManager.Instance.ClearAllAudio();
             KickClientsAndShutdown();
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);

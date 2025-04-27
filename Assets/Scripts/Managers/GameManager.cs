@@ -114,13 +114,13 @@ public class GameManager : NetworkSingleton<GameManager>
 			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
+				AudioManager.Instance.StopAmbience2D(AudioManager.Instance.Get2DSound("RoomAmbience"), 2f);
 					currentDreamLayer.Value = 1;
 					Debug.Log("Lobby");
 					screenManager.HideGameOverScreen();
 					AllHandlesLobbyRpc();
 					break;
 				case GameState.GeneratingLevel:
-
 					seed.Value = UnityEngine.Random.Range(1, 999999);
 					Debug.Log("Current seed:" + seed.Value);
 					ShowSleepLoadingScreenToAllRpc();
@@ -129,6 +129,7 @@ public class GameManager : NetworkSingleton<GameManager>
 
 					break;
 				case GameState.GameStart:
+					AudioManager.Instance.PlayAmbience2D(AudioManager.Instance.Get2DSound("RoomAmbience"), 2f);
 					AllHandlesGameStartRpc();
 					ChangeGameState(GameState.GamePlaying);
 					break;

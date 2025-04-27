@@ -18,6 +18,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
     [SerializeField] private float propSpawnInterval;
     public float hallwayLightSpawnInterval;
     [SerializeField] private float chanceToSpawnHallwayProp = 0.5f;
+    [SerializeField] private LightFlicker lightFlickerScript;
 
     void Start()
     {
@@ -50,6 +51,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
 
                 roomLightObject.transform.rotation *= Quaternion.Euler(0, room.yRotation, 0);
                 roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+                roomLightObject.GetComponent<EnvironmentLightScript>().lightFlicker = lightFlickerScript;
                 lightsInRoom.Add(roomLightObject.GetComponent<NetworkObject>());
             }
         }
@@ -64,6 +66,7 @@ public class HouseMapPropPlacer : NetworkBehaviour
                 //Debug.Log("spawning light");
                 GameObject roomLightObject = Instantiate(hallwayLightPrefab, position, Quaternion.identity);
                 roomLightObject.GetComponent<NetworkObject>().Spawn(true);
+                roomLightObject.GetComponent<EnvironmentLightScript>().lightFlicker = lightFlickerScript;
                 hallwayLights.Add(roomLightObject.GetComponent<NetworkObject>());
             }
         }

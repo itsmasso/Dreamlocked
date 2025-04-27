@@ -48,12 +48,15 @@ public class Door : NetworkBehaviour, IInteractable
         {
             Vector3 dir = pos - transform.position;
             targetYRotation = -Mathf.Sign(Vector3.Dot(transform.right, dir)) * maxDoorAngle;
-            if (IsOwner) AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorOpenSO), soundTransform.position, true, 1f, 1, 30f);
+            if (IsOwner)
+            {
+                AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorOpenSO), soundTransform.position, true, 1f, 1, 30f, false, GetComponent<NetworkObject>());
+            }
       
         }
         else
         {
-            if (IsOwner) AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorCloseSO), soundTransform.position, true, 1f, 1, 30f);
+            if (IsOwner) AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(doorCloseSO), soundTransform.position, true, 1f, 1, 30f,false, GetComponent<NetworkObject>());
             targetYRotation = 0f;
         }
     }

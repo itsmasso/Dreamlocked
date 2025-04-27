@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
-using Unity.VisualScripting;
+
 public enum LurkerState
 {
 	Roaming,
@@ -81,8 +81,15 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public LurkerAnimationManager animationManager;
 	[Header("Map Properties")]
 	public HouseMapGenerator houseMapGenerator;
-
-
+	[Header("SFX")]
+	public Sound3DSO lurkerBreathingSFX;
+	public Sound3DSO lurkerPreChaseSFX;
+	public Sound3DSO lurkerChaseSFX;
+	public Sound3DSO[] regularFootSteps;
+	public Sound3DSO[] heavyFootSteps;
+	[SerializeField] private AudioSource footStepAudioSource;
+	public float walkingFootStepInterval = 1;
+	private float footstepTimer;
 	private void Start()
 	{
 		if (IsServer)
@@ -137,6 +144,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	private void Update()
 	{
 		if (!IsServer) return;
+
 		// if (inLight.Value)
 		// {
 		// 	UnityEngine.Debug.Log("Lurker is in Light");
@@ -158,16 +166,16 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			// Freeze animation if not moving
 			animationManager.PlayIdleAnimation();
 		}
-		if(isInLightThisFrame && !wasInLightLastFrame)
+		if (isInLightThisFrame && !wasInLightLastFrame)
 		{
-		    EnteredLight();
+			EnteredLight();
 		}
-		
-		if(!isInLightThisFrame && wasInLightLastFrame)
+
+		if (!isInLightThisFrame && wasInLightLastFrame)
 		{
-		    ExitLight();
+			ExitLight();
 		}
-		
+
 		wasInLightLastFrame = isInLightThisFrame;
 		isInLightThisFrame = false;
 
@@ -337,6 +345,61 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	{
 		SwitchState(LurkerState.Roaming);
 		currentTarget = null;
+	}
+
+	public void HandleNormalFootStepSFX()
+	{
+		footstepTimer -= Time.deltaTime;
+
+		if (footstepTimer <= 0f)
+		{
+			PlayNormalFootstepRpc();
+
+			float speed = GetSpeed();
+			float interval = walkingFootStepInterval / Mathf.Max(speed, 0.1f); // prevent division by 0
+
+			footstepTimer = Mathf.Max(interval, 0.2f);
+		}
+	}
+
+	public void HandleHeavyFootStepSFX()
+	{
+		footstepTimer -= Time.deltaTime;
+
+		if (footstepTimer <= 0f)
+		{
+			PlayHeavyFootstepRpc();
+
+			float speed = GetSpeed();
+			float interval = walkingFootStepInterval*0.5f / Mathf.Max(speed, 0.1f); // prevent division by 0
+
+			footstepTimer = Mathf.Max(interval, 0.2f);
+		}
+	}
+
+	[Rpc(SendTo.Everyone)]
+	public void PlayNormalFootstepRpc()
+	{
+		Sound3DSO footStep = regularFootSteps[Random.Range(0, regularFootSteps.Length)];
+		footStepAudioSource.pitch = Random.Range(0.9f, 1.1f);
+		footStepAudioSource.volume = Random.Range(Mathf.Clamp01(footStep.volume - 0.4f), footStep.volume);
+		footStepAudioSource.minDistance = footStep.minDistance;
+		footStepAudioSource.maxDistance = footStep.maxDistance;
+		footStepAudioSource.outputAudioMixerGroup = footStep.audioMixerGroup;
+		footStepAudioSource.PlayOneShot(footStep.clip, footStep.volume);
+
+	}
+	[Rpc(SendTo.Everyone)]
+	public void PlayHeavyFootstepRpc()
+	{
+		Sound3DSO footStep = heavyFootSteps[Random.Range(0, heavyFootSteps.Length)];
+		footStepAudioSource.pitch = Random.Range(0.9f, 1.1f);
+		footStepAudioSource.volume = Random.Range(Mathf.Clamp01(footStep.volume - 0.4f), footStep.volume);
+		footStepAudioSource.minDistance = footStep.minDistance;
+		footStepAudioSource.maxDistance = footStep.maxDistance;
+		footStepAudioSource.outputAudioMixerGroup = footStep.audioMixerGroup;
+		footStepAudioSource.PlayOneShot(footStep.clip, footStep.volume);
+
 	}
 
 	public void ActivateBearItemEffect()

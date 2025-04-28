@@ -139,7 +139,24 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         AudioSource audioSource = Get3DSource(soundSO);
         audioSource.transform.position = position;
         if (parent != null)
-            audioSource.transform.parent = parent;
+        {
+            NetworkObject netObj = parent.GetComponent<NetworkObject>();
+            if (netObj != null)
+            {
+                if (netObj.IsSpawned)
+                {
+                    audioSource.transform.SetParent(parent);
+                }
+                else
+                {
+                    StartCoroutine(WaitAndParent(audioSource.transform, parent));
+                }
+            }
+            else
+            {
+                audioSource.transform.SetParent(parent);
+            }
+        }
         audioSource.gameObject.SetActive(true);
 
         float finalVolume = volume ?? soundSO.volume;
@@ -166,6 +183,21 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
             }
         }
         active3DSounds.Add(audioSource);
+    }
+    private IEnumerator WaitAndParent(Transform child, Transform desiredParent)
+    {
+        NetworkObject netObj = desiredParent.GetComponent<NetworkObject>();
+
+        // Wait until the parent NetworkObject is spawned
+        while (netObj != null && !netObj.IsSpawned)
+        {
+            yield return null;
+        }
+
+        if (child != null && desiredParent != null)
+        {
+            child.SetParent(desiredParent);
+        }
     }
     [Rpc(SendTo.Server)]
     public void Play3DSoundServerRpc(int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
@@ -220,14 +252,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     private AudioSource CreateNew3DAudioPool(Sound3DSO soundSO)
     {
         GameObject soundObj = Instantiate(audioSourceNetworkPrefab, transform);
-        if (IsServer)
-        {
-            NetworkObject soundNetObj = soundObj.GetComponent<NetworkObject>();
-            if (soundNetObj != null)
-            {
-                soundNetObj.Spawn(true);
-            }
-        }
+
         AudioSource audioSource = soundObj.GetComponent<AudioSource>();
         if (audioSource == null) audioSource.AddComponent<AudioSource>();
 
@@ -237,7 +262,14 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         audioSource.maxDistance = soundSO.maxDistance;
         audioSource.volume = soundSO.volume;
         audioSource.outputAudioMixerGroup = soundSO.audioMixerGroup;
-
+        if (IsServer)
+        {
+            NetworkObject soundNetObj = soundObj.GetComponent<NetworkObject>();
+            if (soundNetObj != null)
+            {
+                soundNetObj.Spawn(true);
+            }
+        }
         soundObj.SetActive(false);
         return audioSource;
     }

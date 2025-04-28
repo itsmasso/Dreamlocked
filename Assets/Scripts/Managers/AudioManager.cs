@@ -284,19 +284,30 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         }
         active2DSounds.Clear();
 
-        // Clear 3D Sounds
-        foreach (var soundSource in active3DSounds)
+        // Clear 3D Sounds — only the server/host may actually despawn NetworkObjects
+        if (IsServer) 
         {
-            if (soundSource != null)
+            foreach (var soundSource in active3DSounds)
             {
-                soundSource.Stop();
-                soundSource.gameObject.SetActive(false);
+                if (soundSource != null)
+                {
+                    soundSource.Stop();
+                    soundSource.gameObject.SetActive(false);
 
-                Destroy(soundSource.gameObject);
-
+                    var netObj = soundSource.GetComponent<NetworkObject>();
+                    if (netObj != null)
+                    {
+                        netObj.Despawn();
+                    }
+                    else
+                    {
+                        // fallback for any purely-local AudioSources
+                        Destroy(soundSource.gameObject);
+                    }
+                }
             }
+            active3DSounds.Clear();
         }
-        active3DSounds.Clear();
 
         Debug.Log("AudioManager: Cleared all active sounds.");
     }

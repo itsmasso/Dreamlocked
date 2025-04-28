@@ -20,18 +20,28 @@ public class SteamManager : Singleton<SteamManager>
     [SerializeField]
     private TextMeshProUGUI LobbyID;
 
-    [SerializeField]
+    [SerializeField] 
     private GameObject LobbyMenu;
-    [SerializeField] private GameObject mainMenu;
+    [SerializeField] 
+    private GameObject mainMenu;
 
-    [SerializeField] private GameObject settingsPanel;
+    [SerializeField] 
+    private GameObject settingsPanel;
+
+    private float playerCheckTimer = 0f;
+    private const float playerCheckInterval = 1f;
     
+    private int lastPlayerCount = -1; // Store previous player count
+
    
     void OnEnable()
     {
         SteamMatchmaking.OnLobbyCreated += LobbyCreated;
         SteamMatchmaking.OnLobbyEntered += LobbyEntered;
         SteamFriends.OnGameLobbyJoinRequested += GameLobbyJoinRequested;
+
+        SteamMatchmaking.OnLobbyMemberJoined -= OnLobbyMemberJoined;
+        SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeft;
 
     }
 
@@ -40,7 +50,14 @@ public class SteamManager : Singleton<SteamManager>
         SteamMatchmaking.OnLobbyCreated -= LobbyCreated;
         SteamMatchmaking.OnLobbyEntered -= LobbyEntered;
         SteamFriends.OnGameLobbyJoinRequested -= GameLobbyJoinRequested;
+
+        SteamMatchmaking.OnLobbyMemberJoined -= OnLobbyMemberJoined;
+        SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeft;
     }
+
+
+
+  
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -74,15 +91,24 @@ public class SteamManager : Singleton<SteamManager>
 
         CheckUI();
 
+        // Delay refreshing icons
+        StartCoroutine(DelayedRefreshLobbyUI(lobby.MemberCount));
+
         if (!NetworkManager.Singleton.IsHost)
         {
             NetworkManager.Singleton.GetComponent<FacepunchTransport>().targetSteamId = lobby.Owner.Id;
             NetworkManager.Singleton.StartClient();
         }
 
-        // Wait a frame to ensure ChatManager is present
         StartCoroutine(SendDelayedJoinMessage());
     }
+
+    private IEnumerator DelayedRefreshLobbyUI(int memberCount)
+    {
+        yield return new WaitForSeconds(0.1f); // short delay to let LobbyUIManager initialize
+        LobbyUIManager.Instance?.RefreshPlayerIcons(memberCount);
+    }
+
 
 
     private void LobbyCreated(Result result, Lobby lobby)
@@ -135,6 +161,8 @@ public class SteamManager : Singleton<SteamManager>
 
             LobbyID.text = joinCode;
             CheckUI();
+
+            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
 
             Debug.Log($"Hosting lobby with code: {joinCode}");
         }
@@ -206,7 +234,32 @@ public class SteamManager : Singleton<SteamManager>
         LobbySaver.instance.currentLobby = null;
         NetworkManager.Singleton.Shutdown();
         CheckUI();
+        
+        if (LobbyUIManager.Instance != null)
+        {
+            LobbyUIManager.Instance.RefreshPlayerIcons(0);
+        }
+
     }
+
+    private void OnLobbyMemberJoined(Lobby lobby, Friend newMember)
+    {
+        if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
+        {
+            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
+            Debug.Log($"Player joined lobby. Now {lobby.MemberCount} players.");
+        }
+    }
+
+    private void OnLobbyMemberLeft(Lobby lobby, Friend member)
+    {
+        if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
+        {
+            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
+            Debug.Log($"Player left lobby. Now {lobby.MemberCount} players.");
+        }
+    }
+
 
     private IEnumerator SendDelayedJoinMessage()
     {

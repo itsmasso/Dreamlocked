@@ -124,7 +124,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			{
 				case GameState.Lobby:
 				AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
-					currentDreamLayer.Value = 1;
+					currentDreamLayer.Value = 0;
 					Debug.Log("Lobby");
 
 					// POSSIBLE BUG - Might need to call HideGameOverScreenToAllRPC, not screenManager.HideGameOverScreen();

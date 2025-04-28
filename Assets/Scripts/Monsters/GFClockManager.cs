@@ -52,7 +52,6 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 
         if (IsServer)
         {
-            currentTime = TOTAL_TIME;
             timeRunning = true;
             SetDifficulty();
             AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(clockTickingSFX), transform.position, false, 1f, 1f, 30f, true, GetComponent<NetworkObject>(), 0f);
@@ -68,20 +67,25 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
             case 0:
                 TOTAL_TIME = 240f;
                 TIME_TO_DANGER = 30f;
+        
                 break;
             case 1:
                 TOTAL_TIME = 180f;
                 TIME_TO_DANGER = 20f;
+    
                 break;
             case 2:
                 TOTAL_TIME = 120f;
                 TIME_TO_DANGER = 15f;
+
                 break;
             case 3:
                 TOTAL_TIME = 60f;
                 TIME_TO_DANGER = 10f;
+
                 break;
         }
+        currentTime = TOTAL_TIME;
     }
 
     public override void OnNetworkSpawn()

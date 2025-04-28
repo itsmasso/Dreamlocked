@@ -110,6 +110,6 @@ public class LevelLoader : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
-        if(IsServer) GameManager.Instance.onLobby -= ResetSettings;
+        if(IsServer) GameManager.Instance.onLobby -= HandleLobbyLoading;
     }
 }

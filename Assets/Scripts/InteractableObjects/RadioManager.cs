@@ -24,7 +24,7 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
     {
         //Debug.Log("Start Radio Manger");
         AudioManager.Instance.Play3DSoundServerRpc(
-        AudioManager.Instance.Get3DSoundFromList(GetSongForLevel(GameManager.Instance.GetCurrentDreamLayer(), GameManager.Instance.GetMaxDreamLayer())), 
+        AudioManager.Instance.Get3DSoundFromList(GetSongForLevel(GameManager.Instance.GetCurrentDreamLayer(), GameManager.Instance.GetMaxDreamLayer())),
         transform.position, false, 1f, 1f, 20f, true, GetComponent<NetworkObject>(), 2f);
     }
     public Sound3DSO GetSongForLevel(int currentLevel, int totalLevels)
@@ -134,6 +134,12 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
         start everything that needs to be started.
      *****************************************************************/
     private void DescendDreamLevel()
+    {
+        DescendDreamLevelServerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DescendDreamLevelServerRpc()
     {
         Debug.Log("Descending Dream Level...");
         GameManager.Instance.OnNextLevel();

@@ -37,14 +37,12 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     }
     private IEnumerator FadeAudio(AudioSource source, float targetVolume, float duration, bool is3D = false, Sound3DSO related3DSoundSO = null)
     {
-        if (source == null)
+        if (source == null || source.gameObject == null)
             yield break;
 
         float startVolume = source.volume;
-        // Smart check
         if (targetVolume > startVolume)
         {
-            // Fading IN
             source.volume = 0f;
             startVolume = 0f;
         }
@@ -53,10 +51,15 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         while (timer < duration)
         {
             timer += Time.deltaTime;
+
+            if (source == null || source.gameObject == null)
+                yield break; // Exit if destroyed mid-fade
+
             source.volume = Mathf.Lerp(startVolume, targetVolume, timer / duration);
             yield return null;
         }
-
+        if (source == null || source.gameObject == null)
+            yield break;
         source.volume = targetVolume;
 
         if (Mathf.Approximately(targetVolume, 0f))
@@ -180,7 +183,28 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         {
             Play3DSound(sounds3DListSO.sound3DSOList[index], position, null, isOneShot, volume, minDistance, maxDistance, preventDupes, fadeInDuration);
         }
+        Play3DSoundClientRpc(index, position, isOneShot, volume, minDistance, maxDistance, preventDupes, networkObjectReference, fadeInDuration);
 
+    }
+    [Rpc(SendTo.Everyone)]
+    private void Play3DSoundClientRpc(int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
+    {
+        if (IsServer) return;
+
+        if (index < 0 || index >= sounds3DListSO.sound3DSOList.Count)
+        {
+            Debug.LogError($"[AudioManager] Invalid 3D Sound Index: {index}. List Count: {sounds3DListSO.sound3DSOList.Count}");
+            return;
+        }
+
+        if (networkObjectReference.TryGet(out NetworkObject networkObject))
+        {
+            Play3DSound(sounds3DListSO.sound3DSOList[index], position, networkObject.transform, isOneShot, volume, minDistance, maxDistance, preventDupes, fadeInDuration);
+        }
+        else
+        {
+            Play3DSound(sounds3DListSO.sound3DSOList[index], position, null, isOneShot, volume, minDistance, maxDistance, preventDupes, fadeInDuration);
+        }
     }
 
     public void Play3DServerSoundDelayed(float delay, int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
@@ -233,6 +257,8 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     private IEnumerator ReturnAfterDuration(AudioSource audioSource, float duration, Sound3DSO soundSO)
     {
         yield return new WaitForSeconds(duration);
+        if (audioSource == null || audioSource.gameObject == null)
+            yield break;
         audioSource.Stop();
         audioSource.gameObject.SetActive(false);
         soundPools[soundSO].Enqueue(audioSource);

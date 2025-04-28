@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class SettingsUIController : MonoBehaviour
 {
@@ -9,14 +10,39 @@ public class SettingsUIController : MonoBehaviour
     public GameObject crosshair;
 
     [SerializeField] private GameObject playerObject;
+    [Header("Audio Settings")]
+    [SerializeField] private Slider volumeSlider;
 
     private bool isOpen = false;
     private KeybindSettingsManager keybindManager;
+
+    private const string VolumePrefKey = "VolumeLevel"; // Constant key name!
+
+    [SerializeField] private Button muteButton;
+    private bool isMuted = false;
+    private float lastVolumeBeforeMute = 1f; // remember the last good volume
+
 
     void Start()
     {
         keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
         settingsPanel.SetActive(false);
+
+        if (volumeSlider != null)
+        {
+            // Load saved volume from PlayerPrefs or fallback to 1 
+            float savedVolume = PlayerPrefs.GetFloat(VolumePrefKey, 1f);
+            volumeSlider.value = savedVolume;
+            AudioListener.volume = savedVolume;
+
+            volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
+        }
+
+        if (muteButton != null)
+        {
+            muteButton.onClick.AddListener(ToggleMute);
+        }
+
     }
 
     void Update()
@@ -31,7 +57,6 @@ public class SettingsUIController : MonoBehaviour
     {
         if (isOpen)
         {
-            // Save keybinds on close
             if (keybindManager != null)
                 keybindManager.SaveBindings();
         }
@@ -39,27 +64,21 @@ public class SettingsUIController : MonoBehaviour
         isOpen = !isOpen;
         settingsPanel.SetActive(isOpen);
 
-        // Cursor control
         Cursor.lockState = isOpen ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = isOpen;
 
-        // Toggle UI and crosshair
         if (inGameUI != null) inGameUI.SetActive(!isOpen);
         if (crosshair != null) crosshair.SetActive(!isOpen);
 
-        // Disable player control
         if (playerObject != null)
         {
             var input = playerObject.GetComponent<PlayerInput>();
-            if (input != null)
-                input.enabled = !isOpen;
+            if (input != null) input.enabled = !isOpen;
 
             var controller = playerObject.GetComponent<PlayerController>();
-            if (controller != null)
-                controller.enabled = !isOpen;
+            if (controller != null) controller.enabled = !isOpen;
         }
 
-        // Load keybinds when opening
         if (isOpen && keybindManager != null)
             keybindManager.LoadBindings();
     }
@@ -110,9 +129,7 @@ public class SettingsUIController : MonoBehaviour
 
     public void OnExitButtonPressed()
     {
-        
         var keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
-        // Save keybinds before exiting
         if (keybindManager != null)
         {        
             keybindManager?.SaveBindings();
@@ -120,4 +137,33 @@ public class SettingsUIController : MonoBehaviour
 
         FindFirstObjectByType<ExitGameManager>()?.ExitToMenu();
     }
+
+    private void OnVolumeChanged(float value)
+    {
+        AudioListener.volume = value;
+        PlayerPrefs.SetFloat(VolumePrefKey, value); // SAVE it immediately
+        PlayerPrefs.Save(); // Write to disk
+    }
+
+    private void ToggleMute()
+    {
+        if (!isMuted)
+        {
+            lastVolumeBeforeMute = AudioListener.volume; // save current volume
+            AudioListener.volume = 0f;
+            if (volumeSlider != null) volumeSlider.value = 0f;
+            isMuted = true;
+        }
+        else
+        {
+            AudioListener.volume = lastVolumeBeforeMute;
+            if (volumeSlider != null) volumeSlider.value = lastVolumeBeforeMute;
+            isMuted = false;
+        }
+
+        // Save to PlayerPrefs even for mute!
+        PlayerPrefs.SetFloat(VolumePrefKey, AudioListener.volume);
+        PlayerPrefs.Save();
+    }
+
 }

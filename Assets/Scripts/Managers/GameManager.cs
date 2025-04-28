@@ -88,9 +88,15 @@ public class GameManager : NetworkSingleton<GameManager>
     public void OnNextLevel()
 	{
 		if (!IsServer) return;
-		AudioManager.Instance.ClearAllAudio();
+		ClearAudioRpc();
 		StartCoroutine(TransitionToNextLevel());
 		//add respawn here
+	}
+	
+	[Rpc(SendTo.Everyone)]
+	private void ClearAudioRpc()
+	{
+	    AudioManager.Instance.ClearAllAudio();
 	}
 
 	private IEnumerator TransitionToNextLevel()
@@ -100,7 +106,11 @@ public class GameManager : NetworkSingleton<GameManager>
 		yield return new WaitForSeconds(0.1f);
 		ChangeGameState(GameState.GeneratingLevel);
 	}
-
+	[Rpc(SendTo.Everyone)]
+	private void StopMenuMusicRpc()
+	{
+	    AudioManager.Instance.StopMenuMusic();
+	}
 	public void ChangeGameState(GameState newState)
 	{
 		if (IsServer)
@@ -124,7 +134,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
-				AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
+					StopAmbienceRpc();
 					currentDreamLayer.Value = 0;
 					Debug.Log("Lobby");
 
@@ -137,6 +147,7 @@ public class GameManager : NetworkSingleton<GameManager>
 				case GameState.GeneratingLevel:
 					seed.Value = UnityEngine.Random.Range(1, 999999);
 					Debug.Log("Current seed:" + seed.Value);
+					StopMenuMusicRpc();
 					GenerateSecurityCode();
 					ShowSleepLoadingScreenToAllRpc();
 					AllHandlesGenerateLevelRpc();
@@ -144,7 +155,7 @@ public class GameManager : NetworkSingleton<GameManager>
 
 					break;
 				case GameState.GameStart:
-					AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
+					PlayAmbienceRpc();
 					AllHandlesGameStartRpc();
 					ChangeGameState(GameState.GamePlaying);
 					break;
@@ -170,6 +181,17 @@ public class GameManager : NetworkSingleton<GameManager>
 					break;
 			}
 		}
+	}
+	
+	[Rpc(SendTo.Everyone)]
+	private void StopAmbienceRpc()
+	{
+	    AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
+	}
+	[Rpc(SendTo.Everyone)]
+	private void PlayAmbienceRpc()
+	{
+	    AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
 	}
 
 	private IEnumerator ReturnToLobbyAfterDelay()

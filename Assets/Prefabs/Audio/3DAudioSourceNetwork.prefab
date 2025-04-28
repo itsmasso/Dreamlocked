@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8411728857655339728}
   - component: {fileID: 3308090219422948938}
   - component: {fileID: 8125320267302697536}
+  - component: {fileID: 7487849324088032929}
   m_Layer: 0
   m_Name: 3DAudioSourceNetwork
   m_TagString: Untagged
@@ -54,7 +55,7 @@ AudioSource:
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
-  DopplerLevel: 1
+  DopplerLevel: 0.04
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
@@ -247,3 +248,17 @@ MonoBehaviour:
   - 0
   applyHRTFToPathing: 0
   pathingMixLevel: 1
+--- !u!114 &7487849324088032929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7124692274902827920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cdd94617cdd26489c6daa01132bb01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  offset: {x: 0, y: 0, z: 0}

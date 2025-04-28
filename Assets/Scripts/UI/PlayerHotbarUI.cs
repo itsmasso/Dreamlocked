@@ -10,8 +10,8 @@ public class PlayerHotbarUI : MonoBehaviour
     [SerializeField] private GameObject[] slotChargeBars;
     private Slider[] chargeBarSliders;
     [SerializeField] private Sprite emptySlotImage;
-    [SerializeField] private float scaleSpeed = 5f;
-    [SerializeField] private float scaleAmount = 1.1f; // 1.1 = 10% bigger
+    [SerializeField] private float scaleSpeed = 2f;
+    [SerializeField] private float scaleAmount = 1.3f; // 1.1 = 10% bigger
     [SerializeField] private ItemScriptableObject flashlight;
     private int currentSelectedSlot;
     [SerializeField]private Vector2[] originalSizes;
@@ -86,7 +86,7 @@ public class PlayerHotbarUI : MonoBehaviour
             if (slotChargeBars[slotNumber] != null)
             {
                 chargeBarSliders[slotNumber].value = Mathf.Clamp01(chargeAmount / 100);
-                Debug.Log($"[Hotbar UI] Slot {slotNumber} Slider reference ID: {chargeBarSliders[slotNumber].GetInstanceID()}, name: {chargeBarSliders[slotNumber].name}");
+                //Debug.Log($"[Hotbar UI] Slot {slotNumber} Slider reference ID: {chargeBarSliders[slotNumber].GetInstanceID()}, name: {chargeBarSliders[slotNumber].name}");
             }
         }
     }

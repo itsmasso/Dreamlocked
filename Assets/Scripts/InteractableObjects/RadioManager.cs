@@ -135,6 +135,12 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
      *****************************************************************/
     private void DescendDreamLevel()
     {
+        DescendDreamLevelServerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DescendDreamLevelServerRpc()
+    {
         Debug.Log("Descending Dream Level...");
         GameManager.Instance.OnNextLevel();
     }

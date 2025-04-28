@@ -49,7 +49,7 @@ public class BatteryUseable : NetworkBehaviour, IUseableItem<ItemData>
         {
             // Get the flashlight item
             ItemData flashlight = playerInventory.GetItemDataByUniqueId(lowestBatteryFlashLightUniqueID);
-
+            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("BatteryChange"), 0.5f, true);
             flashlight.itemCharge += batteryChargeAmount;
             if (flashlight.itemCharge > 100)
                 flashlight.itemCharge = 100;

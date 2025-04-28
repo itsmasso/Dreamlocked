@@ -27,10 +27,10 @@ public enum MQThreatLevel
 
 public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 {
-    private const float TOTAL_TIME = 300;
-    private const float TIME_TO_DANGER = 200;
-    private const float EXTRACTION_TIME = 60;
-    private const float REWIND_BUFFER = TOTAL_TIME - 10;
+    private float TOTAL_TIME;
+    private float TIME_TO_DANGER;
+    //private float EXTRACTION_TIME;
+    //private float REWIND_BUFFER;
     private bool gameEnding = false;
     private float currentTime;
     private bool timeRunning;
@@ -41,18 +41,49 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     // Developer Variables
     private bool printedActivating = false;
     private bool printedAwakened = false;
+    [SerializeField] private Sound3DSO clockTickingSFX, clockRewindSFX;
     protected override void Awake()
     {
         base.Awake();
+
     }
     void Start()
     {
+
         if (IsServer)
         {
             currentTime = TOTAL_TIME;
             timeRunning = true;
+            SetDifficulty();
+            AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(clockTickingSFX), transform.position, false, 1f, 1f, 30f, true, GetComponent<NetworkObject>(), 0f);
+        }
+
+    }
+
+    private void SetDifficulty()
+    {
+        int currentLevel = GameManager.Instance.GetCurrentDreamLayer();
+        switch (currentLevel)
+        {
+            case 0:
+                TOTAL_TIME = 240f;
+                TIME_TO_DANGER = 30f;
+                break;
+            case 1:
+                TOTAL_TIME = 180f;
+                TIME_TO_DANGER = 20f;
+                break;
+            case 2:
+                TOTAL_TIME = 120f;
+                TIME_TO_DANGER = 15f;
+                break;
+            case 3:
+                TOTAL_TIME = 60f;
+                TIME_TO_DANGER = 10f;
+                break;
         }
     }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -107,6 +138,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     [Rpc(SendTo.Server)]
     private void ServerInstantResetTimerRpc()
     {
+        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(clockRewindSFX), transform.position, true, 1f, 1f, 30f, false, GetComponent<NetworkObject>(), 0f);
         currentTime = TOTAL_TIME;
         timeRunning = true;
         printedActivating = false;
@@ -171,18 +203,22 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
             //Debug.Log("Extraction Complete");
         }
     }
-    public void StartExtraction()
-    {
-        gameEnding = true;
-        currentTime = EXTRACTION_TIME;
-        timeRunning = true;
-    }
+    // public void StartExtraction()
+    // {
+    //     gameEnding = true;
+    //     currentTime = EXTRACTION_TIME;
+    //     timeRunning = true;
+    // }
 
     public void Interact(NetworkObjectReference playerObject)
     {
-        if (!gameEnding && currentTime <= REWIND_BUFFER)
+        if (!gameEnding)
         {
             ServerInstantResetTimerRpc();
         }
+    }
+    public override void OnDestroy()
+    {
+        AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(clockTickingSFX), 1f);
     }
 }

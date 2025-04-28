@@ -93,7 +93,7 @@ public class HouseMapGenerator : NetworkBehaviour
 	{
 
 		nodeDiameter = Mathf.RoundToInt(nodeRadius * 2);
-		mapSize.y = Mathf.RoundToInt(FLOOR_HEIGHT * floors);
+		// mapSize.y = Mathf.RoundToInt(FLOOR_HEIGHT * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x / 2 - Vector3.up * mapSize.y / 2 - Vector3.forward * mapSize.z / 2;
 		GameManager.Instance.onNextLevel += ClearMap;
@@ -111,6 +111,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		Generate();
 
 	}
+	
 
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
 	{

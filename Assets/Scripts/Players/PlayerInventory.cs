@@ -124,7 +124,8 @@ public class PlayerInventory : NetworkBehaviour
         if (!IsServer) return false;
         PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
-        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("ItemPickup"), true);
+        Debug.Log("added item");
+        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("ItemPickup"), 0, true);
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)
@@ -380,7 +381,7 @@ public class PlayerInventory : NetworkBehaviour
             // Clean visual + networked object
             RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemWithoutAnimRpc();
-
+            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("DropItem"), 0f, true);
             // Spawn drop in world
             var dropPrefab = ItemDatabase.Get(syncedInventory[currentInventoryIndex].id).droppablePrefab;
             var droppedItem = Instantiate(dropPrefab, itemTransform.position, Quaternion.identity);

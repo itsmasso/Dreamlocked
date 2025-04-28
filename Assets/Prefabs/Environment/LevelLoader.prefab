@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2285667571
+  GlobalObjectIdHash: 882157083
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -71,4 +71,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  targetSceneName: 
+  houseMapDifficultySettingList:
+  - {fileID: 11400000, guid: 0435810be2aed984ba6f500571585264, type: 2}
+  - {fileID: 11400000, guid: f9a0bc89d1613684cacf3294c153f764, type: 2}
+  - {fileID: 11400000, guid: 99a2699ec5e197549ab652006dd98f7a, type: 2}
+  - {fileID: 11400000, guid: f50d0f39fc9b55544b8114ec20b1891f, type: 2}
+  currentHouseMapDifficultySetting: {fileID: 0}

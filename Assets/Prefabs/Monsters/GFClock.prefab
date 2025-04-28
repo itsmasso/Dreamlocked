@@ -73,6 +73,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  currentThreatLevel:
+    m_InternalValue: 0
+  clockTickingSFX: {fileID: 11400000, guid: 4ad451cc09bc5dc43917708ff2e17c6e, type: 2}
+  clockRewindSFX: {fileID: 11400000, guid: cd97d9ecd6599864e819d161ad14a1f0, type: 2}
 --- !u!65 &7902408619338719963
 BoxCollider:
   m_ObjectHideFlags: 0

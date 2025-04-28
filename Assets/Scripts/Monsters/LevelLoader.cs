@@ -11,7 +11,6 @@ public enum Map
 }
 public class LevelLoader : NetworkBehaviour
 {
-    [SerializeField] private string bootStrapSceneName;
     public event Action onLoadMap;
     [Tooltip("Put the scriptable objects in order from easiest to hardest.")]
     public List<HouseMapDifficultySettingsSO> houseMapDifficultySettingList = new List<HouseMapDifficultySettingsSO>();

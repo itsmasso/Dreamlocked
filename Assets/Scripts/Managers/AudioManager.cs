@@ -12,7 +12,6 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     [Header("2D Sounds")]
     [SerializeField] private AudioSource global2DAudioSource;
     [SerializeField] private GameObject audioSource2DPrefab;
-    private List<AudioSource> active2DAmbiences = new List<AudioSource>();
     private List<AudioSource> active2DSounds = new List<AudioSource>();
     [SerializeField] private List<Sound2DSO> sounds2DList = new List<Sound2DSO>();
 
@@ -36,27 +35,19 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     {
         return sounds2DList.FirstOrDefault(s => s.name == soundName);
     }
-    public void PlayAmbience2D(Sound2DSO soundSO, float fadeInDuration)
+    private IEnumerator FadeAudio(AudioSource source, float targetVolume, float duration, bool is3D = false, Sound3DSO related3DSoundSO = null)
     {
-        if (soundSO == null || soundSO.clip == null)
-            return;
+        if (source == null)
+            yield break;
 
-        GameObject newAmbienceObj = Instantiate(audioSource2DPrefab, transform);
-        AudioSource source = newAmbienceObj.GetComponent<AudioSource>();
-
-        source.clip = soundSO.clip;
-        source.volume = soundSO.volume;
-        source.loop = soundSO.loop;
-        source.outputAudioMixerGroup = soundSO.audioMixerGroup;
-        source.spatialBlend = 0f; // 2D sound
-        source.Play();
-
-        active2DAmbiences.Add(source);
-        StartCoroutine(FadeAudio(source, soundSO.volume, fadeInDuration));
-    }
-    private IEnumerator FadeAudio(AudioSource source, float targetVolume, float duration)
-    {
         float startVolume = source.volume;
+        // Smart check
+        if (targetVolume > startVolume)
+        {
+            // Fading IN
+            source.volume = 0f;
+            startVolume = 0f;
+        }
         float timer = 0f;
 
         while (timer < duration)
@@ -68,26 +59,28 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
 
         source.volume = targetVolume;
 
-        //if fading out all the way, stop and destroy
         if (Mathf.Approximately(targetVolume, 0f))
         {
             source.Stop();
-            active2DAmbiences.Remove(source);
-            Destroy(source.gameObject);
+
+            if (is3D)
+            {
+                source.gameObject.SetActive(false);
+                if (related3DSoundSO != null)
+                {
+                    soundPools[related3DSoundSO].Enqueue(source);
+                }
+                active3DSounds.Remove(source);
+            }
+            else
+            {
+                active2DSounds.Remove(source);
+                Destroy(source.gameObject);
+            }
         }
     }
-    public void StopAmbience2D(Sound2DSO soundSO, float fadeOutDuration)
-    {
-        var source = active2DAmbiences.FirstOrDefault(s => s.clip == soundSO.clip);
-        if (source != null)
-        {
-            StartCoroutine(FadeAudio(source, 0f, fadeOutDuration));
-            // source.Stop();
-            // active2DAmbiences.Remove(source);
-            // Destroy(source.gameObject);
-        }
-    }
-    public void Play2DSound(Sound2DSO soundSO, bool isOneShot = false)
+
+    public void Play2DSound(Sound2DSO soundSO, float fadeInDuration, bool isOneShot = false)
     {
         if (soundSO == null || soundSO.clip == null)
             return;
@@ -116,20 +109,22 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         }
 
         active2DSounds.Add(source);
+        StartCoroutine(FadeAudio(source, soundSO.volume, fadeInDuration));
 
     }
-    public void Stop2DSound(Sound2DSO soundSO)
+    public void Stop2DSound(Sound2DSO soundSO, float fadeOutDuration)
     {
         var source = active2DSounds.FirstOrDefault(s => s.clip == soundSO.clip);
         if (source != null)
         {
-            source.Stop();
-            active2DSounds.Remove(source);
-            Destroy(source.gameObject);
+            StartCoroutine(FadeAudio(source, 0f, fadeOutDuration));
+            // source.Stop();
+            // active2DSounds.Remove(source);
+            // Destroy(source.gameObject);
         }
     }
 
-    public void Play3DSound(Sound3DSO soundSO, Vector3 position, Transform parent, bool isOneShot, float? volume = null, float? minDistance = null, float? maxDistance = null, bool preventDuplicates = true)
+    public void Play3DSound(Sound3DSO soundSO, Vector3 position, Transform parent, bool isOneShot, float? volume = null, float? minDistance = null, float? maxDistance = null, bool preventDuplicates = true, float fadeInDuration = 0f)
     {
         if (!isOneShot && preventDuplicates)
         {
@@ -144,33 +139,58 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
             audioSource.transform.parent = parent;
         audioSource.gameObject.SetActive(true);
 
-        audioSource.volume = volume ?? soundSO.volume;
+        float finalVolume = volume ?? soundSO.volume;
         audioSource.minDistance = minDistance ?? soundSO.minDistance;
         audioSource.maxDistance = maxDistance ?? soundSO.maxDistance;
 
         if (!soundSO.loop && isOneShot)
         {
-            audioSource.PlayOneShot(soundSO.clip, soundSO.clip.length);
+            audioSource.PlayOneShot(soundSO.clip, finalVolume);
             StartCoroutine(ReturnAfterDuration(audioSource, soundSO.clip.length, soundSO));
         }
         else
         {
-            audioSource.Play();
+            if (fadeInDuration > 0f)
+            {
+                audioSource.volume = 0f;
+                audioSource.Play();
+                StartCoroutine(FadeAudio(audioSource, finalVolume, fadeInDuration, is3D: true, related3DSoundSO: soundSO));
+            }
+            else
+            {
+                audioSource.volume = finalVolume;
+                audioSource.Play();
+            }
         }
         active3DSounds.Add(audioSource);
     }
     [Rpc(SendTo.Server)]
-    public void Play3DSoundServerRpc(int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference)
+    public void Play3DSoundServerRpc(int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
     {
+        if (index < 0 || index >= sounds3DListSO.sound3DSOList.Count)
+        {
+            Debug.LogError($"[AudioManager] Invalid 3D Sound Index: {index}. List Count: {sounds3DListSO.sound3DSOList.Count}");
+            return;
+        }
         if (networkObjectReference.TryGet(out NetworkObject networkObject))
         {
-            Play3DSound(sounds3DListSO.sound3DSOList[index], position, networkObject.transform, isOneShot, volume, minDistance, maxDistance, preventDupes);
+            Play3DSound(sounds3DListSO.sound3DSOList[index], position, networkObject.transform, isOneShot, volume, minDistance, maxDistance, preventDupes, fadeInDuration);
         }
         else
         {
-            Play3DSound(sounds3DListSO.sound3DSOList[index], position, null, isOneShot, volume, minDistance, maxDistance, preventDupes);
+            Play3DSound(sounds3DListSO.sound3DSOList[index], position, null, isOneShot, volume, minDistance, maxDistance, preventDupes, fadeInDuration);
         }
 
+    }
+
+    public void Play3DServerSoundDelayed(float delay, int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
+    {
+        StartCoroutine(Start3DSoundDelayed(delay, index, position, isOneShot, volume, minDistance, maxDistance, preventDupes, networkObjectReference, fadeInDuration));
+    }
+    private IEnumerator Start3DSoundDelayed(float delay, int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
+    {
+        yield return new WaitForSeconds(delay);
+        Play3DSoundServerRpc(index, position, isOneShot, volume, minDistance, maxDistance, preventDupes, networkObjectReference, fadeInDuration);
     }
 
     private AudioSource CreateNew3DAudioPool(Sound3DSO soundSO)
@@ -218,20 +238,17 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
         soundPools[soundSO].Enqueue(audioSource);
     }
     [Rpc(SendTo.Server)]
-    public void Stop3DSoundServerRpc(int index)
+    public void Stop3DSoundServerRpc(int index, float fadeInDuration = 0f)
     {
         Sound3DSO sound3DSO = sounds3DListSO.sound3DSOList[index];
-        Stop3DSound(sound3DSO);
+        Stop3DSound(sound3DSO, fadeInDuration);
     }
-    public void Stop3DSound(Sound3DSO soundSO)
+    public void Stop3DSound(Sound3DSO soundSO, float fadeOutDuration = 0.5f)
     {
         var source = active3DSounds.FirstOrDefault(s => s != null && s.clip == soundSO.clip && s.isPlaying);
         if (source != null)
         {
-            source.Stop();
-            source.gameObject.SetActive(false);
-            active3DSounds.Remove(source);
-            soundPools[soundSO].Enqueue(source);
+            StartCoroutine(FadeAudio(source, 0f, fadeOutDuration, is3D: true, related3DSoundSO: soundSO));
         }
     }
 
@@ -256,18 +273,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     }
     public void ClearAllAudio()
     {
-        // Clear 2D Ambience Sounds
-        foreach (var ambienceSource in active2DAmbiences)
-        {
-            if (ambienceSource != null)
-            {
-                ambienceSource.Stop();
-                Destroy(ambienceSource.gameObject);
-            }
-        }
-        active2DAmbiences.Clear();
-
-        // Clear 2D One-shot Sounds
+        // Clear 2D Sounds
         foreach (var soundSource in active2DSounds)
         {
             if (soundSource != null)

@@ -50,6 +50,7 @@ public class KeypadScript : MonoBehaviour
         {
             currentCode[arrayIndex] = key;
             arrayIndex++;
+            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("KeypadBeep"), 0f, true);
             //Debug.Log("Code: " + currentCode[0].ToString() + currentCode[1].ToString() + currentCode[2].ToString() + currentCode[3].ToString());
         }
     }

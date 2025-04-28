@@ -67,6 +67,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 	public float attackCooldown;
 	public bool canAttack;
 	private Coroutine attackCooldownCoroutine;
+	public int damage;
 
 
 	[Header("Light Properties")]
@@ -97,7 +98,9 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			roamSpeed = lurkerScriptableObj.baseSpeed;
 			canStalk = true;
 			canAttack = true;
+			SetDifficulty();
 			SwitchState(LurkerState.Roaming);
+			
 		}
 	}
 
@@ -112,6 +115,38 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			SwitchState(LurkerState.Roaming);
 		}
 	}
+	private void SetDifficulty()
+	{
+		int currentLevel = GameManager.Instance.GetCurrentDreamLayer();
+		switch (currentLevel)
+		{
+			case 0:
+				chanceToStalkPlayer = 0f;
+				break;
+			case 1:
+				chanceToStalkPlayer = 5f;
+				damage = 25;
+				maxStalkTime = 20f;
+				stalkCooldown = 30f;
+				minimumChaseTime = 5f;
+				break;
+			case 2:
+				chanceToStalkPlayer = 15f;
+				damage = 50;
+				maxStalkTime = 40f;
+				stalkCooldown = 20f;
+				minimumChaseTime = 9f;
+				break;
+			case 3:
+				chanceToStalkPlayer = 25f;
+				damage = 100;
+				maxStalkTime = 50f;
+				stalkCooldown = 10f;
+				minimumChaseTime = 15f;
+				break;
+		}
+	}
+
 
 	public void SwitchState(LurkerState newState)
 	{
@@ -371,7 +406,7 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 			PlayHeavyFootstepRpc();
 
 			float speed = GetSpeed();
-			float interval = walkingFootStepInterval*0.5f / Mathf.Max(speed, 0.1f); // prevent division by 0
+			float interval = walkingFootStepInterval * 0.5f / Mathf.Max(speed, 0.1f); // prevent division by 0
 
 			footstepTimer = Mathf.Max(interval, 0.2f);
 		}
@@ -404,10 +439,13 @@ public class LurkerMonsterScript : NetworkBehaviour, IReactToPlayerGaze, IAffect
 
 	public void ActivateBearItemEffect()
 	{
-		StartStalkCooldown();
-		StartAttackCooldown();
-		AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurkerChaseSFX));
-		SwitchState(LurkerState.Roaming);
+		if (networkState.Value != LurkerState.Attacking)
+		{
+			StartStalkCooldown();
+			StartAttackCooldown();
+			AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurkerChaseSFX), 0.5f);
+			SwitchState(LurkerState.Roaming);
+		}
 	}
 
 

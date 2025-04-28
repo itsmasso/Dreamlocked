@@ -95,6 +95,12 @@ public class LurkerAnimationManager : NetworkBehaviour
             animator.SetTrigger("SlightTwitch");
         }
     }
+    
+    public void PlayAggressiveHeadTwitch()
+    {
+        animator.SetLayerWeight(headLayer, 1);
+        animator.SetTrigger("AggressiveTwitch");
+    }
     public void PlayHeadTwitches()
     {
         animator.SetLayerWeight(headLayer, 1);

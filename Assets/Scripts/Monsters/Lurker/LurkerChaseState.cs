@@ -40,7 +40,7 @@ public class LurkerChaseState : LurkerBaseState
         agent = lurker.agent;
         anim = lurker.animationManager;
         AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerPreChaseSFX));
-        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX), lurker.transform.position, false, 1f, 1f, 30f, true, lurker.GetComponent<NetworkObject>());
+        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX), lurker.transform.position, false, 1f, 1f, 30f, true, lurker.GetComponent<NetworkObject>(), 1f);
         //reset variables
         nextChangeTime = 0f;
         chaseTimer = 0;

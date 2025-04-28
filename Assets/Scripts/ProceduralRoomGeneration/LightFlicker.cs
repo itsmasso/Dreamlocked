@@ -26,13 +26,13 @@ public class LightFlicker : MonoBehaviour
 
     private void PlayLightsOutSFX()
     {
-        AudioManager.Instance.Stop2DSound(lightFlickerSFX);
-        AudioManager.Instance.Play2DSound(lightsOutSFX, true);
+        AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
+        AudioManager.Instance.Play2DSound(lightsOutSFX, 0f, true);
     }
 
     private void PlayLightsOnSFX()
     {
-        AudioManager.Instance.Play2DSound(lightsOnSFX, true);
+        AudioManager.Instance.Play2DSound(lightsOnSFX, 0f ,true);
     }
     void Update()
     {
@@ -42,7 +42,7 @@ public class LightFlicker : MonoBehaviour
             timer -= Time.deltaTime;
             if (!hasPlayedLightFlicker)
             {
-                AudioManager.Instance.Play2DSound(lightFlickerSFX);
+                AudioManager.Instance.Play2DSound(lightFlickerSFX, 0f);
                 hasPlayedLightFlicker = true;
             }
             if (timer <= 0f)
@@ -60,7 +60,7 @@ public class LightFlicker : MonoBehaviour
             {
                 if (hasPlayedLightFlicker)
                 {
-                    AudioManager.Instance.Stop2DSound(lightFlickerSFX);
+                    AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
                     hasPlayedLightFlicker = false;
                 }
 

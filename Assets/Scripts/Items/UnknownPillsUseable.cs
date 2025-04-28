@@ -25,6 +25,7 @@ public class UnknownPillsUseable : NetworkBehaviour, IUseableItem<ItemData>
     public void UseItem()
     {
         RequestServerToSpeedUpRpc();
+        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("PopoutPill"), 0f, true);
     }
 
     [Rpc(SendTo.Server)]

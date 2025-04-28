@@ -94,6 +94,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  switchSound: {fileID: 11400000, guid: ac302611726913b42ab287277329937a, type: 2}
+  song1: {fileID: 11400000, guid: 5b8b35be50eac5e47a33fa2f715adf33, type: 2}
+  song2: {fileID: 11400000, guid: 79b80d27ef23bfb4a961cff2e644d9e6, type: 2}
+  song3: {fileID: 11400000, guid: 42021c792a9d6dd428fdd664439db53c, type: 2}
+  song4: {fileID: 11400000, guid: a9320c51a50b52f40aa06f93c217fe33, type: 2}
 --- !u!1001 &7686345139544009195
 PrefabInstance:
   m_ObjectHideFlags: 0

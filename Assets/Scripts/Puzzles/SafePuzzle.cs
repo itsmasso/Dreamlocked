@@ -23,6 +23,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private NetworkVariable<bool> isOpen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> canInteract = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] private Sound3DSO openSFX;
     void Start()
     {
         safeAnimator = GetComponentInChildren<Animator>();
@@ -109,6 +110,7 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         safeCollider.GetComponent<BoxCollider>().enabled = false;
         if (safeAnimator != null)
         {
+            Invoke("PlaySFX", 0.5f);
             safeAnimator.SetTrigger("open");
         }
         else
@@ -116,7 +118,10 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
             Debug.Log("Animator Error");
         }
     }
-
+    private void PlaySFX()
+    {
+        AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(openSFX), transform.position, true, 0.8f, 1, 20f, false, GetComponent<NetworkObject>(), 0.5f);
+    }
     private void HandleInteractCooldown()
     {
         if (interactCooldownTimer > 0)
@@ -146,11 +151,13 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
             if (CheckCode(KeypadScript.GetEnteredCode(), securityCode.Value))
             {
                 Debug.Log("Code Accepted");
+                AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessGranted"), 0f, true);
                 OpenSafeServerRpc();
             }
             else
             {
                 //Debug.Log("Enter Code");
+                AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessDenied"), 0f, true);
                 KeypadScript.AccessKeypad();
             }
         }

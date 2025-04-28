@@ -123,7 +123,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			switch (netGameState.Value)
 			{
 				case GameState.Lobby:
-				AudioManager.Instance.StopAmbience2D(AudioManager.Instance.Get2DSound("RoomAmbience"), 2f);
+				AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
 					currentDreamLayer.Value = 1;
 					Debug.Log("Lobby");
 
@@ -143,7 +143,7 @@ public class GameManager : NetworkSingleton<GameManager>
 
 					break;
 				case GameState.GameStart:
-					AudioManager.Instance.PlayAmbience2D(AudioManager.Instance.Get2DSound("RoomAmbience"), 2f);
+					AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
 					AllHandlesGameStartRpc();
 					ChangeGameState(GameState.GamePlaying);
 					break;

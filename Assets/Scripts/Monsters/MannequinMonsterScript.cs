@@ -65,7 +65,11 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     [Header("Animation")]
     [SerializeField] private MannequinAnimationManager mannequinAnimationManager;
 
-
+    [Header("SFX")]
+    private float footstepTimer;
+    [SerializeField] private float walkingFootStepInterval;
+    [SerializeField] private Sound3DSO[] footStepSounds;
+    [SerializeField] private AudioSource footstepAudioSource;
     private void Start()
     {
         if (!IsServer) return;
@@ -227,6 +231,33 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             }
 
         }
+    }
+    public void HandleNormalFootStepSFX()
+    {
+        footstepTimer -= Time.deltaTime;
+
+        if (footstepTimer <= 0f)
+        {
+            PlayNormalFootstepRpc();
+
+            float speed = threatLevelNetworkState.Value == MQThreatLevel.ACTIVATING ? ACTIVATING_MOVE_SPEED : mannequinScriptable.baseSpeed;
+            float interval = walkingFootStepInterval / Mathf.Max(speed, 0.1f); // prevent division by 0
+
+            footstepTimer = Mathf.Max(interval, 0.2f);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void PlayNormalFootstepRpc()
+    {
+        Sound3DSO footStep = footStepSounds[Random.Range(0, footStepSounds.Length)];
+        footstepAudioSource.pitch = Random.Range(1f, 1.3f);
+        footstepAudioSource.volume = Random.Range(Mathf.Clamp01(footStep.volume - 0.4f), footStep.volume);
+        footstepAudioSource.minDistance = footStep.minDistance;
+        footstepAudioSource.maxDistance = footStep.maxDistance;
+        footstepAudioSource.outputAudioMixerGroup = footStep.audioMixerGroup;
+        footstepAudioSource.PlayOneShot(footStep.clip, footStep.volume);
+
     }
 
     private IEnumerator AttackCooldown()

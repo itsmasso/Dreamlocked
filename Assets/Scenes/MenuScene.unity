@@ -687,7 +687,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abea312c1a859544fb9e82cd6ca017e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LobbyIDInputField: {fileID: 341650441}
+  LobbyIDInputField: {fileID: 909519673}
   LobbyID: {fileID: 1995382012}
   LobbyMenu: {fileID: 52666190}
   mainMenu: {fileID: 1032186511}

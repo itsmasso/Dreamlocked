@@ -143,8 +143,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2282381998
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2879901039
+  InScenePlacedSourceGlobalObjectIdHash: 1387347225
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -170,8 +170,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   global2DAudioSource: {fileID: 2178002652762464223}
-  ambienceAudioSourcePrefab: {fileID: 3408143335965352733, guid: 3a71d56b5e78acc4387410edfcfb634c, type: 3}
-  sounds2DList: []
+  audioSource2DPrefab: {fileID: 3408143335965352733, guid: 3a71d56b5e78acc4387410edfcfb634c, type: 3}
+  sounds2DList:
+  - {fileID: 11400000, guid: c147d11abacd5cb47952c6ba7781c6ca, type: 2}
+  - {fileID: 11400000, guid: db580da02191fa8419e1082bec8cbf47, type: 2}
+  - {fileID: 11400000, guid: d66ce18cdd5b49d4f89878a15d535484, type: 2}
+  - {fileID: 11400000, guid: 91b9a90d5598f3946972a3cbee1534f0, type: 2}
+  - {fileID: 11400000, guid: 26c32d1d8844e594f9fc4c7f92d49369, type: 2}
+  - {fileID: 11400000, guid: 991680ee3e30d1044949a03c7d274490, type: 2}
+  - {fileID: 11400000, guid: 9914faf2b77cc6a478aa6e15035dbb3f, type: 2}
+  - {fileID: 11400000, guid: 2f0aefcfbdf4aae43b2c9f13f2d37d69, type: 2}
+  - {fileID: 11400000, guid: da7a997035558c24189af4632eb561a8, type: 2}
+  - {fileID: 11400000, guid: 57e10d0f55a8bb544ac34c1918ce8a08, type: 2}
+  - {fileID: 11400000, guid: 9334ee122a31f16488946d6345de898f, type: 2}
+  - {fileID: 11400000, guid: 3bc2af18863380c45b792ffd9444e8fa, type: 2}
+  - {fileID: 11400000, guid: 9a624496cdf0efb4286ce65e7d75566d, type: 2}
+  - {fileID: 11400000, guid: 1098a2778e2b7cb4589a72bf190ae714, type: 2}
   audioSourceNetworkPrefab: {fileID: 7124692274902827920, guid: bbe59544cfe73734da303ba757ad2c12, type: 3}
   audioSourceLocalPrefab: {fileID: 3408143335965352733, guid: a5223bcb47ddabb45b4a5c232bed249f, type: 3}
   sounds3DListSO: {fileID: 11400000, guid: 81898588e619e6845b55b4a9bde0d6a6, type: 2}

@@ -21,4 +21,4 @@ MonoBehaviour:
   visualPrefab: {fileID: 6522022900654965735, guid: f4c87fba9d683cc44a0b2ce72dd5a700, type: 3}
   droppablePrefab: {fileID: 6522022900654965735, guid: c52ac2688e7a9fe4f81777cffa7e30a2, type: 3}
   useablePrefab: {fileID: 0}
-  icon: {fileID: 1563511715, guid: 26f6152233c44be4c9643b3cb15ca9d5, type: 3}
+  icon: {fileID: -30658456, guid: 954d032130987be4c8dc4c1a894d0b32, type: 3}

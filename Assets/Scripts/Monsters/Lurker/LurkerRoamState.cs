@@ -14,7 +14,7 @@ public class LurkerRoamState : LurkerBaseState
         anim = lurker.animationManager;
         agent.maxSpeed = lurker.roamSpeed;
         lurker.currentTarget = null;
-
+        AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerPreChaseSFX));
         NetworkObject lurkerNetworkObject = lurker.GetComponent<NetworkObject>();
         if (lurkerNetworkObject != null && lurkerNetworkObject.IsSpawned)
         {

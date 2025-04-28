@@ -20,7 +20,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 	public LightFlicker lightFlicker;
 	[SerializeField] private Sound3DSO lightBuzzSFX;
 	private bool playingLightBuzz;
-
+	public NetworkVariable<bool> isLightEnabled = new NetworkVariable<bool>(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
@@ -32,30 +32,35 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 		playingLightBuzz = false;
 		Timer = MIN_FLICKER_TIME;
-		TurnLightsOn();
+		if(IsServer) TurnLightsOn();
 	}
 
 	void Update()
 	{
 		if (IsServer)
 		{
-			if (isLightOn)
-			{
-				lightScript.TrackEnemiesInLight(false);
-			}
-			CheckLightStatus();
-			if (IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource))
-			{
-				playerSeesLight = true;
+			CheckLightStatus(); // Server controls threat level / flicker style
+			FlickerLights();// Server toggles isLightEnabled.Value
+		}
 
-			}
+		// Locally check if this player should see the light
+		bool shouldSeeLight = IsPlayerNear(lightSource) || CanPlayerSeeLight(lightSource);
+
+		if (shouldSeeLight)
+		{
+			// If player should see the light, set based on networked flicker
+			lightSource.enabled = isLightEnabled.Value;
+
+			if (isLightEnabled.Value)
+				TurnOnMaterialLight();
 			else
-			{
-				playerSeesLight = false;
-				lightSource.enabled = false;
 				TurnOffMaterialLight();
-			}
-
+		}
+		else
+		{
+			// If player should NOT see light, force it off locally
+			lightSource.enabled = false;
+			TurnOffMaterialLight();
 		}
 	}
 	private void TurnOnMaterialLight()
@@ -157,40 +162,37 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 	private void FlickerLights()
 	{
-		if (lightFlicker != null && lightFlicker.isFrozen.Value)
+		if (!IsServer) return;
+		if (GFClockManager.Instance != null && GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.ACTIVATING)
 		{
-			return; // Skip flickering while globally frozen
-		}
+			if (lightFlicker != null && lightFlicker.isFrozen.Value)
+				return; // frozen, don't flicker
 
-		if (Timer > 0)
-		{
-			Timer -= Time.deltaTime;
-		}
-
-		if (Timer <= 0)
-		{
-			if (playerSeesLight)
+			if (Timer > 0)
 			{
-				lightSource.enabled = !lightSource.enabled;
-				if (lightSource.enabled)
-					TurnOnMaterialLight();
-				else
-					TurnOffMaterialLight();
+				Timer -= Time.deltaTime;
 			}
-			// The comment out line would make the flickering all different and random
-			Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
-			//Timer = MIN_FLICKER_TIME;
+
+			if (Timer <= 0)
+			{
+				// Toggle light on/off
+				isLightEnabled.Value = !isLightEnabled.Value;
+				Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
+			}
 		}
 	}
 
 	private void TurnLightsOff()
 	{
 		isLightOn = false;
+		isLightEnabled.Value = false; 
+
 		if (playingLightBuzz)
 		{
 			AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lightBuzzSFX));
 			playingLightBuzz = false;
 		}
+
 		lightSource.enabled = false;
 		TurnOffMaterialLight();
 	}
@@ -198,6 +200,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 	private void TurnLightsOn()
 	{
 		isLightOn = true;
+		isLightEnabled.Value = true;
 		NetworkObject netObj = GetComponent<NetworkObject>();
 		if (!playingLightBuzz && netObj != null && netObj.IsSpawned)
 		{

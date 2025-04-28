@@ -141,6 +141,10 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
         //Debug.Log("Current Code: " + arr1[0].ToString() + arr1[1].ToString() + arr1[2].ToString() + arr1[3].ToString());
         //Debug.Log("Correct Code: " + arr2[0].ToString() + arr2[1].ToString() + arr2[2].ToString() + arr2[3].ToString());
         int enteredCode = (arr1[0] * 1000) + (arr1[1] * 100) + (arr1[2] * 10) + arr1[3];
+        if(correctCode == enteredCode) 
+            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessGranted"), 0f, true);
+        else
+            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessDenied"), 0f, true);
         return correctCode == enteredCode;
     }
 
@@ -151,13 +155,12 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
             if (CheckCode(KeypadScript.GetEnteredCode(), securityCode.Value))
             {
                 Debug.Log("Code Accepted");
-                AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessGranted"), 0f, true);
                 OpenSafeServerRpc();
             }
             else
             {
                 //Debug.Log("Enter Code");
-                AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("AcessDenied"), 0f, true);
+
                 KeypadScript.AccessKeypad();
             }
         }

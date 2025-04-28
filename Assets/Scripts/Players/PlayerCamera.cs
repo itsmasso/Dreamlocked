@@ -70,6 +70,11 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		else
 		{
 			playerCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineCamera>();
+			playerCam.gameObject.SetActive(true);
+			if(spectatorCam != null && spectatorCam.gameObject.activeSelf)
+			{
+				spectatorCam.gameObject.SetActive(false);
+			}
 			cmCamPanTilt = playerCam.gameObject.GetComponent<CinemachinePanTilt>();
 			playerCam.Follow = camFollowPivot;
 			camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
@@ -83,10 +88,8 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 			mainCameraPosition = Camera.main.transform;
 			Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
 
-			spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera").GetComponent<CinemachineCamera>();
 			PlayerHealth.onDeath += DisablePlayerCamera;
-			spectatorCam.enabled = false;
-			playerCam.enabled = true;
+			
 			itemCamera.enabled = true;
 			isDead = false;
 			canMove = true;
@@ -122,13 +125,14 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	}
 	private void DisablePlayerCamera()
 	{
-		playerCam.enabled = false;
+		playerCam.gameObject.SetActive(false);
 		itemCamera.enabled = false;
+		spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera").GetComponent<CinemachineCamera>();
 		if(PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
 		{
 			Debug.Log("Starting to Spectate");
 			// This needs logic to protect when all players are dead
-			spectatorCam.enabled = true;
+			spectatorCam.gameObject?.SetActive(true);
 			currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
 			spectatorCam.Follow = currentPlayerToSpectate;
 		}
@@ -288,11 +292,11 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	void Update()
 	{
 
-		if (playerCam != null && playerCam.enabled == true && !isDead)
+		if (playerCam != null && playerCam.gameObject.activeSelf == true && !isDead)
 		{
 			CheckForEnemyVisibility();
 		}
-		if (spectatorCam != null && spectatorCam.enabled == true && isDead)
+		if (spectatorCam != null && spectatorCam.gameObject.activeSelf == true && isDead)
 		{
 			camFollowPivot.transform.position = currentPlayerToSpectate.transform.position;
 		}

@@ -944,7 +944,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2267609107756851503, guid: bd2657c915537c946aa98d34a060f068, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2441913102533825639, guid: bd2657c915537c946aa98d34a060f068, type: 3}
       propertyPath: m_Pivot.x
@@ -1423,6 +1423,7 @@ GameObject:
   - component: {fileID: 991684649}
   - component: {fileID: 991684647}
   - component: {fileID: 991684648}
+  - component: {fileID: 991684650}
   m_Layer: 0
   m_Name: SpectateCamera
   m_TagString: SpectatorCamera
@@ -1546,6 +1547,14 @@ MonoBehaviour:
     CameraRadius: 0.2
     DampingIntoCollision: 0
     DampingFromCollision: 0.5
+--- !u!81 &991684650
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 991684641}
+  m_Enabled: 1
 --- !u!1001 &1051990370
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1565,10 +1574,6 @@ PrefabInstance:
     - target: {fileID: 2495896612000000318, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
       propertyPath: m_Name
       value: PlayerUI
-      objectReference: {fileID: 0}
-    - target: {fileID: 2495896612000000318, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5965594028092726620, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2600,10 +2605,10 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.1
-  far clip plane: 120
-  field of view: 60
+  far clip plane: 5000
+  field of view: 78
   orthographic: 0
-  orthographic size: 10
+  orthographic size: 13
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -2937,8 +2942,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7084424359747896696}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2, y: -6, z: 12}
+  m_LocalRotation: {x: 0.13225639, y: 0, z: 0, w: 0.9912155}
+  m_LocalPosition: {x: 155.46829, y: 966.0469, z: -692.87573}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

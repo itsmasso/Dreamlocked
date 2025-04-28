@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 714363266665642365}
   - component: {fileID: 4507854731335237695}
   - component: {fileID: 1587450121930520918}
+  - component: {fileID: 8832382038940378701}
   m_Layer: 0
   m_Name: HouseLevelGenerator
   m_TagString: Untagged
@@ -46,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 462693179
+  GlobalObjectIdHash: 2821912521
   InScenePlacedSourceGlobalObjectIdHash: 1224099820
   DeferredDespawnTick: 0
   Ownership: 1
@@ -73,36 +74,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   mapSize: {x: 200, y: 200, z: 200}
-  floorHeight: 4
-  floors: 2
+  floors: 1
   aStarComponent: {fileID: 0}
-  playerNetwork: {fileID: 0}
+  isLevelGenerated: 0
+  difficultyListScriptable: {fileID: 11400000, guid: 9166041e5760a814eb6efd7e86f9e9b4, type: 2}
   nodeRadius: 2
   roomCeilingPrefab: {fileID: 1305380972374618748, guid: 0824f0031f2f76a4da38dddaa6f51081, type: 3}
-  roomCeilingWithLightPrefab: {fileID: 1305380972374618748, guid: d7804d853f10fea468fe4a49d2ed1d3d, type: 3}
   roomFloorPrefab: {fileID: 1305380972374618748, guid: 18b26fb7e90dc0b42a436f1971c74e53, type: 3}
-  roomLightPrefab: {fileID: 6844388644389274886, guid: 77999163b7b8aaa479a78a7406593502, type: 3}
-  wallPrefab: {fileID: 3728408625380386639, guid: 191309018b13a0845bc87d2275236f03, type: 3}
-  wallThickness: 0.2
-  ceilingThickness: 0.2
-  floorThickness: 0.2
-  roomPrefabList:
-  - {fileID: 4367447932712270340, guid: 07d2e0c8c58180141ab5e10639c4c318, type: 3}
-  - {fileID: 4367447932712270340, guid: a388b4dda312535448f579ae01365e28, type: 3}
-  - {fileID: 4367447932712270340, guid: 498dcd71c7000094696b36ff761a5dcb, type: 3}
-  - {fileID: 4367447932712270340, guid: b6c81fa0f04e7734490023574ae5cd53, type: 3}
-  - {fileID: 4367447932712270340, guid: afa48e1c86e271c44a739fd9ecd99764, type: 3}
-  mainRoomPrefab: {fileID: 4367447932712270340, guid: d5cd6f412bf28664ca76b0a7d2587cba, type: 3}
-  GFClockRoomPrefab: {fileID: 4367447932712270340, guid: dae1e217d89dd3644bf8c8e05caed9ac, type: 3}
-  specialRooms:
-  - {fileID: 4367447932712270340, guid: d5cd6f412bf28664ca76b0a7d2587cba, type: 3}
-  - {fileID: 4367447932712270340, guid: dae1e217d89dd3644bf8c8e05caed9ac, type: 3}
-  roomsPerFloor: 20
+  defaultWallPrefab: {fileID: 2602338538655731649, guid: ff0e79e57d101424ebf38356c34cab78, type: 3}
+  altWallPrefabs:
+  - {fileID: 2602338538655731649, guid: 4b134afd392fb864d875e172bfa5f632, type: 3}
+  chanceToSpawnAltWall: 0.2
+  normalRoomsPrefabList: []
+  specialRoomPrefabList: []
+  roomsPerFloor: 8
   spaceBetweenRooms: 8
-  roomGenerator: {fileID: 1587450121930520918}
+  propObjectPlacer: {fileID: 1587450121930520918}
   maxIteration: 45
   spawnCycleChance: 0.8
-  hallwayLightSpawnInterval: 9
   stairRooms:
   - {fileID: 3286224633064905065, guid: 4a211cb806fb0c0449b1f73fc319186d, type: 3}
   chanceToSpawnStairs: 30
@@ -128,3 +117,33 @@ MonoBehaviour:
   doorPrefab: {fileID: 2849634166944264067, guid: aca939422fa890c4ea5036ca81183373, type: 3}
   doorsInRoom: []
   lightsInRoom: []
+  propScriptableObjList:
+  - {fileID: 11400000, guid: ca6bda15d489b8e41b682f937eee238b, type: 2}
+  - {fileID: 11400000, guid: 4d02a2cca79e90b45b42843861984752, type: 2}
+  deadEndPropsList:
+  - {fileID: 11400000, guid: a3b79a076372a1f4e8d009896c3bc246, type: 2}
+  hallwayLightPrefab: {fileID: 6844388644389274886, guid: a07d31e458f4f454ba8e4b690b350637, type: 3}
+  propSpawnInterval: 7
+  hallwayLightSpawnInterval: 8
+  chanceToSpawnHallwayProp: 0.75
+  lightFlickerScript: {fileID: 8832382038940378701}
+--- !u!114 &8832382038940378701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4395893181215863329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 113fa53ea9268944bacace6e914669aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  freezeAttemptInterval: 5
+  freezeDuration: 2
+  isFrozen:
+    m_InternalValue: 0
+  lightFlickerSFX: {fileID: 11400000, guid: 2f0aefcfbdf4aae43b2c9f13f2d37d69, type: 2}
+  lightsOutSFX: {fileID: 11400000, guid: 57e10d0f55a8bb544ac34c1918ce8a08, type: 2}
+  lightsOnSFX: {fileID: 11400000, guid: da7a997035558c24189af4632eb561a8, type: 2}

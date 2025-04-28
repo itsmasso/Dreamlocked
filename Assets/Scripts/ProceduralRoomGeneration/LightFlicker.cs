@@ -1,14 +1,14 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-public class LightFlicker : MonoBehaviour
+public class LightFlicker : NetworkBehaviour
 {
     [SerializeField] private float freezeAttemptInterval = 5f;
     [Tooltip("How long lights stay frozen.")]
     [SerializeField] private float freezeDuration = 1f;
     private float timer;
-    private bool isFrozen = false;
-    public bool IsFrozen => isFrozen;
+    public NetworkVariable<bool> isFrozen = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private bool hasPlayedLightFlicker;
     [SerializeField] private Sound2DSO lightFlickerSFX;
     [SerializeField] private Sound2DSO lightsOutSFX;
@@ -32,7 +32,7 @@ public class LightFlicker : MonoBehaviour
 
     private void PlayLightsOnSFX()
     {
-        AudioManager.Instance.Play2DSound(lightsOnSFX, 0f ,true);
+        AudioManager.Instance.Play2DSound(lightsOnSFX, 0f, true);
     }
     void Update()
     {
@@ -56,7 +56,7 @@ public class LightFlicker : MonoBehaviour
             }
 
 
-            if (isFrozen || GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.AWAKENED)
+            if (isFrozen.Value || GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.AWAKENED)
             {
                 if (hasPlayedLightFlicker)
                 {
@@ -71,11 +71,14 @@ public class LightFlicker : MonoBehaviour
     }
     private IEnumerator FreezeFlickering()
     {
-        isFrozen = true;
-        yield return new WaitForSeconds(freezeDuration);
-        isFrozen = false;
+        if (IsServer)
+        {
+            isFrozen.Value = true;
+            yield return new WaitForSeconds(freezeDuration);
+            isFrozen.Value = false;
+        }
     }
-    void OnDestroy()
+    public override void OnDestroy()
     {
         if (GFClockManager.Instance != null)
         {

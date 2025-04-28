@@ -88,6 +88,7 @@ public class GameManager : NetworkSingleton<GameManager>
     public void OnNextLevel()
 	{
 		if (!IsServer) return;
+		AudioManager.Instance.ClearAllAudio();
 		StartCoroutine(TransitionToNextLevel());
 		//add respawn here
 	}

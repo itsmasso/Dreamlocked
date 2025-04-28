@@ -299,31 +299,34 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     }
     public void ClearAllAudio()
     {
-        // Clear 2D Sounds
-        foreach (var soundSource in active2DSounds)
+        if (IsServer)
         {
-            if (soundSource != null)
+            // Clear 2D Sounds
+            foreach (var soundSource in active2DSounds)
             {
-                soundSource.Stop();
-                Destroy(soundSource.gameObject);
+                if (soundSource != null)
+                {
+                    soundSource.Stop();
+                    Destroy(soundSource.gameObject);
+                }
             }
-        }
-        active2DSounds.Clear();
+            active2DSounds.Clear();
 
-        // Clear 3D Sounds
-        foreach (var soundSource in active3DSounds)
-        {
-            if (soundSource != null)
+            // Clear 3D Sounds
+            foreach (var soundSource in active3DSounds)
             {
-                soundSource.Stop();
-                soundSource.gameObject.SetActive(false);
+                if (soundSource != null)
+                {
+                    soundSource.Stop();
+                    soundSource.gameObject.SetActive(false);
 
-                Destroy(soundSource.gameObject);
+                    Destroy(soundSource.gameObject);
 
+                }
             }
-        }
-        active3DSounds.Clear();
+            active3DSounds.Clear();
 
-        Debug.Log("AudioManager: Cleared all active sounds.");
+            Debug.Log("AudioManager: Cleared all active sounds.");
+        }
     }
 }

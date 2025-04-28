@@ -157,7 +157,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 	private void FlickerLights()
 	{
-		if (lightFlicker != null && lightFlicker.IsFrozen)
+		if (lightFlicker != null && lightFlicker.isFrozen.Value)
 		{
 			return; // Skip flickering while globally frozen
 		}

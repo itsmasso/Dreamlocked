@@ -220,7 +220,8 @@ public class PlayerInventory : NetworkBehaviour
         var itemSO = ItemDatabase.Get(itemData.id);
         GameObject visualItemPrefab = itemSO?.visualPrefab;
         GameObject visualItem = Instantiate(visualItemPrefab, itemTransform.position, itemTransform.rotation);
-        visualItem.layer = IsOwner ? LayerMask.NameToLayer("ItemHold") : LayerMask.NameToLayer("Default");
+        bool isMine = NetworkManager.Singleton.LocalClientId == OwnerClientId;
+        visualItem.layer = isMine ? LayerMask.NameToLayer("ItemHold") : LayerMask.NameToLayer("Default");
         visualItem.transform.SetParent(itemTransform, false);
         visualItem.transform.localPosition = Vector3.zero;
         visualItem.transform.localRotation = Quaternion.LookRotation(Vector3.forward);

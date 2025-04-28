@@ -99,6 +99,11 @@ public class PlayerInventory : NetworkBehaviour
 
     }
 
+    public void SelectHotbarSlot(int slot)
+    {
+        onNewSlotSelected?.Invoke(slot);
+    }
+
     public void OnDropItem(InputAction.CallbackContext ctx)
     {
         if (ctx.performed && !isInventoryLocked)
@@ -357,6 +362,53 @@ public class PlayerInventory : NetworkBehaviour
 
     }
 
+    public void OnScroll(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed || isInventoryLocked) return;
+
+        float scroll = ctx.ReadValue<Vector2>().y;
+
+        if (scroll > 0)
+        {
+            ScrollInventory(-1); // Scroll up
+        }
+        else if (scroll < 0)
+        {
+            ScrollInventory(1); // Scroll down
+        }
+    }
+
+    private void ScrollInventory(int direction)
+    {
+        if (syncedInventory.Count == 0) return;
+
+        int newSlot = currentInventoryIndex;
+        int attempts = 0;
+
+        do
+        {
+            newSlot += direction;
+
+            if (newSlot >= syncedInventory.Count)
+                newSlot = 0;
+            else if (newSlot < 0)
+                newSlot = syncedInventory.Count - 1;
+
+            attempts++;
+
+            if (attempts > syncedInventory.Count)
+                break; // No available item
+        }
+        while (syncedInventory[newSlot].id == -1);
+
+        if (newSlot != currentInventoryIndex)
+        {
+            RequestServerToSelectNewItemRpc(newSlot);
+        }
+    }
+
+
+
     [Rpc(SendTo.Owner)]
     private void SetHoldItemRpc(bool isHoldingItem)
     {
@@ -439,6 +491,15 @@ public class PlayerInventory : NetworkBehaviour
             }
         }
     }
+
+    public bool IsSlotOccupied(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= syncedInventory.Count)
+            return false;
+
+        return syncedInventory[slotIndex].id != -1;
+    }
+
 
     [Rpc(SendTo.Owner)]
     private void UnlockInventoryRpc()

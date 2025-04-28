@@ -5,86 +5,90 @@ using System.Collections;
 public class LurkerStalkState : LurkerBaseState
 {
 	//lurker component variables
-    private FollowerEntity agent;
-    private LurkerAnimationManager anim;
-    
-    //lurker position variables
-    private Vector3 targetPosition;
-    private Transform lurkerTransform;
-    //stalk variables
-    private float stalkTimer;
-    private float playerStalkRange;
-    //stalking outside of room variables
-    private bool chosenDoorToHover;
-    private Vector3 doorToHoverPosition;
-    private int chosenDoorTries;
-    private int maxTries;
-    
-    public override void EnterState(LurkerMonsterScript lurker)
-    {
+	private FollowerEntity agent;
+	private LurkerAnimationManager anim;
+
+	//lurker position variables
+	private Vector3 targetPosition;
+	private Transform lurkerTransform;
+	//stalk variables
+	private float stalkTimer;
+	private float playerStalkRange;
+	//stalking outside of room variables
+	private bool chosenDoorToHover;
+	private Vector3 doorToHoverPosition;
+	private int chosenDoorTries;
+	private int maxTries;
+
+	public override void EnterState(LurkerMonsterScript lurker)
+	{
 		//initialize variables
 		lurkerTransform = lurker.transform;
-        playerStalkRange = lurker.targetStalkRange;
-        targetPosition = lurker.targetPosition;
-        agent = lurker.agent;
-        anim = lurker.animationManager;
-        chosenDoorToHover = false;
-   
-        //reset variables
-        stalkTimer = 0;
-        maxTries = 30;
-        chosenDoorTries = 0;
-    }
+		playerStalkRange = lurker.targetStalkRange;
+		targetPosition = lurker.targetPosition;
+		agent = lurker.agent;
+		anim = lurker.animationManager;
+		chosenDoorToHover = false;
 
-    public override void UpdateState(LurkerMonsterScript lurker)
-    {
-        targetPosition = lurker.targetPosition;
-        agent.stopDistance = lurker.defaultStoppingDistance;
-        agent.maxSpeed = lurker.roamSpeed;
-        agent.canMove = true;
-        
+		//reset variables
+		stalkTimer = 0;
+		maxTries = 30;
+		chosenDoorTries = 0;
+	}
+
+	public override void UpdateState(LurkerMonsterScript lurker)
+	{
+		targetPosition = lurker.targetPosition;
+		agent.stopDistance = lurker.defaultStoppingDistance;
+		agent.maxSpeed = lurker.roamSpeed;
+		agent.canMove = true;
+
 		//Set animations
 		anim.PlayWalkAnimation();
-		
+		if (agent.velocity.magnitude > 0.1f && agent.canMove && !agent.reachedEndOfPath && agent.hasPath)
+		{
+			lurker.HandleNormalFootStepSFX();
+		}
+
 		//if target is in a room (1 = room tag)
-		if(IsPlayerInRoom())
+		if (IsPlayerInRoom())
 		{
 			HoverNearPlayerInRoom(lurker);
 		}
-		else 
+		else
 		{
 			FollowPlayerIfFarEnough(GetTargetDistance());
 		}
-
+		
 		stalkTimer += Time.deltaTime;
-		if(stalkTimer >= lurker.maxStalkTime)
+		if (stalkTimer >= lurker.maxStalkTime)
 		{
 			lurker.StartStalkCooldown();
 			lurker.SwitchState(LurkerState.Roaming);
 		}
-    }
-    
-    private float GetTargetDistance()
+	}
+
+	private float GetTargetDistance()
 	{
-	    return Vector2.Distance(
-			new Vector2(targetPosition.x, targetPosition.z), 
+		return Vector2.Distance(
+			new Vector2(targetPosition.x, targetPosition.z),
 			new Vector2(lurkerTransform.position.x, lurkerTransform.position.z)
 			);
 	}
-    
-    private bool IsPlayerInRoom()
+
+	private bool IsPlayerInRoom()
 	{
-	    return AstarPath.active.GetNearest(targetPosition).node.Tag == 1;
+		return AstarPath.active.GetNearest(targetPosition).node.Tag == 1;
 	}
-	
+
 	private void HoverNearPlayerInRoom(LurkerMonsterScript lurker)
 	{
-		if(!chosenDoorToHover && lurker.houseMapGenerator != null)
+		if (!chosenDoorToHover && lurker.houseMapGenerator != null)
 		{
 			//gets random node next to door, returns 0 vector if it cant retrieve the node and sets it to go roam. 
 			//Only picks a room position once and will stay there until player leaves the room.
 			doorToHoverPosition = lurker.houseMapGenerator.GetDoorClosestToTarget(targetPosition);
-			if(doorToHoverPosition != Vector3.zero)
+			if (doorToHoverPosition != Vector3.zero)
 			{
 				Debug.Log(doorToHoverPosition);
 				agent.canMove = true;
@@ -92,32 +96,35 @@ public class LurkerStalkState : LurkerBaseState
 				agent.SearchPath();
 				chosenDoorToHover = true;
 			}
-			else if(++chosenDoorTries >= maxTries)
+			else if (++chosenDoorTries >= maxTries)
 			{
 				Debug.LogWarning("Lurker can't get to the player!");
 				//consider making it switch targets instead too as an altnerative
 				lurker.StartStalkCooldown();
-			    lurker.SwitchState(LurkerState.Roaming);
+				lurker.SwitchState(LurkerState.Roaming);
 			}
-		} 
+		}
 	}
-	
-	private void FollowPlayerIfFarEnough(float targetDistance) 
+
+	private void FollowPlayerIfFarEnough(float targetDistance)
 	{
 		//allows movement if agent keeps distance from player and if the node is walkable
 		chosenDoorToHover = false;
-		if (targetDistance > playerStalkRange && IsValidNode(AstarPath.active.GetNearest(agent.position).node)) {
+		if (targetDistance > playerStalkRange && IsValidNode(AstarPath.active.GetNearest(agent.position).node))
+		{
 			agent.destination = targetPosition;
 			agent.SearchPath();
-		} else {
+		}
+		else
+		{
 			agent.canMove = false;
-    	}
+		}
 	}
-	
+
 	private bool IsValidNode(GraphNode node)
 	{
 		//tag 1 is room node
 		return node.Tag != 1;
 	}
-	
+
 }

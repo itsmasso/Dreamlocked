@@ -11,6 +11,8 @@ public class Cupboard : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private List<GameObject> items = new List<GameObject>();
     [SerializeField] private List<Transform> itemTransforms = new List<Transform>();
     [SerializeField] private List<ItemScriptableObject> potentialItems = new List<ItemScriptableObject>();
+    [Header("SFX")]
+    [SerializeField] private Sound3DSO cupboardOpenSFX, cupboardCloseSFX;
     void Start()
     {
         if (IsServer)
@@ -63,7 +65,13 @@ public class Cupboard : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private void RequestToOpenDoorsRpc()
     {
         isOpen.Value = !isOpen.Value;
-
+        if(isOpen.Value)
+        {
+            AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(cupboardOpenSFX), transform.position, true, 1f, 1f, 20f, false, GetComponent<NetworkObject>());
+        }else
+        {
+             AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(cupboardCloseSFX), transform.position, true, 1f, 1f, 20f, false, GetComponent<NetworkObject>());
+        }
     }
     void Update()
     {

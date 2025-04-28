@@ -331,6 +331,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   lightScript: {fileID: 7978976873083772709}
+  lightFlicker: {fileID: 0}
+  lightBuzzSFX: {fileID: 11400000, guid: 32042ef3fd15c15459c44b408dc185ff, type: 2}
 --- !u!114 &7978976873083772709
 MonoBehaviour:
   m_ObjectHideFlags: 0

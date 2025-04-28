@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3306360697858904772}
   - component: {fileID: 1685888284040217410}
   - component: {fileID: 1062620483171237563}
+  - component: {fileID: 5711450229181930995}
   m_Layer: 3
   m_Name: Floor
   m_TagString: Untagged
@@ -371,6 +372,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 12, y: 0.13371839, z: 16}
   m_Center: {x: 0, y: -0.016859196, z: 0}
+--- !u!114 &5711450229181930995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9696064450587806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e829c87dc2a2ed2419c5f67848317fe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 11400000, guid: a086f686223eed942816c70be67841b0, type: 2}
+  exportAllChildren: 0
+  terrainSimplificationLevel: 0
 --- !u!1 &369994854212420437
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,62 +480,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2034378400268218833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2260819019555333869
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2076829607167746500}
-  - component: {fileID: 3249068108479968507}
-  m_Layer: 0
-  m_Name: Audio Reverb Zone
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2076829607167746500
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2260819019555333869}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2034378400268218833}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!167 &3249068108479968507
-AudioReverbZone:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2260819019555333869}
-  m_Enabled: 1
-  m_MinDistance: 3.7
-  m_MaxDistance: 8.92
-  m_ReverbPreset: 27
-  m_Room: -2747
-  m_RoomHF: -410
-  m_DecayTime: 1.49
-  m_DecayHFRatio: 0.59
-  m_Reflections: -1219
-  m_ReflectionsDelay: 0.007
-  m_Reverb: -900
-  m_ReverbDelay: 0.011
-  m_HFReference: 5000
-  m_Diffusion: 100
-  m_Density: 100
-  m_LFReference: 250
-  m_RoomLF: 0
 --- !u!1 &2340503460065430130
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,6 +619,7 @@ GameObject:
   - component: {fileID: 2670880656015629084}
   - component: {fileID: 938865846353654547}
   - component: {fileID: 3055588082422216930}
+  - component: {fileID: 8323004099638145990}
   m_Layer: 10
   m_Name: Ceiling
   m_TagString: Untagged
@@ -1016,6 +977,21 @@ MonoBehaviour:
   includeInScan: 0
   surfaceID: 1
   mode: 1
+--- !u!114 &8323004099638145990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3551811120522613498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e829c87dc2a2ed2419c5f67848317fe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 11400000, guid: a086f686223eed942816c70be67841b0, type: 2}
+  exportAllChildren: 0
+  terrainSimplificationLevel: 0
 --- !u!1 &3723294172672301346
 GameObject:
   m_ObjectHideFlags: 0
@@ -1128,7 +1104,6 @@ Transform:
   - {fileID: 8551717491448562442}
   - {fileID: 3179841469778380977}
   - {fileID: 2064485234845181045}
-  - {fileID: 2076829607167746500}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4012220719375766048
@@ -1721,6 +1696,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 047d03d895d1cdd4ab0545404d552518, type: 3}
       insertIndex: -1
       addedObject: {fileID: 335314710285250816}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 047d03d895d1cdd4ab0545404d552518, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5176713304532436199}
   m_SourcePrefab: {fileID: 100100000, guid: 047d03d895d1cdd4ab0545404d552518, type: 3}
 --- !u!1 &2840293985149391371 stripped
 GameObject:
@@ -1749,6 +1727,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 6503316152310639137, guid: 047d03d895d1cdd4ab0545404d552518, type: 3}
+--- !u!114 &5176713304532436199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2840293985149391371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e829c87dc2a2ed2419c5f67848317fe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 11400000, guid: a086f686223eed942816c70be67841b0, type: 2}
+  exportAllChildren: 1
+  terrainSimplificationLevel: 0
 --- !u!4 &3179841469778380977 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 047d03d895d1cdd4ab0545404d552518, type: 3}

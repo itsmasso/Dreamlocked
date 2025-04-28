@@ -16,6 +16,7 @@
  *****************************************************************/
 using UnityEngine;
 using Unity.Netcode;
+using System;
 // This enum will handle what stage the timer is at
 public enum MQThreatLevel
 {
@@ -27,14 +28,16 @@ public enum MQThreatLevel
 public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
 {
     private const float TOTAL_TIME = 300;
-    private const float TIME_TO_DANGER = 30;
+    private const float TIME_TO_DANGER = 200;
     private const float EXTRACTION_TIME = 60;
     private const float REWIND_BUFFER = TOTAL_TIME - 10;
     private bool gameEnding = false;
     private float currentTime;
     private bool timeRunning;
     public NetworkVariable<MQThreatLevel> currentThreatLevel = new NetworkVariable<MQThreatLevel>(MQThreatLevel.PASSIVE, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
+    public event Action onPassive;
+    public event Action onActivating;
+    public event Action onAwakened;
     // Developer Variables
     private bool printedActivating = false;
     private bool printedAwakened = false;
@@ -50,7 +53,33 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
             timeRunning = true;
         }
     }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        currentThreatLevel.OnValueChanged += OnThreatLevelChanged;
+    }
 
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        currentThreatLevel.OnValueChanged -= OnThreatLevelChanged;
+    }
+    private void OnThreatLevelChanged(MQThreatLevel previousValue, MQThreatLevel newValue)
+    {
+
+        switch (newValue)
+        {
+            case MQThreatLevel.PASSIVE:
+                onPassive?.Invoke();
+                break;
+            case MQThreatLevel.ACTIVATING:
+                onActivating?.Invoke();
+                break;
+            case MQThreatLevel.AWAKENED:
+                onAwakened?.Invoke();
+                break;
+        }
+    }
     void Update()
     {
         if (!IsServer) return;

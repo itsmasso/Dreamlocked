@@ -18,6 +18,8 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
     private Coroutine hideRoutine;
     private Vector3 drawerForward;
     [SerializeField] private ItemPlacer itemPlacer;
+     [SerializeField] private Sounds3DSOList soundsSOList;
+     [SerializeField] private Sound3DSO drawerOpen, drawerClose;
 
     public override void OnNetworkSpawn()
     {
@@ -115,6 +117,10 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         {
             if (IsServer && item != null) AllShowItemRpc();
             targetZPosition = extendAmount;
+             if (IsOwner)
+            {
+                AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(drawerOpen), transform.position, true, 1f, 1, 30f, false, GetComponent<NetworkObject>());
+            }
         }
         else
         {
@@ -123,6 +129,10 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
                 if (hideRoutine != null)
                     StopCoroutine(hideRoutine);
                 hideRoutine = StartCoroutine(HideDelay());
+            }
+             if (IsOwner)
+            {
+                AudioManager.Instance.Play3DSoundServerRpc(Get3DSoundFromList(drawerClose), transform.position, true, 1f, 1, 30f, false, GetComponent<NetworkObject>());
             }
             targetZPosition = 0f;
         }
@@ -168,6 +178,10 @@ public class DrawerBox : NetworkBehaviour, IInteractable, IHasNetworkChildren
         {
             RequestServerToToggleDrawerRpc();
         }
+    }
+    private int Get3DSoundFromList(Sound3DSO sound3DSO)
+    {
+        return soundsSOList.sound3DSOList.IndexOf(sound3DSO);
     }
 
     public void DestroyNetworkChildren()

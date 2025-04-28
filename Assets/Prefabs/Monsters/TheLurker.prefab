@@ -164,6 +164,7 @@ GameObject:
   - component: {fileID: 4344768006437791759}
   - component: {fileID: 3993357798698020809}
   - component: {fileID: 4522203820104293178}
+  - component: {fileID: 1939717377052359367}
   m_Layer: 9
   m_Name: TheLurker
   m_TagString: Untagged
@@ -332,7 +333,7 @@ MonoBehaviour:
   roamSpeed: 3
   chanceToStalkPlayer: 100
   targetStalkRange: 8
-  maxStalkTime: 600
+  maxStalkTime: 20
   stalkCooldown: 25
   canStalk: 0
   pauseBeforeChasingDuration: 5
@@ -362,6 +363,20 @@ MonoBehaviour:
   anim: {fileID: 7914557563573989929}
   animationManager: {fileID: 4344768006437791759}
   houseMapGenerator: {fileID: 0}
+  lurkerBreathingSFX: {fileID: 11400000, guid: fff6f230ba83e44408a7899036e485d0, type: 2}
+  lurkerPreChaseSFX: {fileID: 11400000, guid: f5122a1ad9b993947b15ae877582c08b, type: 2}
+  lurkerChaseSFX: {fileID: 11400000, guid: b15d542cb6787db459c6de92c26bb2bd, type: 2}
+  regularFootSteps:
+  - {fileID: 11400000, guid: 3671eb73cb32e8b43b979e9facfffb2a, type: 2}
+  - {fileID: 11400000, guid: d9af3077e260e254ba5f801e30a780a4, type: 2}
+  - {fileID: 11400000, guid: c20326ac6c1ee0b4c9cfdbc501b5ae83, type: 2}
+  heavyFootSteps:
+  - {fileID: 11400000, guid: 1e9def0589015274187310c79b3007ce, type: 2}
+  - {fileID: 11400000, guid: 9f0c7c234c2bcb7448b4fb1eadd8b94f, type: 2}
+  - {fileID: 11400000, guid: 0fbd0888e01cd6f4197f33c903728799, type: 2}
+  - {fileID: 11400000, guid: 6c433d781f1e646438f6995dd454409c, type: 2}
+  footStepAudioSource: {fileID: 1939717377052359367}
+  walkingFootStepInterval: 3.5
 --- !u!114 &4344768006437791759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -466,6 +481,103 @@ MonoBehaviour:
     TriggerNameHash: 1080829965
     TransitionIndex: 0
   m_Animator: {fileID: 7914557563573989929}
+--- !u!82 &1939717377052359367
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4207613464781364640}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -2167409848733965624, guid: c83088607955ca842b751de910f7450a, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 2
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &8839032708170728960
 GameObject:
   m_ObjectHideFlags: 0

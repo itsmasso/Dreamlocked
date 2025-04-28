@@ -92,6 +92,8 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 			canMove = true;
 			defaultFOV = followZoom.FovRange;
 
+			// For End of Game Logic
+			GameManager.Instance.onLobby += HandleLobbyLoading;
 		}
 
 
@@ -122,9 +124,14 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	{
 		playerCam.enabled = false;
 		itemCamera.enabled = false;
-		spectatorCam.enabled = true;
-		currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
-		spectatorCam.Follow = currentPlayerToSpectate;
+		if(PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
+		{
+			Debug.Log("Starting to Spectate");
+			// This needs logic to protect when all players are dead
+			spectatorCam.enabled = true;
+			currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
+			spectatorCam.Follow = currentPlayerToSpectate;
+		}
 		isDead = true;
 	}
 
@@ -281,11 +288,11 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	void Update()
 	{
 
-		if (playerCam != null && !isDead)
+		if (playerCam != null && playerCam.enabled == true && !isDead)
 		{
 			CheckForEnemyVisibility();
 		}
-		if (spectatorCam != null && isDead)
+		if (spectatorCam != null && spectatorCam.enabled == true && isDead)
 		{
 			camFollowPivot.transform.position = currentPlayerToSpectate.transform.position;
 		}
@@ -322,6 +329,13 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		canMove = false;
 		yield return new WaitForSeconds(lockTime);
 		canMove = true;
+	}
+
+	private void HandleLobbyLoading()
+	{
+		Debug.Log("PlayerCamera.cs - Unlocking Cursor + Disabling Cameras");
+		Cursor.visible = true;
+		Cursor.lockState = CursorLockMode.None;
 	}
 
 }

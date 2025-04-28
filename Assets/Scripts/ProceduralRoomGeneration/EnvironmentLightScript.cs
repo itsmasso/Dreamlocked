@@ -7,8 +7,8 @@ using UnityEngine.SceneManagement;
 public class EnvironmentLightScript : NetworkBehaviour
 {
 
-	const float MIN_FLICKER_TIME = 0.5f;
-	const float MAX_FLICKER_TIME = 1f;
+	const float MIN_FLICKER_TIME = 0.2f;
+	const float MAX_FLICKER_TIME = 0.5f;
 	[SerializeField] private Light lightSource;
 	[SerializeField] private List<Renderer> lightMaterialList = new List<Renderer>();
 	[SerializeField] private LayerMask playerLayer;
@@ -17,6 +17,9 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 	[SerializeField] private DetectEnemyInLights lightScript;
 	private float Timer;
+	public LightFlicker lightFlicker;
+	[SerializeField] private Sound3DSO lightBuzzSFX;
+	private bool playingLightBuzz;
 
 	public override void OnNetworkSpawn()
 	{
@@ -27,7 +30,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 		// The comment out line would make the flickering all different and random
 		//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
 
-
+		playingLightBuzz = false;
 		Timer = MIN_FLICKER_TIME;
 		TurnLightsOn();
 	}
@@ -132,6 +135,7 @@ public class EnvironmentLightScript : NetworkBehaviour
 			{
 				case MQThreatLevel.PASSIVE:
 					TurnLightsOn();
+
 					break;
 				case MQThreatLevel.ACTIVATING:
 					FlickerLights();
@@ -153,6 +157,11 @@ public class EnvironmentLightScript : NetworkBehaviour
 
 	private void FlickerLights()
 	{
+		if (lightFlicker != null && lightFlicker.IsFrozen)
+		{
+			return; // Skip flickering while globally frozen
+		}
+
 		if (Timer > 0)
 		{
 			Timer -= Time.deltaTime;
@@ -169,14 +178,19 @@ public class EnvironmentLightScript : NetworkBehaviour
 					TurnOffMaterialLight();
 			}
 			// The comment out line would make the flickering all different and random
-			//Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
-			Timer = MIN_FLICKER_TIME;
+			Timer = Random.Range(MIN_FLICKER_TIME, MAX_FLICKER_TIME);
+			//Timer = MIN_FLICKER_TIME;
 		}
 	}
 
 	private void TurnLightsOff()
 	{
 		isLightOn = false;
+		if (playingLightBuzz)
+		{
+			AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lightBuzzSFX));
+			playingLightBuzz = false;
+		}
 		lightSource.enabled = false;
 		TurnOffMaterialLight();
 	}
@@ -184,6 +198,21 @@ public class EnvironmentLightScript : NetworkBehaviour
 	private void TurnLightsOn()
 	{
 		isLightOn = true;
+		NetworkObject netObj = GetComponent<NetworkObject>();
+		if (!playingLightBuzz && netObj != null && netObj.IsSpawned)
+		{
+			AudioManager.Instance.Play3DSoundServerRpc(
+				AudioManager.Instance.Get3DSoundFromList(lightBuzzSFX),
+				lightSource.transform.position,
+				false,
+				0.9f,
+				1f,
+				10f,
+				false,
+				netObj
+			);
+			playingLightBuzz = true;
+		}
 		if (playerSeesLight)
 		{
 			lightSource.enabled = true;

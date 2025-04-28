@@ -105,10 +105,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c97c5550e21a1e547946809550474b92, type: 2}
   - {fileID: 11400000, guid: fe629c8638517684aa71907a02e5d019, type: 2}
   - {fileID: 11400000, guid: 4f2838519e479414c9929af2434f515a, type: 2}
+  - {fileID: 11400000, guid: bdaab5e968d58f4498124f6025d4026a, type: 2}
   canInteract:
     m_InternalValue: 1
   interactCooldown: 1
   itemPlacer: {fileID: 2523325249988665512}
+  soundsSOList: {fileID: 11400000, guid: 81898588e619e6845b55b4a9bde0d6a6, type: 2}
+  drawerOpen: {fileID: 11400000, guid: 2578e3b73af33af4393ad9a4ddc21832, type: 2}
+  drawerClose: {fileID: 11400000, guid: 823694ea088ed8940a6aecdca11b40ff, type: 2}
 --- !u!114 &2523325249988665512
 MonoBehaviour:
   m_ObjectHideFlags: 0

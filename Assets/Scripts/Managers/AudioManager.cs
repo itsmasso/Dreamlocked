@@ -274,15 +274,18 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     public void ClearAllAudio()
     {
         // Clear 2D Sounds
-        foreach (var soundSource in active2DSounds)
+        if (IsServer)
         {
-            if (soundSource != null)
+            foreach (var soundSource in active2DSounds)
             {
-                soundSource.Stop();
-                Destroy(soundSource.gameObject);
+                if (soundSource != null)
+                {
+                    soundSource.Stop();
+                    Destroy(soundSource.gameObject);
+                }
             }
+            active2DSounds.Clear();
         }
-        active2DSounds.Clear();
 
         // Clear 3D Sounds — only the server/host may actually despawn NetworkObjects
         if (IsServer) 

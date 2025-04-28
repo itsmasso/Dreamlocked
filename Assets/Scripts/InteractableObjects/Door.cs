@@ -11,6 +11,7 @@ public class Door : NetworkBehaviour, IInteractable
     [SerializeField] private float maxDoorAngle;
     [SerializeField] private bool isOpen;
     public bool isLocked;
+    private NetworkVariable<bool> doorIsServerLocked = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     [SerializeField] private ItemScriptableObject requiredKeySO;
     [SerializeField] private ItemScriptableObject lockpickSO;
     [SerializeField] private Sounds3DSOList soundsSOList;
@@ -21,6 +22,10 @@ public class Door : NetworkBehaviour, IInteractable
     void Start()
     {
         isOpen = false;
+        if (IsServer)
+        {
+            doorIsServerLocked.Value = isLocked;
+        }
 
         defaultYRotation = pivot.eulerAngles.y;
     }
@@ -107,7 +112,7 @@ public class Door : NetworkBehaviour, IInteractable
     {
         if (playerObjectRef.TryGet(out NetworkObject playerObject))
         {
-            if (!isLocked)
+            if (!doorIsServerLocked.Value)
             {
                 RequestServerToToggleDoorRpc(playerObject.transform.position);
             }
@@ -118,7 +123,7 @@ public class Door : NetworkBehaviour, IInteractable
                 {
                     Debug.Log("Unlocked Door");
                     AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(unlockSO), transform.position, true, 1f, 1, 25f, false, GetComponent<NetworkObject>(), 0f);
-                    isLocked = false;
+                    UnlockDoorServerRpc();
                     playerObject.GetComponent<PlayerInventory>().RequestServerToDestroyItemRpc();
                 }
                 else if (playerObject.GetComponent<PlayerInventory>().currentHeldItemData.id != -1 &&
@@ -128,7 +133,7 @@ public class Door : NetworkBehaviour, IInteractable
                     if (rand <= 0.5f)//crochet needle (lock pick) has a 50 chance of opening any locked door
                     {
                         AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(unlockSO), transform.position, true, 1f, 1, 25f, false, GetComponent<NetworkObject>(), 0f);
-                        isLocked = false;
+                        UnlockDoorServerRpc();
                     }
                     else
                     {
@@ -147,5 +152,11 @@ public class Door : NetworkBehaviour, IInteractable
     private int Get3DSoundFromList(Sound3DSO sound3DSO)
     {
         return soundsSOList.sound3DSOList.IndexOf(sound3DSO);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void UnlockDoorServerRpc()
+    {
+        doorIsServerLocked.Value = false;
     }
 }

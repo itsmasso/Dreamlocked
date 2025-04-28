@@ -18,9 +18,7 @@ public class SafeClueItemSpawn : NetworkBehaviour
         if (IsServer)
         {
             // Set the clue of the object BEFORE SPAWNING
-            safeCode = GameManager.Instance.GetSafeCode().Value;
-            SafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
-            VisualSafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
+            SetBookTextClientRpc();
             
             // Spawn the object
             item = Instantiate(SafeClueScriptableObject.droppablePrefab, SafeClueTransform.position, SafeClueTransform.rotation);
@@ -36,6 +34,7 @@ public class SafeClueItemSpawn : NetworkBehaviour
             safeClueScript.InitializeItemData(newItemData);
             safeClueScript.isStored.Value = true;
         }
+        SafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
     }
 
     public void DestroyNetworkChildren()
@@ -55,5 +54,14 @@ public class SafeClueItemSpawn : NetworkBehaviour
                 }
             }
         }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void SetBookTextClientRpc()
+    {
+        safeCode = GameManager.Instance.GetSafeCode().Value;
+        SafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
+        VisualSafeClueObject.transform.Find("Year").GetComponent<TextMeshPro>().SetText(safeCode.ToString());
+        Debug.Log("Setting Safe Clue: " + safeCode);
     }
 }

@@ -228,6 +228,10 @@ PrefabInstance:
       value: HouseLevelGenerator
       objectReference: {fileID: 0}
     - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
+      propertyPath: floors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507854731335237695, guid: 3454158d00f260444947423f4176c895, type: 3}
       propertyPath: mapSize.x
       value: 200
       objectReference: {fileID: 0}

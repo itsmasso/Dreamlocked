@@ -22,7 +22,7 @@ public class Door : NetworkBehaviour, IInteractable
     void Start()
     {
         isOpen = false;
-        if (IsServer)
+        if (IsServer && isLocked)
         {
             doorIsServerLocked.Value = isLocked;
         }

@@ -359,8 +359,8 @@ MonoBehaviour:
   damage: 0
   inLight:
     m_InternalValue: 0
-  inDarkSpeed: 10
-  inLightSpeed: 2
+  inDarkSpeed: 12
+  inLightSpeed: 3
   anim: {fileID: 7914557563573989929}
   animationManager: {fileID: 4344768006437791759}
   houseMapGenerator: {fileID: 0}

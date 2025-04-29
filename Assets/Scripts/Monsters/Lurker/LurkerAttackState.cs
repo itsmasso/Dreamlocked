@@ -10,7 +10,7 @@ public class LurkerAttackState : LurkerBaseState
     {
         animator = lurker.anim;
         //AudioManager.Instance.Stop3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(lurker.lurkerChaseSFX));
-        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("VHSStatic"), 1f, false);
+        AudioManager.Instance.PlayLocalClientOnly2DSound(AudioManager.Instance.Get2DSound("VHSStatic"), 1f, false);
         
         lurker.StartCoroutine(AttackPlayer(lurker));
     }

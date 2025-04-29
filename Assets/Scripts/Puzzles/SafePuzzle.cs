@@ -70,20 +70,9 @@ public class SafePuzzle : NetworkBehaviour, IInteractable, IHasNetworkChildren
 
     public void DestroyNetworkChildren()
     {
-        foreach (Transform child in transform)
+        if (item != null)
         {
-            NetworkObject childNetObj = child.GetComponent<NetworkObject>();
-            if (childNetObj != null)
-            {
-                if (childNetObj.IsSpawned)
-                {
-                    if (childNetObj.GetComponent<IHasNetworkChildren>() != null)
-                    {
-                        childNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
-                    }
-                    childNetObj.Despawn(true);
-                }
-            }
+            item.GetComponent<NetworkObject>().Despawn(true);
         }
     }
 

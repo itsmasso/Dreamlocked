@@ -130,7 +130,7 @@ public class Door : NetworkBehaviour, IInteractable
                 playerObject.GetComponent<PlayerInventory>().GetCurrentHeldItemID() == lockpickSO.id)
                 {
                     float rand = Random.value;
-                    if (rand <= 0.5f)//crochet needle (lock pick) has a 50 chance of opening any locked door
+                    if (rand <= 0.20f)//crochet needle (lock pick) has a 50 chance of opening any locked door
                     {
                         AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(unlockSO), transform.position, true, 1f, 1, 25f, false, GetComponent<NetworkObject>(), 0f);
                         UnlockDoorServerRpc();

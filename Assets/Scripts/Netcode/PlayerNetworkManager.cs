@@ -228,7 +228,11 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				player.GetComponent<PlayerInventory>().EnsureEmptyInventorySlots(4);
 				foreach (var itemData in inventory)
 				{
-					player.GetComponent<PlayerInventory>().RepopulateItem(itemData);
+					//skip over book and key items
+					if(itemData.id != 1 || itemData.id != 4)
+					{
+					    player.GetComponent<PlayerInventory>().RepopulateItem(itemData);
+					}
 				}
 				player.GetComponent<PlayerInventory>().RequestServerToSelectNewItemRpc(0);
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");

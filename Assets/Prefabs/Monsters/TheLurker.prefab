@@ -356,9 +356,10 @@ MonoBehaviour:
   attackRange: 1.5
   attackCooldown: 7
   canAttack: 0
+  damage: 0
   inLight:
     m_InternalValue: 0
-  inDarkSpeed: 8
+  inDarkSpeed: 10
   inLightSpeed: 2
   anim: {fileID: 7914557563573989929}
   animationManager: {fileID: 4344768006437791759}

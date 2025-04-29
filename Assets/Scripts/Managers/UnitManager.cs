@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Pathfinding;
@@ -95,7 +96,8 @@ public class UnitManager : NetworkBehaviour
 		if (IsServer)
 		{
 			canSpawnEnemies = true;
-			SpawnMannequinMonsters();
+			//SpawnMannequinMonsters();
+			StartCoroutine(SpawnMannequinMonstersDelayed());
 		}
 	}
 	void Update()
@@ -139,6 +141,8 @@ public class UnitManager : NetworkBehaviour
 
 
 	}
+	
+	
 	/*****************************************************************
 	* SpawnMannequinMonsters
 	*****************************************************************
@@ -150,7 +154,11 @@ public class UnitManager : NetworkBehaviour
 		the positions of all the rooms and then it creates instances
 		of the MQMonster objects in each room.
 	*****************************************************************/
-
+	private IEnumerator SpawnMannequinMonstersDelayed()
+	{
+		yield return new WaitForSeconds(4f);
+	    SpawnMannequinMonsters();
+	}
 	private void SpawnMannequinMonsters()
 	{
 		foreach (Room room in houseMapGenerator.GetNormalRoomComponents().ToList())

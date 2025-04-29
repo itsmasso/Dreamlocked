@@ -9,92 +9,63 @@ using Unity.Netcode;
 using Netcode.Transports.Facepunch;
 
 
-public class SteamManager : Singleton<SteamManager>
+public class SteamManager : PersistentSingleton<SteamManager>
 {
     Lobby currentLobby;
-    
+
     [Header("UI")]
-    [SerializeField]
-    private TMP_InputField LobbyIDInputField;
+    // [SerializeField]
+    // private TMP_InputField LobbyIDInputField;
 
-    [SerializeField]
-    private TextMeshProUGUI LobbyID;
+    // [SerializeField]
+    // private TextMeshProUGUI LobbyID;
 
-    [SerializeField] 
-    private GameObject LobbyMenu;
-    [SerializeField] 
-    private GameObject mainMenu;
+    // [SerializeField] 
+    // private GameObject LobbyMenu;
+    // [SerializeField] 
+    // private GameObject mainMenu;
 
-    [SerializeField] 
-    private GameObject settingsPanel;
+    // [SerializeField] 
+    // private GameObject settingsPanel;
 
     private float playerCheckTimer = 0f;
     private const float playerCheckInterval = 1f;
-    
+
     private int lastPlayerCount = -1; // Store previous player count
 
-   
+
     void OnEnable()
     {
-        SteamMatchmaking.OnLobbyCreated += LobbyCreated;
         SteamMatchmaking.OnLobbyEntered += LobbyEntered;
         SteamFriends.OnGameLobbyJoinRequested += GameLobbyJoinRequested;
-
-        SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoined;
-        SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeft;
+        SteamMatchmaking.OnLobbyCreated += LobbyCreated;
 
 
     }
 
     void OnDisable()
     {
-        SteamMatchmaking.OnLobbyCreated -= LobbyCreated;
         SteamMatchmaking.OnLobbyEntered -= LobbyEntered;
         SteamFriends.OnGameLobbyJoinRequested -= GameLobbyJoinRequested;
-
-        SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoined;
-        SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeft;
+        SteamMatchmaking.OnLobbyCreated -= LobbyCreated;
 
     }
 
-
-
-  
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    public Lobby GetCurrentLobby()
     {
-        StartCoroutine(DelayedUIBinding(scene));
+        return currentLobby;
     }
-
-    private IEnumerator DelayedUIBinding(Scene scene)
-    {
-        if (scene.name == "MenuScene")
-        {
-            // Wait one frame to allow Unity to finish initializing the new scene objects
-            yield return null;
-
-            LobbyIDInputField = GameObject.Find("LobbyInputField")?.GetComponent<TMP_InputField>();
-            LobbyID = GameObject.Find("LobbyIDText")?.GetComponent<TextMeshProUGUI>();
-            LobbyMenu = GameObject.Find("LobbyMenu");
-            mainMenu = GameObject.Find("MainMenu");
-            settingsPanel = GameObject.Find("SettingsPanel");
-
-            Debug.Log("Rebound UI elements in MenuScene");
-        }
-    }
-
-
     private void LobbyEntered(Lobby lobby)
     {
         LobbySaver.instance.currentLobby = lobby;
+        currentLobby = lobby;
+        //string joinCode = lobby.GetData("joinCode");
+        //LobbyID.text = string.IsNullOrEmpty(joinCode) ? lobby.Id.ToString() : joinCode;
 
-        string joinCode = lobby.GetData("joinCode");
-        LobbyID.text = string.IsNullOrEmpty(joinCode) ? lobby.Id.ToString() : joinCode;
-
-        CheckUI();
+        //CheckUI();
 
         // Delay refreshing icons
-        StartCoroutine(DelayedRefreshLobbyUI(lobby.MemberCount));
+        //StartCoroutine(DelayedRefreshLobbyUI(lobby.MemberCount));
 
         if (!NetworkManager.Singleton.IsHost)
         {
@@ -102,18 +73,18 @@ public class SteamManager : Singleton<SteamManager>
             NetworkManager.Singleton.StartClient();
         }
 
-        StartCoroutine(SendDelayedJoinMessage());
+        //StartCoroutine(SendDelayedJoinMessage());
     }
 
-    private IEnumerator DelayedRefreshLobbyUI(int memberCount)
-    {
-        yield return new WaitForSeconds(0.1f); // short delay to let LobbyUIManager initialize
-        LobbyUIManager.Instance?.RefreshPlayerIcons(memberCount);
-    }
+    // private IEnumerator DelayedRefreshLobbyUI(int memberCount)
+    // {
+    //     yield return new WaitForSeconds(0.1f); // short delay to let LobbyUIManager initialize
+    //     LobbyUIManager.Instance?.RefreshPlayerIcons(memberCount);
+    // }
 
 
 
-    private void LobbyCreated(Result result, Lobby lobby)
+    public void LobbyCreated(Result result, Lobby lobby)
     {
         if (result == Result.OK)
         {
@@ -129,31 +100,31 @@ public class SteamManager : Singleton<SteamManager>
     {
         await lobby.Join();
     }
-    
-    private void CheckUI()
-    {
 
-        if (mainMenu == null || LobbyMenu == null) return;
+    // private void CheckUI()
+    // {
 
-        bool inLobby = LobbySaver.instance.currentLobby != null;
+    //     if (mainMenu == null || LobbyMenu == null) return;
 
-        mainMenu.SetActive(!inLobby);
-        LobbyMenu.SetActive(inLobby);
+    //     bool inLobby = LobbySaver.instance.currentLobby != null;
 
-        // explicit check in case Messenger is disabled separately
-        Transform messenger = LobbyMenu.transform.Find("Messenger");
-        if (messenger != null)
-            messenger.gameObject.SetActive(inLobby);
-    }
+    //     mainMenu.SetActive(!inLobby);
+    //     LobbyMenu.SetActive(inLobby);
 
-    public async void HostLobby()
+    //     // explicit check in case Messenger is disabled separately
+    //     Transform messenger = LobbyMenu.transform.Find("Messenger");
+    //     if (messenger != null)
+    //         messenger.gameObject.SetActive(inLobby);
+    // }
+
+    public async void HostLobby(string joinCode)
     {
         Lobby? maybeLobby = await SteamMatchmaking.CreateLobbyAsync(4);
         if (maybeLobby.HasValue)
         {
             Lobby lobby = maybeLobby.Value;
 
-            string joinCode = GenerateRandomCode(6);
+            //string joinCode = GenerateRandomCode(6);
             lobby.SetPublic();
             lobby.SetJoinable(true);
             lobby.SetData("joinCode", joinCode);
@@ -161,10 +132,10 @@ public class SteamManager : Singleton<SteamManager>
             LobbySaver.instance.currentLobby = lobby;
             NetworkManager.Singleton.StartHost();
 
-            LobbyID.text = joinCode;
-            CheckUI();
+            //LobbyID.text = joinCode;
+            //CheckUI();
 
-            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
+            //LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
 
             Debug.Log($"Hosting lobby with code: {joinCode}");
         }
@@ -174,19 +145,19 @@ public class SteamManager : Singleton<SteamManager>
         }
     }
 
-    public async void JoinLobbyByCode()
+    public async void JoinLobbyByCode(string inputCode)
     {
-        string inputCode = LobbyIDInputField.text.Trim().ToUpper();
+        // string inputCode = LobbyIDInputField.text.Trim().ToUpper();
 
-        if (string.IsNullOrEmpty(inputCode))
-        {
-            Debug.LogError("Join code is empty.");
-            return;
-        }
+        // if (string.IsNullOrEmpty(inputCode))
+        // {
+        //     Debug.LogError("Join code is empty.");
+        //     return;
+        // }
 
         var lobbies = await SteamMatchmaking.LobbyList.RequestAsync();
 
-        Debug.Log($"Searching for code: {inputCode}");
+        // Debug.Log($"Searching for code: {inputCode}");
         foreach (var lobby in lobbies)
         {
             string code = lobby.GetData("joinCode");
@@ -203,24 +174,24 @@ public class SteamManager : Singleton<SteamManager>
         Debug.LogError($"No lobby found with code: {inputCode}");
     }
 
-    
-
-    private string GenerateRandomCode(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        System.Random random = new System.Random();
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
-    }
 
 
-    public void CopyID()
-    {
-        TextEditor te = new TextEditor();
-        te.text = LobbyID.text;
-        te.SelectAll();
-        te.Copy();
-    }
+    // private string GenerateRandomCode(int length)
+    // {
+    //     const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    //     System.Random random = new System.Random();
+    //     return new string(Enumerable.Repeat(chars, length)
+    //         .Select(s => s[random.Next(s.Length)]).ToArray());
+    // }
+
+
+    // public void CopyID()
+    // {
+    //     TextEditor te = new TextEditor();
+    //     te.text = LobbyID.text;
+    //     te.SelectAll();
+    //     te.Copy();
+    // }
     public void StartGameServer()
     {
         if (NetworkManager.Singleton.IsHost)
@@ -230,83 +201,83 @@ public class SteamManager : Singleton<SteamManager>
     }
     public void LeaveLobby()
     {
-        FindFirstObjectByType<ChatManager>()?.ClearChat();
-        LobbySaver.instance.currentLobby?.SendChatString($"<b><color=#AAAAAA>[System]</color></b> {SteamClient.Name} has left the lobby.");
+        // FindFirstObjectByType<ChatManager>()?.ClearChat();
+        // LobbySaver.instance.currentLobby?.SendChatString($"<b><color=#AAAAAA>[System]</color></b> {SteamClient.Name} has left the lobby.");
         LobbySaver.instance.currentLobby?.Leave();
         LobbySaver.instance.currentLobby = null;
         NetworkManager.Singleton.Shutdown();
-        CheckUI();
-        
-        if (LobbyUIManager.Instance != null)
-        {
-            LobbyUIManager.Instance.RefreshPlayerIcons(0);
-        }
+        // CheckUI();
+
+        // if (LobbyUIManager.Instance != null)
+        // {
+        //     LobbyUIManager.Instance.RefreshPlayerIcons(0);
+        // }
 
     }
 
-    private void OnLobbyMemberJoined(Lobby lobby, Friend newMember)
-    {
-        if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
-        {
-            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
-            Debug.Log($"Player joined lobby. Now {lobby.MemberCount} players.");
-        }
-    }
+    // private void OnLobbyMemberJoined(Lobby lobby, Friend newMember)
+    // {
+    //     if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
+    //     {
+    //         LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
+    //         Debug.Log($"Player joined lobby. Now {lobby.MemberCount} players.");
+    //     }
+    // }
 
-    private void OnLobbyMemberLeft(Lobby lobby, Friend member)
-    {
-        if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
-        {
-            LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
-            Debug.Log($"Player left lobby. Now {lobby.MemberCount} players.");
-        }
-    }
+    // private void OnLobbyMemberLeft(Lobby lobby, Friend member)
+    // {
+    //     if (LobbySaver.instance.currentLobby.HasValue && lobby.Id == LobbySaver.instance.currentLobby.Value.Id)
+    //     {
+    //         LobbyUIManager.Instance?.RefreshPlayerIcons(lobby.MemberCount);
+    //         Debug.Log($"Player left lobby. Now {lobby.MemberCount} players.");
+    //     }
+    // }
 
 
-    private IEnumerator SendDelayedJoinMessage()
-    {
-        yield return null; // wait 1 frame
-        var chatManager = FindFirstObjectByType<ChatManager>();
-        LobbySaver.instance.currentLobby?.SendChatString($"<b><color=#AAAAAA>[System]</color></b> {SteamClient.Name} has joined the lobby.");
-    }
-    public void OpenSettings()
-    {
-        // Load keybinds when opening settings
-        var keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
-        keybindManager?.LoadBindings();
-        
-        mainMenu.SetActive(false);         // hide main menu
-        settingsPanel.SetActive(true);
-    }
+    // private IEnumerator SendDelayedJoinMessage()
+    // {
+    //     yield return null; // wait 1 frame
+    //     var chatManager = FindFirstObjectByType<ChatManager>();
+    //     LobbySaver.instance.currentLobby?.SendChatString($"<b><color=#AAAAAA>[System]</color></b> {SteamClient.Name} has joined the lobby.");
+    // }
+    // public void OpenSettings()
+    // {
+    //     // Load keybinds when opening settings
+    //     var keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
+    //     keybindManager?.LoadBindings();
 
-    public void CloseSettings()
-    {
-        // Save any rebinds before hiding the panel
-        var keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
-        if (keybindManager != null)
-        {
-            keybindManager.SaveBindings();
-        }
+    //     mainMenu.SetActive(false);         // hide main menu
+    //     settingsPanel.SetActive(true);
+    // }
 
-        settingsPanel.SetActive(false);
-        mainMenu.SetActive(true);         // open main menu
-    }
+    // public void CloseSettings()
+    // {
+    //     // Save any rebinds before hiding the panel
+    //     var keybindManager = FindFirstObjectByType<KeybindSettingsManager>();
+    //     if (keybindManager != null)
+    //     {
+    //         keybindManager.SaveBindings();
+    //     }
 
-    public void OnCloseSettingsButtonPressed()
-    {
-        if (!KeybindSettingsManager.IsRebindingKey)
-        {
-            CloseSettings();
-        }
-    }
+    //     settingsPanel.SetActive(false);
+    //     mainMenu.SetActive(true);         // open main menu
+    // }
 
-    public void QuitGame()
-    {
-    #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-    #else
-        Application.Quit();
-    #endif
-    }
+    // public void OnCloseSettingsButtonPressed()
+    // {
+    //     if (!KeybindSettingsManager.IsRebindingKey)
+    //     {
+    //         CloseSettings();
+    //     }
+    // }
+
+    // public void QuitGame()
+    // {
+    // #if UNITY_EDITOR
+    //     UnityEditor.EditorApplication.isPlaying = false;
+    // #else
+    //     Application.Quit();
+    // #endif
+    // }
 
 }

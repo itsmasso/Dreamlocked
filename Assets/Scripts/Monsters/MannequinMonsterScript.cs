@@ -129,6 +129,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
                 if (!inLight.Value)
                 {
                     MoveToPlayer(ACTIVATING_MOVE_SPEED);
+ 
                     mannequinAnimationManager.SetAnimationSpeed(0.5f);
                 }
                 AttackPlayer();
@@ -136,7 +137,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
             case MQThreatLevel.AWAKENED:
                 // Debug.Log("Mannequin Threat Level is now: " + threatLevelNetworkState.Value);
                 // Chase currentTarget at AWAKENED_SPEED
-
+                
                 if (!inLight.Value)
                 {
                     MoveToPlayer(mannequinScriptable.baseSpeed);
@@ -231,6 +232,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         agent.maxSpeed = speed;
         if (currentTarget != null)
         {
+            HandleNormalFootStepSFX();
             agent.destination = currentTarget.position;
             mannequinAnimationManager.PlayWalkAnimation();
             agent.SearchPath();

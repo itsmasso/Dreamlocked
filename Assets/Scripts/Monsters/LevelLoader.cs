@@ -80,7 +80,7 @@ public class LevelLoader : NetworkBehaviour
         {
             ClientQuitRpc();
             NetworkManager.Singleton.Shutdown();
-            SceneManager.LoadScene("Bootstrapper");
+            SceneManager.LoadScene("MenuScene");
             Debug.Log("Host Quitting and Returning to Lobby");
         }
     }
@@ -90,7 +90,7 @@ public class LevelLoader : NetworkBehaviour
         if (!IsHost)
         {
             NetworkManager.Singleton.Shutdown();
-            SceneManager.LoadScene("Bootstrapper");
+            SceneManager.LoadScene("MenuScene");
             Debug.Log("Client Quitting and Returning to Lobby");
         }
     }

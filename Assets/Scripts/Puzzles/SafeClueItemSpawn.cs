@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 
-public class SafeClueItemSpawn : NetworkBehaviour
+public class SafeClueItemSpawn : NetworkBehaviour, IHasNetworkChildren
 {
     private GameObject item;
     [SerializeField] private Transform SafeClueTransform;
@@ -39,20 +39,9 @@ public class SafeClueItemSpawn : NetworkBehaviour
 
     public void DestroyNetworkChildren()
     {
-        foreach (Transform child in transform)
+       if (item != null)
         {
-            NetworkObject childNetObj = child.GetComponent<NetworkObject>();
-            if (childNetObj != null)
-            {
-                if (childNetObj.IsSpawned)
-                {
-                    if (childNetObj.GetComponent<IHasNetworkChildren>() != null)
-                    {
-                        childNetObj.GetComponent<IHasNetworkChildren>().DestroyNetworkChildren();
-                    }
-                    childNetObj.Despawn(true);
-                }
-            }
+            item.GetComponent<NetworkObject>().Despawn(true);
         }
     }
 

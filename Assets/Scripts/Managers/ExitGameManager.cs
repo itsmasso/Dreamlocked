@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class ExitGameManager : NetworkBehaviour
 {
-    [SerializeField] private string menuSceneName = "Bootstrapper"; 
+    [SerializeField] private string menuSceneName = "MenuScene"; 
 
     public void ExitToMenu()
     {
@@ -16,11 +16,11 @@ public class ExitGameManager : NetworkBehaviour
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
-        // else if (IsClient)
-        // {
-        //     NetworkManager.Singleton.Shutdown();
-        //     SceneManager.LoadScene(menuSceneName);
-        // }
+        else if (IsClient)
+        {
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene(menuSceneName);
+        }
     }
 
     private void KickClientsAndShutdown()

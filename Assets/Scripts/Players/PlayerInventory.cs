@@ -53,6 +53,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+
     }
 
     public void UseItem(InputAction.CallbackContext ctx)
@@ -108,7 +109,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed && !isInventoryLocked)
         {
-            
+
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
@@ -131,7 +132,7 @@ public class PlayerInventory : NetworkBehaviour
         PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
         Debug.Log("added item");
-        
+
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)
@@ -465,7 +466,7 @@ public class PlayerInventory : NetworkBehaviour
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
     }
-    
+
     [Rpc(SendTo.Owner)]
     private void PlayDropItemSoundRpc()
     {
@@ -552,6 +553,48 @@ public class PlayerInventory : NetworkBehaviour
     {
         onRemoveSprite?.Invoke(slot);
     }
+    private void CleanupInventory()
+    {
+        // Despawn networked useable item
+        if (currentUseableItem != null)
+        {
+            if (currentUseableItem.TryGetComponent(out NetworkObject netObj))
+            {
+                if (netObj.IsSpawned)
+                {
+                    netObj.Despawn(true);
+                }
+            }
+            currentUseableItem = null;
+        }
 
+        // Destroy visual-only item
+        if (currentVisualItem != null)
+        {
+            Destroy(currentVisualItem);
+            currentVisualItem = null;
+        }
 
+        // Clear syncedInventory
+        if (IsServer)
+        {
+            for (int i = 0; i < syncedInventory.Count; i++)
+            {
+                syncedInventory[i] = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
+            }
+        }
+    }
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+
+        if (IsOwner)
+        {
+            // Unsubscribe
+            syncedInventory.OnListChanged -= OnInventoryChanged;
+        }
+
+        // Clean up any remaining held items
+        CleanupInventory();
+    }
 }

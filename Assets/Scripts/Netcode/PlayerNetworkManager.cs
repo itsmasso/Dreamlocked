@@ -166,7 +166,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		yield return new WaitUntil(() => houseMapGenerator.isLevelGenerated);
 		screenManager.HideSleepingLoadingScreen();
 
-		if (IsServer) currentSpawnPos = houseMapGenerator.GetPlayerSpawnPosition();
+		currentSpawnPos = houseMapGenerator.GetPlayerSpawnPosition();
 
 
 		if (IsServer)

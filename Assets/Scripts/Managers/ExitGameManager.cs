@@ -16,11 +16,15 @@ public class ExitGameManager : NetworkBehaviour
             KickClientsAndShutdown();
 
             // Shutdown Netcode
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
@@ -41,6 +45,8 @@ public class ExitGameManager : NetworkBehaviour
         if (!IsHost)
         {
             // This runs on clients only
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }

@@ -31,6 +31,10 @@ public class PlayerInventory : NetworkBehaviour
     [Header("Animation")]
     [SerializeField] private Animator animator;
 
+    private float scrollCooldown = 0.15f;
+    private float lastScrollTime = 0f;
+
+
     void Start()
     {
         isInventoryLocked = false;
@@ -374,52 +378,47 @@ public class PlayerInventory : NetworkBehaviour
         }
 
     }
-
     public void OnScroll(InputAction.CallbackContext ctx)
     {
-        if (!ctx.performed) return;
+        if (!IsOwner || isInventoryLocked) return;
 
-        float scroll = ctx.ReadValue<float>();
+        float scrollY = ctx.ReadValue<float>();
+        if (Mathf.Abs(scrollY) < 0.01f) return;
 
-        if (scroll >= 0.1f)
-        {
-            ScrollInventory(-1); // Scroll up
-        }
-        else if (scroll <= -0.1f)
-        {
-            ScrollInventory(1); // Scroll down
-        }
+        if (Time.time - lastScrollTime < scrollCooldown) return;
+
+        if (scrollY > 0)
+            ScrollInventory(-1);  // Scroll up
+        else if (scrollY < 0)
+            ScrollInventory(1);   // Scroll down
+
+        lastScrollTime = Time.time;
     }
 
 
     private void ScrollInventory(int direction)
     {
-        if (syncedInventory.Count == 0) return;
+        int inventorySize = syncedInventory.Count;
+        if (inventorySize == 0) return;
 
-        int newSlot = currentInventoryIndex;
         int attempts = 0;
+        int index = currentInventoryIndex;
 
         do
         {
-            newSlot += direction;
-
-            if (newSlot >= syncedInventory.Count)
-                newSlot = 0;
-            else if (newSlot < 0)
-                newSlot = syncedInventory.Count - 1;
-
+            index = (index + direction + inventorySize) % inventorySize;
             attempts++;
 
-            if (attempts > syncedInventory.Count)
-                break; // No available item
-        }
-        while (syncedInventory[newSlot].id == -1);
+            if (syncedInventory[index].id != -1)
+            {
+                RequestServerToSelectNewItemRpc(index);
+                return;
+            }
 
-        if (newSlot != currentInventoryIndex)
-        {
-            RequestServerToSelectNewItemRpc(newSlot);
-        }
+        } while (attempts < inventorySize);
     }
+
+
 
 
 

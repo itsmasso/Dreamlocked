@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98ccfdf1bf772de46bd5b0ecf6439aeb, type: 3}
   m_Name: ClockDing
   m_EditorClassIdentifier: 
-  soundName: 
-  clip: {fileID: 0}
+  soundName: ClockDing
+  clip: {fileID: 8300000, guid: 605088de1cea79c498036b36c686b834, type: 3}
   loop: 0
-  volume: 1
-  audioMixerGroup: {fileID: 0}
+  volume: 0.8
+  audioMixerGroup: {fileID: -2167409848733965624, guid: c83088607955ca842b751de910f7450a, type: 2}

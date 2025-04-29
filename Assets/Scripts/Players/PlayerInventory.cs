@@ -167,7 +167,11 @@ public class PlayerInventory : NetworkBehaviour
     public void RepopulateItem(ItemData itemData)
     {
         if (!IsServer) return;
-
+        if (itemData.id == 1 || itemData.id == 4)
+        {
+            Debug.Log($"Skipping repopulating item with ID {itemData.id}");
+            return;
+        }
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)

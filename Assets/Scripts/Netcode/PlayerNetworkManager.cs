@@ -18,7 +18,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
 	public static event Action onRespawnPlayer;
 	[SerializeField] private ScreenManager screenManager;
-	private NetworkVariable<Vector3> currentSpawnPos = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	private Vector3 currentSpawnPos;
 	private Dictionary<ulong, List<ItemData>> savedInventories = new();
 	void Start()
 	{
@@ -110,6 +110,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 
 	public void RespawnPlayers()
 	{
+		currentSpawnPos = Vector3.zero;
 		StartCoroutine(WaitForHouseMapToLoad("HouseMapLevel"));
 	}
 	private IEnumerator WaitForHouseMapToLoad(string sceneName)
@@ -165,12 +166,12 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		yield return new WaitUntil(() => houseMapGenerator.isLevelGenerated);
 		screenManager.HideSleepingLoadingScreen();
 
-		if (IsServer) currentSpawnPos.Value = houseMapGenerator.GetPlayerSpawnPosition();
+		if (IsServer) currentSpawnPos = houseMapGenerator.GetPlayerSpawnPosition();
 
 
 		if (IsServer)
 		{
-			SpawnPlayers(currentSpawnPos.Value);
+			SpawnPlayers(currentSpawnPos);
 		}
 
 	}
@@ -246,7 +247,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	
 	public Vector3 GetSpawnPosition()
 	{
-	    return DetermineSpawnPosition(currentSpawnPos.Value);
+	    return DetermineSpawnPosition(currentSpawnPos);
 	}
 
 	public void DespawnPlayers()

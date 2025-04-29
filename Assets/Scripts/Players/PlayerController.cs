@@ -76,6 +76,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	{
 		if (IsOwner)
 		{
+
 			gameObject.GetComponent<CharacterController>().enabled = true;
 
 		}

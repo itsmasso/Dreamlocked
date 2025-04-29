@@ -217,9 +217,11 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	{
 		if (IsServer)
 		{
+			Vector3 baseSpawnPos = position;
 			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
-				GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(position), Quaternion.identity);
+				Vector3 spawnPos = DetermineSpawnPosition(baseSpawnPos);
+				GameObject player = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);

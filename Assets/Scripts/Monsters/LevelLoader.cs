@@ -79,7 +79,8 @@ public class LevelLoader : NetworkBehaviour
         if (IsHost)
         {
             ClientQuitRpc();
-            NetworkManager.Singleton.Shutdown();
+            //NetworkManager.Singleton.Shutdown();
+            SteamManager.Instance.LeaveLobby();
             SceneManager.LoadScene("MenuScene");
             Debug.Log("Host Quitting and Returning to Lobby");
         }
@@ -89,7 +90,8 @@ public class LevelLoader : NetworkBehaviour
     {
         if (!IsHost)
         {
-            NetworkManager.Singleton.Shutdown();
+            //NetworkManager.Singleton.Shutdown();
+            SteamManager.Instance.LeaveLobby();
             SceneManager.LoadScene("MenuScene");
             Debug.Log("Client Quitting and Returning to Lobby");
         }

@@ -13,12 +13,14 @@ public class ExitGameManager : NetworkBehaviour
         {
             AudioManager.Instance.ClearAllAudio();
             KickClientsAndShutdown();
-            NetworkManager.Singleton.Shutdown();
+            //NetworkManager.Singleton.Shutdown();
+            SteamManager.Instance.LeaveLobby();
             SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {
-            NetworkManager.Singleton.Shutdown();
+            //NetworkManager.Singleton.Shutdown();
+            SteamManager.Instance.LeaveLobby();
             SceneManager.LoadScene(menuSceneName);
         }
     }
@@ -38,7 +40,8 @@ public class ExitGameManager : NetworkBehaviour
         if (!IsHost)
         {
             // This runs on clients only
-            NetworkManager.Singleton.Shutdown();
+            //NetworkManager.Singleton.Shutdown();
+            SteamManager.Instance.LeaveLobby();
             SceneManager.LoadScene(menuSceneName);
         }
     }

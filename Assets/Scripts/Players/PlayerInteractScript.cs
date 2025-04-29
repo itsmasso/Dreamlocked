@@ -28,8 +28,8 @@ public class PlayerInteractScript : NetworkBehaviour
 			this.enabled = false;
 		}
 		pressedInteract = false;
-		mainCameraPosition = Camera.main.transform;
 		interactableLayers = interactableLayer.value | interactableMoveableLayer.value;
+		StartCoroutine(WaitForMainCamera());
 	}
 
 	public void OnInteract(InputAction.CallbackContext ctx)
@@ -41,6 +41,15 @@ public class PlayerInteractScript : NetworkBehaviour
 		}
 
 	}
+	private IEnumerator WaitForMainCamera()
+	{
+		while (Camera.main == null)
+		{
+			yield return null; // Wait 1 frame until Camera.main is assigned
+		}
+
+		mainCameraPosition = Camera.main.transform;
+	}
 
 	private IEnumerator ResetButtonPressed()
 	{
@@ -51,31 +60,34 @@ public class PlayerInteractScript : NetworkBehaviour
 	private void PlayerInteract()
 	{
 		RaycastHit hit;
-		if (Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange))
+		if (mainCameraPosition != null)
 		{
-			hits = Physics.OverlapSphere(hit.point, sphereRadius, interactableLayers);
-			hits = hits.OrderByDescending(obj => obj.GetComponent<InteractableItemBase>() != null).ToArray();
-			foreach (Collider obj in hits)
+			if (Physics.Raycast(mainCameraPosition.position, mainCameraPosition.forward, out hit, interactRange))
 			{
-				//NetworkObject networkObj = obj.gameObject.GetComponent<NetworkObject>();
-				IInteractable interactable = obj.gameObject.GetComponent<IInteractable>();
-				IInteractable interactableParent = obj.gameObject.GetComponentInParent<IInteractable>();
-				if (interactable != null && pressedInteract)
+				hits = Physics.OverlapSphere(hit.point, sphereRadius, interactableLayers);
+				hits = hits.OrderByDescending(obj => obj.GetComponent<InteractableItemBase>() != null).ToArray();
+				foreach (Collider obj in hits)
 				{
-					interactable.Interact(gameObject.GetComponent<NetworkObject>());
+					//NetworkObject networkObj = obj.gameObject.GetComponent<NetworkObject>();
+					IInteractable interactable = obj.gameObject.GetComponent<IInteractable>();
+					IInteractable interactableParent = obj.gameObject.GetComponentInParent<IInteractable>();
+					if (interactable != null && pressedInteract)
+					{
+						interactable.Interact(gameObject.GetComponent<NetworkObject>());
 
-					pressedInteract = false;
-					break;
-				}
-				else if (interactableParent != null && pressedInteract)
-				{
-					interactableParent.Interact(gameObject.GetComponent<NetworkObject>());
+						pressedInteract = false;
+						break;
+					}
+					else if (interactableParent != null && pressedInteract)
+					{
+						interactableParent.Interact(gameObject.GetComponent<NetworkObject>());
 
-					pressedInteract = false;
-					break;
+						pressedInteract = false;
+						break;
+					}
 				}
+				Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 			}
-			Debug.DrawRay(mainCameraPosition.position, mainCameraPosition.forward * interactRange, Color.red);
 		}
 	}
 

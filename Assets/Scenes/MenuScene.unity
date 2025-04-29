@@ -758,8 +758,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: OpenSettings
         m_Mode: 1
         m_Arguments:
@@ -1052,9 +1052,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
-        m_MethodName: StartGameServer
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
+        m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3238,8 +3238,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: HostLobby
         m_Mode: 1
         m_Arguments:
@@ -4023,8 +4023,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: LeaveLobby
         m_Mode: 1
         m_Arguments:
@@ -4401,8 +4401,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 1
         m_Arguments:
@@ -6036,8 +6036,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: JoinLobbyByCode
         m_Mode: 1
         m_Arguments:
@@ -8124,8 +8124,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
+      - m_Target: {fileID: 555556532}
+        m_TargetAssemblyTypeName: MenuHandler, Assembly-CSharp
         m_MethodName: CopyID
         m_Mode: 1
         m_Arguments:

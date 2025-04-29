@@ -121,6 +121,10 @@ public class MenuHandler : MonoBehaviour
 
         LobbyUIManager.Instance?.RefreshPlayerIcons(SteamManager.Instance.GetCurrentLobby().MemberCount);
     }
+    public void StartGame()
+    {
+        SteamManager.Instance.StartGameServer();
+    }
 
     private void CheckUI()
     {

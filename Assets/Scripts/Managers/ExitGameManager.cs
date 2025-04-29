@@ -17,22 +17,11 @@ public class ExitGameManager : NetworkBehaviour
 
             // Shutdown Netcode
             NetworkManager.Singleton.Shutdown();
-
-            // Properly de-init Steam
-            if (SteamClient.IsValid)
-            {
-                SteamClient.Shutdown();
-            }
             SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {
             NetworkManager.Singleton.Shutdown();
-            // Properly de-init Steam
-            if (SteamClient.IsValid)
-            {
-                SteamClient.Shutdown();
-            }
             SceneManager.LoadScene(menuSceneName);
         }
     }
@@ -53,11 +42,6 @@ public class ExitGameManager : NetworkBehaviour
         {
             // This runs on clients only
             NetworkManager.Singleton.Shutdown();
-            // Properly de-init Steam
-            if (SteamClient.IsValid)
-            {
-                SteamClient.Shutdown();
-            }
             SceneManager.LoadScene(menuSceneName);
         }
     }

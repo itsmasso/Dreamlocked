@@ -56,7 +56,15 @@ public class PlayerInventory : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        }
 
+        if (IsOwner)
+        {
+            syncedInventory.OnListChanged += OnInventoryChanged;
+        }
     }
 
     public void UseItem(InputAction.CallbackContext ctx)
@@ -112,7 +120,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed && !isInventoryLocked)
         {
-            
+
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
@@ -135,7 +143,7 @@ public class PlayerInventory : NetworkBehaviour
         PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
         Debug.Log("added item");
-        
+
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)
@@ -192,7 +200,7 @@ public class PlayerInventory : NetworkBehaviour
     }
     private void UpdateItemDataOnChange(ItemData newData)
     {
-        if (!IsServer) return;
+        if (!IsServer || syncedInventory == null || !IsSpawned) return;
 
         for (int i = 0; i < syncedInventory.Count; i++)
         {
@@ -470,7 +478,7 @@ public class PlayerInventory : NetworkBehaviour
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
     }
-    
+
     [Rpc(SendTo.Owner)]
     private void PlayDropItemSoundRpc()
     {
@@ -557,44 +565,55 @@ public class PlayerInventory : NetworkBehaviour
     {
         onRemoveSprite?.Invoke(slot);
     }
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (clientId == OwnerClientId)
+        {
+            Debug.Log($"Cleaning up inventory for disconnected client {clientId}");
+            CleanupInventory();
+        }
+    }
     private void CleanupInventory()
-     {
-         // Despawn networked useable item
-         if (currentUseableItem != null)
-         {
-             if (currentUseableItem.TryGetComponent(out NetworkObject netObj))
-             {
-                 if (netObj.IsSpawned)
-                 {
-                     netObj.Despawn(true);
-                 }
-             }
-             currentUseableItem = null;
-         }
- 
-         // Destroy visual-only item
-         if (currentVisualItem != null)
-         {
-             Destroy(currentVisualItem);
-             currentVisualItem = null;
-         }
- 
-         // Clear syncedInventory
-         if (IsServer)
-         {
-             for (int i = 0; i < syncedInventory.Count; i++)
-             {
-                 syncedInventory[i] = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
-             }
-         }
-     }
+    {
+        // Safe clear usable item
+        if (currentUseableItem != null)
+        {
+            if (currentUseableItem.TryGetComponent(out NetworkObject netObj))
+            {
+                if (netObj.IsSpawned && NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                {
+                    netObj.Despawn(true);
+                }
+                else
+                {
+                    Destroy(currentUseableItem);
+                }
+            }
+            else
+            {
+                Destroy(currentUseableItem);
+            }
+            currentUseableItem = null;
+        }
+
+        // Safe destroy visual item
+        if (currentVisualItem != null)
+        {
+            Destroy(currentVisualItem);
+            currentVisualItem = null;
+        }
+    }
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-        if(IsOwner)
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
+
+        if (IsOwner)
         {
             syncedInventory.OnListChanged -= OnInventoryChanged;
-            CleanupInventory();
         }
     }
 

@@ -125,7 +125,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     }
     public void PlayLocalClientOnly2DSound(Sound2DSO soundSO, float fadeInDuration, bool isOneShot = false)
     {
-        if (NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost)
+        if (!NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost)
         {
             Play2DSound(soundSO, fadeInDuration, isOneShot);
         }

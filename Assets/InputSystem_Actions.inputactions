@@ -422,10 +422,10 @@
                 {
                     "name": "",
                     "id": "5c265e71-3536-44ea-8cc1-29540bf8e34c",
-                    "path": "<Mouse>/scroll",
+                    "path": "<Mouse>/scroll/y",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "ScrollWheel",
                     "isComposite": false,
                     "isPartOfComposite": false

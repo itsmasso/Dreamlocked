@@ -6,7 +6,7 @@ using Steamworks;
 
 public class ExitGameManager : NetworkBehaviour
 {
-    [SerializeField] private string menuSceneName = "MenuScene"; 
+    [SerializeField] private string menuSceneName = "Bootstrapper"; 
 
     public void ExitToMenu()
     {

@@ -231,6 +231,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         agent.maxSpeed = speed;
         if (currentTarget != null)
         {
+            HandleNormalFootStepSFX();
             agent.destination = currentTarget.position;
             mannequinAnimationManager.PlayWalkAnimation();
             agent.SearchPath();

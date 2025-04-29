@@ -557,6 +557,46 @@ public class PlayerInventory : NetworkBehaviour
     {
         onRemoveSprite?.Invoke(slot);
     }
+    private void CleanupInventory()
+     {
+         // Despawn networked useable item
+         if (currentUseableItem != null)
+         {
+             if (currentUseableItem.TryGetComponent(out NetworkObject netObj))
+             {
+                 if (netObj.IsSpawned)
+                 {
+                     netObj.Despawn(true);
+                 }
+             }
+             currentUseableItem = null;
+         }
+ 
+         // Destroy visual-only item
+         if (currentVisualItem != null)
+         {
+             Destroy(currentVisualItem);
+             currentVisualItem = null;
+         }
+ 
+         // Clear syncedInventory
+         if (IsServer)
+         {
+             for (int i = 0; i < syncedInventory.Count; i++)
+             {
+                 syncedInventory[i] = new ItemData { id = -1, itemCharge = 0, usesRemaining = 0, uniqueId = -1 };
+             }
+         }
+     }
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        if(IsOwner)
+        {
+            syncedInventory.OnListChanged -= OnInventoryChanged;
+            CleanupInventory();
+        }
+    }
 
 
 }

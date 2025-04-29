@@ -142,7 +142,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
             if (alreadyPlaying != null)
                 return; // already playing, don't duplicate
         }
-        GameObject new2DSoundObj = Instantiate(audioSource2DPrefab, transform);
+        GameObject new2DSoundObj = Instantiate(audioSource2DPrefab);
         AudioSource source = new2DSoundObj.GetComponent<AudioSource>();
 
         source.clip = soundSO.clip;
@@ -264,7 +264,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
 
     private AudioSource CreateNew3DAudioPool(Sound3DSO soundSO)
     {
-        GameObject soundObj = Instantiate(audioSourceNetworkPrefab, transform);
+        GameObject soundObj = Instantiate(audioSourceNetworkPrefab);
 
         AudioSource audioSource = soundObj.GetComponent<AudioSource>();
         if (audioSource == null) audioSource.AddComponent<AudioSource>();

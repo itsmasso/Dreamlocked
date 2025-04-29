@@ -108,6 +108,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
                 onPassive?.Invoke();
                 break;
             case MQThreatLevel.ACTIVATING:
+                AudioManager.Instance.PlayLocalClientOnly2DSound(AudioManager.Instance.Get2DSound("ClockDing"), 0.5f, true);
                 onActivating?.Invoke();
                 break;
             case MQThreatLevel.AWAKENED:

@@ -30,7 +30,7 @@ public class PlayerInventory : NetworkBehaviour
     [SerializeField] private float throwForce;
     [Header("Animation")]
     [SerializeField] private Animator animator;
-    
+
     void Start()
     {
         isInventoryLocked = false;
@@ -217,7 +217,14 @@ public class PlayerInventory : NetworkBehaviour
         }
         return default;
     }
-
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
+    }
 
     [Rpc(SendTo.Everyone)]
     private void SpawnVisualItemRpc(ItemData itemData)
@@ -226,8 +233,8 @@ public class PlayerInventory : NetworkBehaviour
         GameObject visualItemPrefab = itemSO?.visualPrefab;
         GameObject visualItem = Instantiate(visualItemPrefab, itemTransform.position, itemTransform.rotation);
         bool isMine = NetworkManager.Singleton.LocalClientId == OwnerClientId;
-        visualItem.layer = isMine ? LayerMask.NameToLayer("ItemHold") : LayerMask.NameToLayer("Default");
-        visualItem.transform.SetParent(itemTransform, false);
+        int targetLayer = isMine ? LayerMask.NameToLayer("ItemHold") : LayerMask.NameToLayer("Default");
+        SetLayerRecursively(visualItem, targetLayer);
         visualItem.transform.localPosition = Vector3.zero;
         visualItem.transform.localRotation = Quaternion.LookRotation(Vector3.forward);
         currentVisualItem = visualItem;

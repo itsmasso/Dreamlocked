@@ -111,7 +111,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		Generate();
 
 	}
-	
+
 
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
 	{
@@ -356,8 +356,36 @@ public class HouseMapGenerator : NetworkBehaviour
 				SpaceRooms(rooms);
 			}
 		}
-	}
+		EnsureMainRoomExists();
 
+	}
+	private void EnsureMainRoomExists()
+	{
+		// Check if any room is already marked as Main Room
+		bool hasMainRoom = rooms.Any(r =>
+			r != null &&
+			r.GetComponent<Room>() != null &&
+			r.GetComponent<Room>().isMainRoom);
+
+		if (!hasMainRoom)
+		{
+			UnityEngine.Debug.LogWarning("[HouseMapGenerator] No Main Room was found! Assigning the first valid room as Main Room.");
+
+			// Assign the first valid room as Main Room
+			foreach (var roomObj in rooms)
+			{
+				if (roomObj != null)
+				{
+					Room roomComponent = roomObj.GetComponent<Room>();
+					if (roomComponent != null)
+					{
+						roomComponent.isMainRoom = true;
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	private void MarkRoomsInGrid(List<GameObject> rooms)
 	{

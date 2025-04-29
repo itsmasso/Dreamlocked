@@ -2,6 +2,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class ExitGameManager : NetworkBehaviour
 {
@@ -13,11 +14,17 @@ public class ExitGameManager : NetworkBehaviour
         {
             AudioManager.Instance.ClearAllAudio();
             KickClientsAndShutdown();
+
+            // Shutdown Netcode
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
@@ -38,6 +45,8 @@ public class ExitGameManager : NetworkBehaviour
         if (!IsHost)
         {
             // This runs on clients only
+            Cursor.visible = true;
+		    Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }

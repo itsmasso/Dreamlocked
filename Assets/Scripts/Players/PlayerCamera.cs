@@ -68,6 +68,10 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 
 		if (IsOwner)
 		{
+			if (spectatorCam == null)
+			{
+				spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera")?.GetComponent<CinemachineCamera>();
+			}
 			if (spectatorCam != null)
 			{
 				spectatorCam.gameObject.SetActive(false);
@@ -150,17 +154,41 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	}
 	private void DisablePlayerCamera()
 	{
-		playerCam.gameObject.SetActive(false);
-		itemCamera.enabled = false;
-		spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera").GetComponent<CinemachineCamera>();
-		if (PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
+		if (playerCam != null)
+			playerCam.gameObject.SetActive(false);
+
+		if (itemCamera != null)
+			itemCamera.enabled = false;
+
+		if (spectatorCam != null)
 		{
-			Debug.Log("Starting to Spectate");
-			// This needs logic to protect when all players are dead
-			spectatorCam.gameObject?.SetActive(true);
-			currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
-			spectatorCam.Follow = currentPlayerToSpectate;
+			if (PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
+			{
+				Debug.Log("Starting to Spectate");
+
+				spectatorCam.gameObject.SetActive(true);
+
+				Transform nextSpectateTarget = PlayerNetworkManager.Instance.GetNextPlayerToSpectate()?.transform;
+				if (nextSpectateTarget != null)
+				{
+					currentPlayerToSpectate = nextSpectateTarget;
+					spectatorCam.Follow = currentPlayerToSpectate;
+				}
+				else
+				{
+					Debug.LogWarning("No players left to spectate!");
+				}
+			}
+			else
+			{
+				Debug.LogWarning("No alive players left!");
+			}
 		}
+		else
+		{
+			Debug.LogWarning("Spectator Camera is missing!");
+		}
+
 		isDead = true;
 	}
 

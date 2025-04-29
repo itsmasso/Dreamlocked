@@ -77,6 +77,9 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		if (IsOwner)
 		{
 
+			gameObject.GetComponent<CharacterController>().enabled = false;
+			Vector3 spawnPos = PlayerNetworkManager.Instance.GetSpawnPosition();
+			this.transform.position = spawnPos;
 			gameObject.GetComponent<CharacterController>().enabled = true;
 
 		}
@@ -88,15 +91,6 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		if (IsServer)
 		{
 			PlayerNetworkManager.Instance.RegisterPlayerClientRpc(GetComponent<NetworkObject>());
-		}
-	}
-	[Rpc(SendTo.Owner)]
-	public void MovePlayerToCorrectSpawnClientRpc(Vector3 spawnPos)
-	{
-		if (IsOwner)
-		{
-			transform.position = spawnPos;
-			Debug.Log("[Spawn Correction] Player moved to spawn: " + spawnPos);
 		}
 	}
 

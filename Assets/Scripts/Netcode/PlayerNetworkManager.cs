@@ -7,6 +7,7 @@ using Unity.Netcode.Components;
 using System;
 using System.Linq;
 
+
 public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 {
 	public const int MAX_PLAYERS = 4;
@@ -218,17 +219,18 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		if (IsServer)
 		{
 			Vector3 baseSpawnPos = position;
+			
 			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
-				Vector3 spawnPos = DetermineSpawnPosition(baseSpawnPos);
-				GameObject player = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+				//Vector3 spawnPos = DetermineSpawnPosition(baseSpawnPos);
+				GameObject player = Instantiate(playerPrefab);
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
 				player.GetComponent<PlayerHealth>().ResetHealth();
 
 				// Delay 0.5s, then correct position for this player
-				StartCoroutine(CorrectSpawnAfterDelay(playerNetworkObject, spawnPos, clientId));
+				//StartCoroutine(CorrectSpawnAfterDelay(playerNetworkObject, spawnPos, clientId));
 
 				var inventory = LoadInventory(playerNetworkObject.OwnerClientId);
 				player.GetComponent<PlayerInventory>().EnsureEmptyInventorySlots(4);
@@ -241,17 +243,10 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			}
 		}
 	}
-	private IEnumerator CorrectSpawnAfterDelay(NetworkObject playerNetworkObject, Vector3 spawnPos, ulong clientId)
+	
+	public Vector3 GetSpawnPosition()
 	{
-		yield return new WaitForSeconds(0.5f); // wait half second
-		if (playerNetworkObject != null && playerNetworkObject.IsSpawned)
-		{
-			var player = playerNetworkObject.GetComponent<PlayerController>();
-			if (player != null)
-			{
-				player.MovePlayerToCorrectSpawnClientRpc(spawnPos);
-			}
-		}
+	    return DetermineSpawnPosition(currentSpawnPos.Value);
 	}
 
 	public void DespawnPlayers()

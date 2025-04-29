@@ -90,6 +90,15 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			PlayerNetworkManager.Instance.RegisterPlayerClientRpc(GetComponent<NetworkObject>());
 		}
 	}
+	[Rpc(SendTo.Owner)]
+	public void MovePlayerToCorrectSpawnClientRpc(Vector3 spawnPos)
+	{
+		if (IsOwner)
+		{
+			transform.position = spawnPos;
+			Debug.Log("[Spawn Correction] Player moved to spawn: " + spawnPos);
+		}
+	}
 
 
 	void Start()

@@ -226,6 +226,10 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
 				player.GetComponent<PlayerHealth>().ResetHealth();
+
+				// Delay 0.5s, then correct position for this player
+				StartCoroutine(CorrectSpawnAfterDelay(playerNetworkObject, spawnPos, clientId));
+
 				var inventory = LoadInventory(playerNetworkObject.OwnerClientId);
 				player.GetComponent<PlayerInventory>().EnsureEmptyInventorySlots(4);
 				foreach (var itemData in inventory)
@@ -234,6 +238,18 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 				}
 				player.GetComponent<PlayerInventory>().RequestServerToSelectNewItemRpc(0);
 				Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
+			}
+		}
+	}
+	private IEnumerator CorrectSpawnAfterDelay(NetworkObject playerNetworkObject, Vector3 spawnPos, ulong clientId)
+	{
+		yield return new WaitForSeconds(0.5f); // wait half second
+		if (playerNetworkObject != null && playerNetworkObject.IsSpawned)
+		{
+			var player = playerNetworkObject.GetComponent<PlayerController>();
+			if (player != null)
+			{
+				player.MovePlayerToCorrectSpawnClientRpc(spawnPos);
 			}
 		}
 	}

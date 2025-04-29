@@ -484,7 +484,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &320504431894901123
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1004,9 +1004,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'successfully administered
+  m_text: 'Successfully administered
 
-    anidote. you may now awake...'
+    antidote. You may now awake...'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: afde2f1591ec9c845a53f22856e3fb92, type: 2}
   m_sharedMaterial: {fileID: 453621275727524778, guid: afde2f1591ec9c845a53f22856e3fb92, type: 2}

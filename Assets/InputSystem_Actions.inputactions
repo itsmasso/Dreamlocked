@@ -126,7 +126,7 @@
                     "name": "ScrollWheel",
                     "type": "Value",
                     "id": "ff82cf6a-4a4e-4f16-bd33-a49f0b7b5550",
-                    "expectedControlType": "Vector2",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true

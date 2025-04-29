@@ -377,19 +377,20 @@ public class PlayerInventory : NetworkBehaviour
 
     public void OnScroll(InputAction.CallbackContext ctx)
     {
-        if (!ctx.performed || isInventoryLocked) return;
+        if (!ctx.performed) return;
 
-        float scroll = ctx.ReadValue<Vector2>().y;
+        float scroll = ctx.ReadValue<float>();
 
-        if (scroll > 0)
+        if (scroll >= 0.1f)
         {
             ScrollInventory(-1); // Scroll up
         }
-        else if (scroll < 0)
+        else if (scroll <= -0.1f)
         {
             ScrollInventory(1); // Scroll down
         }
     }
+
 
     private void ScrollInventory(int direction)
     {

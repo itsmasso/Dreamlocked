@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Steamworks;
 
 public enum Map
 {
@@ -80,6 +81,11 @@ public class LevelLoader : NetworkBehaviour
         {
             ClientQuitRpc();
             NetworkManager.Singleton.Shutdown();
+            // Properly de-init Steam
+            if (SteamClient.IsValid)
+            {
+                SteamClient.Shutdown();
+            }
             SceneManager.LoadScene("MenuScene");
             Debug.Log("Host Quitting and Returning to Lobby");
         }
@@ -90,6 +96,11 @@ public class LevelLoader : NetworkBehaviour
         if (!IsHost)
         {
             NetworkManager.Singleton.Shutdown();
+            // Properly de-init Steam
+            if (SteamClient.IsValid)
+            {
+                SteamClient.Shutdown();
+            }
             SceneManager.LoadScene("MenuScene");
             Debug.Log("Client Quitting and Returning to Lobby");
         }

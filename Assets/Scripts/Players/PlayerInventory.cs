@@ -378,6 +378,8 @@ public class PlayerInventory : NetworkBehaviour
         }
 
     }
+
+    // CLIENT: When player scrolls
     public void OnScroll(InputAction.CallbackContext ctx)
     {
         if (!IsOwner || isInventoryLocked) return;
@@ -387,15 +389,22 @@ public class PlayerInventory : NetworkBehaviour
 
         if (Time.time - lastScrollTime < scrollCooldown) return;
 
-        if (scrollY > 0)
-            ScrollInventory(-1);  // Scroll up
-        else if (scrollY < 0)
-            ScrollInventory(1);   // Scroll down
+        int direction = scrollY > 0 ? -1 : 1; // Scroll up = previous, down = next
+        RequestServerToScrollInventoryRpc(direction);
 
         lastScrollTime = Time.time;
     }
 
+    // SERVER: Handle scroll intent
+    [Rpc(SendTo.Server)]
+    private void RequestServerToScrollInventoryRpc(int direction)
+    {
+        if (!IsOwner) return;
 
+        ScrollInventory(direction); // <== uses the old method!
+    }
+
+    // SERVER: Actual scroll logic
     private void ScrollInventory(int direction)
     {
         int inventorySize = syncedInventory.Count;
@@ -417,9 +426,6 @@ public class PlayerInventory : NetworkBehaviour
 
         } while (attempts < inventorySize);
     }
-
-
-
 
 
     [Rpc(SendTo.Owner)]

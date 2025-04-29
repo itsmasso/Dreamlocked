@@ -86,7 +86,7 @@ public class LevelLoader : NetworkBehaviour
             {
                 SteamClient.Shutdown();
             }
-            SceneManager.LoadScene("Bootstrapper");
+            SceneManager.LoadScene("MenuScene");
             Debug.Log("Host Quitting and Returning to Lobby");
         }
     }
@@ -101,7 +101,7 @@ public class LevelLoader : NetworkBehaviour
             {
                 SteamClient.Shutdown();
             }
-            SceneManager.LoadScene("Bootstrapper");
+            SceneManager.LoadScene("MenuScene");
             Debug.Log("Client Quitting and Returning to Lobby");
         }
     }

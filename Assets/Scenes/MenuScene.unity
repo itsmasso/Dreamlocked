@@ -7578,6 +7578,14 @@ PrefabInstance:
     - target: {fileID: 985240838211853086, guid: bbbe90b32547f9b4eb82744a52e72fa2, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
+      objectReference: {fileID: 555556532}
+    - target: {fileID: 985240838211853086, guid: bbbe90b32547f9b4eb82744a52e72fa2, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseSettings
+      objectReference: {fileID: 0}
+    - target: {fileID: 985240838211853086, guid: bbbe90b32547f9b4eb82744a52e72fa2, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MenuHandler, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1818761509972798069, guid: bbbe90b32547f9b4eb82744a52e72fa2, type: 3}
       propertyPath: m_AnchorMax.y

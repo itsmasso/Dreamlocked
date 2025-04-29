@@ -33,7 +33,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     private void Start()
     {
         global2DAudioSource = GetComponent<AudioSource>();
-        
+
     }
     public void PlayMenuMusic()
     {
@@ -98,6 +98,8 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
             source.volume = Mathf.Lerp(startVolume, targetVolume, timer / duration);
             yield return null;
         }
+        if (source == null || source.gameObject == null)
+            yield break;
 
         source.volume = targetVolume;
 
@@ -213,6 +215,7 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     [Rpc(SendTo.Server)]
     public void Play3DSoundServerRpc(int index, Vector3 position, bool isOneShot, float volume, float minDistance, float maxDistance, bool preventDupes, NetworkObjectReference networkObjectReference, float fadeInDuration = 0f)
     {
+
         if (index < 0 || index >= sounds3DListSO.sound3DSOList.Count)
         {
             Debug.LogError($"[AudioManager] Invalid 3D Sound Index: {index}. List Count: {sounds3DListSO.sound3DSOList.Count}");
@@ -319,6 +322,8 @@ public class AudioManager : PersistentNetworkSingleton<AudioManager>
     [Rpc(SendTo.Everyone)]
     private void Stop3DSoundClientRpc(int index, float fadeOutDuration = 0.5f)
     {
+        if (this == null || !this.isActiveAndEnabled)
+            return; // AudioManager was destroyed, don't try to run RPC
         if (index < 0 || index >= sounds3DListSO.sound3DSOList.Count)
         {
             Debug.LogError($"[AudioManager] Invalid 3D Sound Index: {index}");

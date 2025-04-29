@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Door
   - SpectatorCamera
+  - PlayerCamera
   layers:
   - Default
   - TransparentFX

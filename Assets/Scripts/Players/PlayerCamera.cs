@@ -61,58 +61,83 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 	[SerializeField] private Vector2 sprintFOV;
 	public float currentFOVSpeedBoost = 0f;
 	[SerializeField] private float fovTransitionSpeed = 5f;
-	void Start()
-	{
-		if (!IsOwner)
-		{
-			this.enabled = false;
-		}
-		else
-		{
-			playerCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CinemachineCamera>();
-			playerCam.gameObject.SetActive(true);
-			if(spectatorCam != null && spectatorCam.gameObject.activeSelf)
-			{
-				spectatorCam.gameObject.SetActive(false);
-			}
-			cmCamPanTilt = playerCam.gameObject.GetComponent<CinemachinePanTilt>();
-			playerCam.Follow = camFollowPivot;
-			camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
-			inputAxisController = playerCam.GetComponentInChildren<CinemachineInputAxisController>();
-			followZoom = playerCam.GetComponentInChildren<CinemachineFollowZoom>();
-
-			Cursor.lockState = CursorLockMode.Locked;
-			Cursor.visible = false;
-			playerController = gameObject.GetComponent<PlayerController>();
-			originalCamPos = camFollowPivot.localPosition;
-			mainCameraPosition = Camera.main.transform;
-			Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
-
-			PlayerHealth.onDeath += DisablePlayerCamera;
-			
-			itemCamera.enabled = true;
-			isDead = false;
-			canMove = true;
-			defaultFOV = followZoom.FovRange;
-
-			// For End of Game Logic
-			GameManager.Instance.onLobby += HandleLobbyLoading;
-		}
-
-
-	}
 
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
+
+		if (IsOwner)
+		{
+			if (spectatorCam != null)
+			{
+				spectatorCam.gameObject.SetActive(false);
+			}
+			if (playerCam != null)
+			{
+				playerCam.gameObject.SetActive(true);
+			}
+		}
 	}
-	
+	private IEnumerator Start()
+	{
+		if (!IsOwner)
+		{
+			this.enabled = false;
+			yield break;
+		}
+
+		// Wait until Camera.main exists
+		while (Camera.main == null)
+		{
+			yield return null;
+		}
+
+		// Find the PlayerCam Virtual Camera
+		playerCam = GameObject.FindGameObjectWithTag("PlayerCamera")?.GetComponent<CinemachineCamera>();
+		if (playerCam == null)
+		{
+			Debug.LogError("PlayerCam (CinemachineCamera) not found in scene! Make sure you tagged it properly.");
+			yield break;
+		}
+
+		playerCam.gameObject.SetActive(true);
+
+		spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera")?.GetComponent<CinemachineCamera>();
+		if (spectatorCam != null)
+		{
+			spectatorCam.gameObject.SetActive(false);
+		}
+
+		cmCamPanTilt = playerCam.GetComponent<CinemachinePanTilt>();
+		playerCam.Follow = camFollowPivot;
+		camNoiseChannel = playerCam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+		inputAxisController = playerCam.GetComponentInChildren<CinemachineInputAxisController>();
+		followZoom = playerCam.GetComponentInChildren<CinemachineFollowZoom>();
+
+		Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
+
+		playerController = GetComponent<PlayerController>();
+		originalCamPos = camFollowPivot.localPosition;
+		mainCameraPosition = Camera.main.transform;
+		Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(itemCamera);
+
+		PlayerHealth.onDeath += DisablePlayerCamera;
+		itemCamera.enabled = true;
+		isDead = false;
+		canMove = true;
+		defaultFOV = followZoom.FovRange;
+
+		GameManager.Instance.onLobby += HandleLobbyLoading;
+	}
+
+
 	public void OnSpectateNext(InputAction.CallbackContext ctx)
 	{
-	    if(ctx.performed && isDead)
-	    {
-	        currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
-	    }
+		if (ctx.performed && isDead)
+		{
+			currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
+		}
 	}
 	public Transform GetSpectatorTransform()
 	{
@@ -128,7 +153,7 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		playerCam.gameObject.SetActive(false);
 		itemCamera.enabled = false;
 		spectatorCam = GameObject.FindGameObjectWithTag("SpectatorCamera").GetComponent<CinemachineCamera>();
-		if(PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
+		if (PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
 		{
 			Debug.Log("Starting to Spectate");
 			// This needs logic to protect when all players are dead
@@ -301,18 +326,26 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 			camFollowPivot.transform.position = currentPlayerToSpectate.transform.position;
 		}
 
-		inputAxisController.enabled = canMove;
-		if(canMove && playerController.currentState == PlayerState.Walking)
+		if (inputAxisController != null)
 		{
-		    followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, defaultFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed * Time.deltaTime);
-		}else if(canMove && playerController.currentState == PlayerState.Running){
-			followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, sprintFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed  * Time.deltaTime);
+			inputAxisController.enabled = canMove;
 		}
-		else if(!canMove)
+		if (followZoom != null)
 		{
-		    followZoom.FovRange =  Vector2.Lerp(followZoom.FovRange, jumpScareFOV, zoomSmoothTime * Time.deltaTime);
+			if (canMove && playerController.currentState == PlayerState.Walking)
+			{
+				followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, defaultFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed * Time.deltaTime);
+			}
+			else if (canMove && playerController.currentState == PlayerState.Running)
+			{
+				followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, sprintFOV + new Vector2(0, currentFOVSpeedBoost), fovTransitionSpeed * Time.deltaTime);
+			}
+			else if (!canMove)
+			{
+				followZoom.FovRange = Vector2.Lerp(followZoom.FovRange, jumpScareFOV, zoomSmoothTime * Time.deltaTime);
+			}
 		}
-		
+
 
 	}
 
@@ -340,6 +373,14 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		Debug.Log("PlayerCamera.cs - Unlocking Cursor + Disabling Cameras");
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
+		if (spectatorCam != null)
+		{
+			spectatorCam.gameObject.SetActive(false);
+		}
+		if (playerCam != null)
+		{
+			playerCam.gameObject.SetActive(true);
+		}
 	}
 
 }

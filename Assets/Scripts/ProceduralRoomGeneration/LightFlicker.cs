@@ -13,48 +13,68 @@ public class LightFlicker : NetworkBehaviour
     [SerializeField] private Sound2DSO lightFlickerSFX;
     [SerializeField] private Sound2DSO lightsOutSFX;
     [SerializeField] private Sound2DSO lightsOnSFX;
-
+    private bool hasPlayedLightsOutSound = false;
+    private bool hasPlayedLightsOnSound = true;
     void Start()
     {
         hasPlayedLightFlicker = false;
-        if (GFClockManager.Instance != null)
-        {
-            GFClockManager.Instance.onAwakened += PlayLightsOutSFX;
-            GFClockManager.Instance.onPassive += PlayLightsOnSFX;
-        }
+        hasPlayedLightsOutSound = false;
+        hasPlayedLightsOnSound = true;
     }
 
     private void PlayLightsOutSFX()
     {
-        AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
-        AudioManager.Instance.Play2DSound(lightsOutSFX, 0f, true);
+        if (!hasPlayedLightsOutSound && GFClockManager.Instance != null)
+        {
+            if (GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.AWAKENED)
+            {
+                hasPlayedLightsOnSound = false;
+                hasPlayedLightsOutSound = true;
+                AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
+
+                AudioManager.Instance.Play2DSound(lightsOutSFX, 0f, true);
+            }
+        }
+
     }
 
     private void PlayLightsOnSFX()
     {
-        AudioManager.Instance.Play2DSound(lightsOnSFX, 0f, true);
+        if (!hasPlayedLightsOnSound && GFClockManager.Instance != null)
+        {
+            if (GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.PASSIVE)
+            {
+                hasPlayedLightsOutSound = false;
+                hasPlayedLightsOnSound = true;
+                AudioManager.Instance.Play2DSound(lightsOnSFX, 0f, true);
+            }
+        }
+
     }
     void Update()
     {
 
-        if (GFClockManager.Instance != null && GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.ACTIVATING)
+        if (GFClockManager.Instance != null)
         {
-            timer -= Time.deltaTime;
-            if (!hasPlayedLightFlicker)
+            if (GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.ACTIVATING)
             {
-                AudioManager.Instance.Play2DSound(lightFlickerSFX, 0f);
-                hasPlayedLightFlicker = true;
-            }
-            if (timer <= 0f)
-            {
-                timer = freezeAttemptInterval + Random.Range(-3f, 3f); // Make it a little random
-
-                if (Random.value < 0.25f) // 25% chance to actually freeze
+                timer -= Time.deltaTime;
+                if (!hasPlayedLightFlicker)
                 {
-                    StartCoroutine(FreezeFlickering());
+                    AudioManager.Instance.Play2DSound(lightFlickerSFX, 0f);
+                    hasPlayedLightFlicker = true;
                 }
-            }
+                if (timer <= 0f)
+                {
+                    timer = freezeAttemptInterval + Random.Range(-3f, 3f); // Make it a little random
 
+                    if (Random.value < 0.25f) // 25% chance to actually freeze
+                    {
+                        StartCoroutine(FreezeFlickering());
+                    }
+                }
+
+            }
 
             if (isFrozen.Value || GFClockManager.Instance.GetMQThreatLevel() == MQThreatLevel.AWAKENED)
             {
@@ -67,6 +87,8 @@ public class LightFlicker : NetworkBehaviour
             }
 
         }
+        PlayLightsOutSFX();
+        PlayLightsOnSFX();
 
     }
     private IEnumerator FreezeFlickering()
@@ -77,13 +99,11 @@ public class LightFlicker : NetworkBehaviour
             yield return new WaitForSeconds(freezeDuration);
             isFrozen.Value = false;
         }
-    }
-    public override void OnDestroy()
-    {
-        if (GFClockManager.Instance != null)
+        if (hasPlayedLightFlicker)
         {
-            GFClockManager.Instance.onAwakened -= PlayLightsOnSFX;
-            GFClockManager.Instance.onPassive -= PlayLightsOutSFX;
+            AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
+            hasPlayedLightFlicker = false;
         }
     }
+
 }

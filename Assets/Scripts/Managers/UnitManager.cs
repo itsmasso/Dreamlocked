@@ -161,7 +161,7 @@ public class UnitManager : NetworkBehaviour
 					float rand = UnityEngine.Random.value;
 					if (rand <= currentDifficultySetting.chanceToSpawnMannequin)
 					{
-						SpawnMonster(MQMonsterPrefab, new Vector3(monsterTransform.position.x, monsterTransform.position.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height / 16, monsterTransform.position.z), Quaternion.identity);
+						SpawnMonster(MQMonsterPrefab, new Vector3(monsterTransform.position.x, monsterTransform.position.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height / 16 + 1f, monsterTransform.position.z), Quaternion.identity);
 						mannequinSpawnCount++;
 					}
 					

@@ -67,12 +67,12 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
             case 0:
                 TOTAL_TIME = 240f;
                 TIME_TO_DANGER = 30f;
-        
+
                 break;
             case 1:
                 TOTAL_TIME = 180f;
                 TIME_TO_DANGER = 20f;
-    
+
                 break;
             case 2:
                 TOTAL_TIME = 120f;
@@ -101,7 +101,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     }
     private void OnThreatLevelChanged(MQThreatLevel previousValue, MQThreatLevel newValue)
     {
-
+        Debug.Log($"GFClockManager: Threat Level Changed {previousValue} -> {newValue}");
         switch (newValue)
         {
             case MQThreatLevel.PASSIVE:
@@ -111,6 +111,7 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
                 onActivating?.Invoke();
                 break;
             case MQThreatLevel.AWAKENED:
+                Debug.Log("GFClockManager: Invoking onAwakened event.");
                 onAwakened?.Invoke();
                 break;
         }

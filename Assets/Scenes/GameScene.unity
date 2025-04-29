@@ -1665,6 +1665,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerUI
       objectReference: {fileID: 0}
+    - target: {fileID: 4586620182408595684, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.480999
+      objectReference: {fileID: 0}
     - target: {fileID: 5965594028092726620, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1680,6 +1684,10 @@ PrefabInstance:
     - target: {fileID: 6096865791231979176, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6924719581207552581, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.480999
       objectReference: {fileID: 0}
     - target: {fileID: 7199958592002875113, guid: c5722f592d5fa5b4695a55ea52e0eb03, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2846,10 +2854,10 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.1
-  far clip plane: 5000
-  field of view: 78
+  far clip plane: 120
+  field of view: 60
   orthographic: 0
-  orthographic size: 13
+  orthographic size: 10
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -3155,7 +3163,7 @@ GameObject:
   - component: {fileID: 7533377662210386463}
   m_Layer: 0
   m_Name: PlayerCamera
-  m_TagString: MainCamera
+  m_TagString: PlayerCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3187,8 +3195,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7084424359747896696}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.13225639, y: 0, z: 0, w: 0.9912155}
-  m_LocalPosition: {x: 155.46829, y: 966.0469, z: -692.87573}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2, y: -6, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

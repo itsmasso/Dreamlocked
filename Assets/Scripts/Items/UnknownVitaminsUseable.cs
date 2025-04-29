@@ -26,7 +26,7 @@ public class UnknownVitaminsUseable : NetworkBehaviour, IUseableItem<ItemData>
     public void UseItem()
     {
         RequestServerToHealRpc();
-        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("VitaminSFX"), 0f, true);
+        AudioManager.Instance.PlayLocalClientOnly2DSound(AudioManager.Instance.Get2DSound("VitaminSFX"), 0f, true);
     }
 
     [Rpc(SendTo.Server)]

@@ -108,6 +108,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (ctx.performed && !isInventoryLocked)
         {
+            
             RequestServerToDropItemRpc(Camera.main.transform.forward, throwForce);
         }
     }
@@ -130,7 +131,7 @@ public class PlayerInventory : NetworkBehaviour
         PickUpAnimationRpc();
         // If current slot is full, add to the first available empty slot
         Debug.Log("added item");
-        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("ItemPickup"), 0, true);
+        
         for (int i = 0; i < syncedInventory.Count; i++)
         {
             if (syncedInventory[i].id == -1)
@@ -170,6 +171,7 @@ public class PlayerInventory : NetworkBehaviour
     private void PickUpAnimationRpc()
     {
         animator.Play("PickUp", animator.GetLayerIndex("HoldingLayer"));
+        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("ItemPickup"), 0, true);
         StartCoroutine(SetHoldingAfterDelay(1f));
     }
     private IEnumerator SetHoldingAfterDelay(float time)
@@ -235,6 +237,7 @@ public class PlayerInventory : NetworkBehaviour
         bool isMine = NetworkManager.Singleton.LocalClientId == OwnerClientId;
         int targetLayer = isMine ? LayerMask.NameToLayer("ItemHold") : LayerMask.NameToLayer("Default");
         SetLayerRecursively(visualItem, targetLayer);
+        visualItem.transform.SetParent(itemTransform, false);
         visualItem.transform.localPosition = Vector3.zero;
         visualItem.transform.localRotation = Quaternion.LookRotation(Vector3.forward);
         currentVisualItem = visualItem;
@@ -442,7 +445,7 @@ public class PlayerInventory : NetworkBehaviour
             // Clean visual + networked object
             RequestServerToDespawnUseableItemRpc();
             DestroyVisualItemWithoutAnimRpc();
-            AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("DropItem"), 0f, true);
+            PlayDropItemSoundRpc();
             // Spawn drop in world
             var dropPrefab = ItemDatabase.Get(syncedInventory[currentInventoryIndex].id).droppablePrefab;
             var droppedItem = Instantiate(dropPrefab, itemTransform.position, Quaternion.identity);
@@ -460,6 +463,12 @@ public class PlayerInventory : NetworkBehaviour
             // Notify client to remove sprite
             OwnerRemovesSpriteRpc(currentInventoryIndex);
         }
+    }
+    
+    [Rpc(SendTo.Owner)]
+    private void PlayDropItemSoundRpc()
+    {
+        AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("DropItem"), 0f, true);
     }
 
     [Rpc(SendTo.Server)]

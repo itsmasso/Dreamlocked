@@ -74,7 +74,7 @@ public class BatteryUseable : NetworkBehaviour, IUseableItem<ItemData>
 
     public void UseItem()
     {
-         AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("BatteryChange"), 0.5f, true);
+         AudioManager.Instance.PlayLocalClientOnly2DSound(AudioManager.Instance.Get2DSound("BatteryChange"), 0.5f, true);
         RequestServerToChargeFlashLightRpc();
     }
 

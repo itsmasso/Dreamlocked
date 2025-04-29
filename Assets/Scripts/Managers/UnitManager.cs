@@ -22,6 +22,7 @@ public class UnitManager : NetworkBehaviour
 	private int lurkerSpawnCount;
 	private bool canSpawnLurker;
 	private int mannequinSpawnCount;
+	
 	void Start()
 	{
 		if (IsServer)
@@ -103,7 +104,7 @@ public class UnitManager : NetworkBehaviour
 		{
 			HandleLurkerSpawnTimer();
 		}
-		
+
 	}
 
 	private void HandleLurkerSpawnTimer()
@@ -161,10 +162,23 @@ public class UnitManager : NetworkBehaviour
 					float rand = UnityEngine.Random.value;
 					if (rand <= currentDifficultySetting.chanceToSpawnMannequin)
 					{
-						SpawnMonster(MQMonsterPrefab, new Vector3(monsterTransform.position.x, monsterTransform.position.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height/2, monsterTransform.position.z), Quaternion.identity);
+						Vector3 spawnPosition = monsterTransform.position;
+
+						// Raycast to find ground
+						if (Physics.Raycast(spawnPosition + Vector3.up * 5f, Vector3.down, out RaycastHit hitInfo, 10f, LayerMask.GetMask("GroundCheck")))
+						{
+							spawnPosition = hitInfo.point;
+						}
+						else
+						{
+							// fallback to normal position if ground not found
+							spawnPosition = new Vector3(monsterTransform.position.x, monsterTransform.position.y + MQMonsterPrefab.GetComponentInChildren<CapsuleCollider>().height / 2, monsterTransform.position.z);
+						}
+
+						SpawnMonster(MQMonsterPrefab, spawnPosition, Quaternion.identity);
 						mannequinSpawnCount++;
 					}
-					
+
 				}
 			}
 		}

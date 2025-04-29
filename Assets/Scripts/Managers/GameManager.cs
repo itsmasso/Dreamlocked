@@ -262,7 +262,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	[Rpc(SendTo.Everyone)]
 	public void ShowGameWinScreenToAllRpc()
 	{
-	    screenManager.ShowGameOverScreen();
+	    screenManager.ShowGameWinScreen();
 	}
 	
 	[Rpc(SendTo.Everyone)]

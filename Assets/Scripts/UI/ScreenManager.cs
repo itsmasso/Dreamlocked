@@ -6,9 +6,10 @@ public class ScreenManager : MonoBehaviour
 {
 
     [SerializeField] private GameObject sleepingLoadingScreen;
-    [SerializeField] private GameObject gameOverScreen;
+    [SerializeField] private GameObject gameOverScreen, gameWinScreen;
     [SerializeField] private float fadeSpeed;
     public static event Action onHideSleepingLoadScreen;
+    
     public void ShowSleepingLoadingScreen()
     {
         sleepingLoadingScreen.SetActive(true);
@@ -36,6 +37,10 @@ public class ScreenManager : MonoBehaviour
     public void ShowGameOverScreen()
     {
         gameOverScreen.SetActive(true);
+    }
+    public void ShowGameWinScreen()
+    {
+        gameWinScreen.SetActive(true);
     }
     
     public void HideGameOverScreen()

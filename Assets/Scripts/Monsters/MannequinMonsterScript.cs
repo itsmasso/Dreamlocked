@@ -64,6 +64,8 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     private float callTimer;
     [Header("Animation")]
     [SerializeField] private MannequinAnimationManager mannequinAnimationManager;
+    [SerializeField] private float openingDoorRange;
+    [SerializeField] private LayerMask doorLayer;
 
     [Header("SFX")]
     private float footstepTimer;
@@ -87,6 +89,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     {
         //only server can run this code
         if (!IsServer) return;
+        CheckForDoor();
         // if there is a change in threatLevel, then update the variable
         if (threatLevelNetworkState.Value != manager.GetMQThreatLevel())
         {
@@ -186,6 +189,19 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         }
 
         currentTarget = closestTarget;
+    }
+    private void CheckForDoor()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, openingDoorRange, doorLayer);
+        foreach (Collider collider in colliders)
+        {
+            Door door = collider.GetComponent<Door>();
+            if (door != null)
+            {
+                door.OpenDoor(transform.position);
+            }
+        }
+
     }
 
     // [Rpc(SendTo.Everyone)]

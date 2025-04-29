@@ -90,6 +90,10 @@ MonoBehaviour:
   inLight:
     m_InternalValue: 0
   mannequinAnimationManager: {fileID: 8613220904704825237}
+  openingDoorRange: 0.5
+  doorLayer:
+    serializedVersion: 2
+    m_Bits: 2048
   walkingFootStepInterval: 2
   footStepSounds:
   - {fileID: 11400000, guid: 3671eb73cb32e8b43b979e9facfffb2a, type: 2}

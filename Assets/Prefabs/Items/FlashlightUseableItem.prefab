@@ -197,7 +197,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   batteryLevel: 100
   spotLight: {fileID: 9070394446626249861}
-  batteryDrainRate: 5
+  batteryDrainRate: 2.5
   lightScript: {fileID: 295240960199913343}
   flashlightSFX: {fileID: 11400000, guid: 46ab4b4cc28beff499c66a17af008af5, type: 2}
 --- !u!114 &295240960199913343

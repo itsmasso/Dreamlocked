@@ -269,6 +269,14 @@ PrefabInstance:
       propertyPath: musicAudioMixerGroup
       value: 
       objectReference: {fileID: 8222041978716257834, guid: c83088607955ca842b751de910f7450a, type: 2}
+    - target: {fileID: 183616777960967381, guid: f17d3218935719f4398d06b912ec3970, type: 3}
+      propertyPath: sounds2DList.Array.size
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 183616777960967381, guid: f17d3218935719f4398d06b912ec3970, type: 3}
+      propertyPath: 'sounds2DList.Array.data[14]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 06aff0469eababf4fb7aac8cec19943b, type: 2}
     - target: {fileID: 2569631890868806715, guid: f17d3218935719f4398d06b912ec3970, type: 3}
       propertyPath: m_Name
       value: AudioManager

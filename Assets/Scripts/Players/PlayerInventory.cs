@@ -379,15 +379,15 @@ public class PlayerInventory : NetworkBehaviour
     {
         if (!ctx.performed) return;
 
-        float scroll = ctx.ReadValue<float>();
+        Vector2 scrollDelta = ctx.ReadValue<Vector2>();
 
-        if (scroll >= 0.1f)
+        if (scrollDelta.y >= 0.1f)
         {
-            ScrollInventory(-1); // Scroll up
+            ScrollInventory(-1); // scroll up
         }
-        else if (scroll <= -0.1f)
+        else if (scrollDelta.y <= -0.1f)
         {
-            ScrollInventory(1); // Scroll down
+            ScrollInventory(1); // scroll down
         }
     }
 

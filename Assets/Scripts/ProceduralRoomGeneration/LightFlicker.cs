@@ -46,6 +46,7 @@ public class LightFlicker : NetworkBehaviour
             {
                 hasPlayedLightsOutSound = false;
                 hasPlayedLightsOnSound = true;
+                AudioManager.Instance.Stop2DSound(lightFlickerSFX, 0f);
                 AudioManager.Instance.Play2DSound(lightsOnSFX, 0f, true);
             }
         }

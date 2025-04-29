@@ -38,6 +38,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
     // Maybe, maybe not, but if we get a bug related, I would start by looking there
     [SerializeField] public NetworkVariable<MQThreatLevel> threatLevelNetworkState = new NetworkVariable<MQThreatLevel>(MQThreatLevel.PASSIVE);
     [SerializeField] private MonsterScriptableObject mannequinScriptable;
+    [SerializeField] private LayerMask groundLayer;
 
     [Header("Target Properties")]
     private Transform currentTarget;
@@ -79,11 +80,21 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         canAttack = true;
         agent.stopDistance = STOPPING_DISTANCE;
         callTimer = 0;
+        SpawnOnGround();
     }
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
         if (manager != null) threatLevelNetworkState.Value = manager.GetMQThreatLevel();
+    }
+    private void SpawnOnGround()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        {
+            float objectHeightOffset = GetComponent<Collider>() != null ? GetComponent<Collider>().bounds.extents.y : 0f;
+            Vector3 newPosition = new Vector3(transform.position.x, hit.point.y + objectHeightOffset, transform.position.z);
+            transform.position = newPosition;
+        }
     }
     private void Update()
     {

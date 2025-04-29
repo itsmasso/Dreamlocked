@@ -162,26 +162,18 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 
 		if (spectatorCam != null)
 		{
-			if (PlayerNetworkManager.Instance.alivePlayersCount.Value > 0)
+			spectatorCam.gameObject.SetActive(true);
+
+			Transform nextSpectateTarget = PlayerNetworkManager.Instance.GetNextPlayerToSpectate()?.transform;
+			if (nextSpectateTarget != null)
 			{
 				Debug.Log("Starting to Spectate");
-
-				spectatorCam.gameObject.SetActive(true);
-
-				Transform nextSpectateTarget = PlayerNetworkManager.Instance.GetNextPlayerToSpectate()?.transform;
-				if (nextSpectateTarget != null)
-				{
-					currentPlayerToSpectate = nextSpectateTarget;
-					spectatorCam.Follow = currentPlayerToSpectate;
-				}
-				else
-				{
-					Debug.LogWarning("No players left to spectate!");
-				}
+				currentPlayerToSpectate = nextSpectateTarget;
+				spectatorCam.Follow = currentPlayerToSpectate;
 			}
 			else
 			{
-				Debug.LogWarning("No alive players left!");
+				Debug.LogWarning("No players left to spectate!");
 			}
 		}
 		else

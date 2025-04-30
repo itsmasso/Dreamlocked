@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System;
 using System.Linq;
 using Unity.Netcode;
+using System.Collections;
 
 public enum CellType
 {
@@ -99,23 +100,32 @@ public class HouseMapGenerator : NetworkBehaviour
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x / 2 - Vector3.up * mapSize.y / 2 - Vector3.forward * mapSize.z / 2;
 		GameManager.Instance.onNextLevel += ClearMap;
 	}
-
-	void Start()
+	public override void OnNetworkSpawn()
 	{
+		base.OnNetworkSpawn();
 		if (IsServer)
 		{
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
 			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
-			GenerateClientRpc();
 		}
-		
+		GameManager.Instance.seed.OnValueChanged += OnSeedChanged;
+		if (IsClient && GameManager.Instance.seed.Value != 0)
+		{
+			// Trigger manually in case the value was already set
+			OnSeedChanged(0, GameManager.Instance.seed.Value);
+		}
+	}
+
+	void Start()
+	{
+
 
 	}
-	[Rpc(SendTo.Everyone)]
-	private void GenerateClientRpc()
+
+	private void OnSeedChanged(int oldSeed, int newSeed)
 	{
-	    SetDifficulty();
-		Generate();
+		SetDifficulty();
+		Generate(newSeed);
 	}
 
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
@@ -146,10 +156,10 @@ public class HouseMapGenerator : NetworkBehaviour
 		}
 	}
 
-	public void Generate()
+	public void Generate(int seed)
 	{
 
-		UnityEngine.Random.InitState(GameManager.Instance.seed.Value);
+		UnityEngine.Random.InitState(seed);
 
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
@@ -184,7 +194,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		if (IsServer)
 		{
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
-			
+
 		}
 
 	}
@@ -798,6 +808,7 @@ public class HouseMapGenerator : NetworkBehaviour
 			base.OnDestroy();
 			ClearMap();
 			GameManager.Instance.onNextLevel -= ClearMap;
+			GameManager.Instance.seed.OnValueChanged -= OnSeedChanged;
 		}
 
 	}

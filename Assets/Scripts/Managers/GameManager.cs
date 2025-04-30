@@ -110,6 +110,8 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		AudioManager.Instance.StopMenuMusic();
 	}
+	
+
 	public void ChangeGameState(GameState newState)
 	{
 		if (IsServer)

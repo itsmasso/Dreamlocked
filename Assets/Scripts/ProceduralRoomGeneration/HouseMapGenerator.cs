@@ -106,10 +106,16 @@ public class HouseMapGenerator : NetworkBehaviour
 		{
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
 			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
+			GenerateClientRpc();
 		}
-		SetDifficulty();
-		Generate();
+		
 
+	}
+	[Rpc(SendTo.Everyone)]
+	private void GenerateClientRpc()
+	{
+	    SetDifficulty();
+		Generate();
 	}
 
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)

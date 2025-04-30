@@ -90,6 +90,7 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		playerCam.enabled = true;
 		itemCamera.enabled = true;
 		spectatorCam.enabled = false;
+		spectatorCam.gameObject.GetComponent<AudioListener>().enabled = false;
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -129,6 +130,7 @@ public class PlayerCamera : NetworkBehaviour, ILurkerJumpScare
 		playerCam.enabled = false;
 		itemCamera.enabled = false;
 		spectatorCam.enabled = true;
+		spectatorCam.gameObject.GetComponent<AudioListener>().enabled = true;
 		currentPlayerToSpectate = PlayerNetworkManager.Instance.GetNextPlayerToSpectate().transform;
 		spectatorCam.Follow = camFollowPivot;
 		isDead = true;

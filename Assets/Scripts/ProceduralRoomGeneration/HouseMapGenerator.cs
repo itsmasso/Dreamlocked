@@ -26,7 +26,7 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	}
 
-
+	public static event Action<Vector3> onFoundSpawnPos;
 	[Header("Map Properties")]
 	[Tooltip("200x200x200 is recommended")]
 	[SerializeField] private Vector3Int mapSize;
@@ -97,7 +97,6 @@ public class HouseMapGenerator : NetworkBehaviour
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x / 2 - Vector3.up * mapSize.y / 2 - Vector3.forward * mapSize.z / 2;
 		GameManager.Instance.onNextLevel += ClearMap;
-		GameManager.Instance.onLobby += ClearMap;
 	}
 
 	void Start()
@@ -174,9 +173,10 @@ public class HouseMapGenerator : NetworkBehaviour
 		aStarComponent.Scan();
 		sw.Stop();
 		isLevelGenerated = true;
+		onFoundSpawnPos?.Invoke(GetPlayerSpawnPosition());
+		UnityEngine.Debug.Log(GetPlayerSpawnPosition());
 		if (IsServer)
-		{
-
+		{	
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
 		}
 
@@ -793,7 +793,6 @@ public class HouseMapGenerator : NetworkBehaviour
 			base.OnDestroy();
 			ClearMap();
 			GameManager.Instance.onNextLevel -= ClearMap;
-			GameManager.Instance.onLobby -= ClearMap;
 		}
 
 	}

@@ -4,12 +4,6 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
 {
-    [Header("Scene Names")]
-    [SerializeField] private string persistentScene = "PersistScene";
-    [SerializeField] private string mainMenuScene = "MainMenu";
-    [SerializeField] private string gameLevelScene = "GameScene";
-    [SerializeField] private string defaultActiveScene = "GameScene";
-
     private Scene currentActiveScene;
     [SerializeField] private bool isProcessingSceneOperation = false;
     private string waitingForSceneName = "";
@@ -25,23 +19,8 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
             NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneEvent;
             // Optional: Enable active scene synchronization
             NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
-            if (!SceneManager.GetSceneByName(persistentScene).isLoaded)
-            {
-                SceneManager.LoadScene(persistentScene, LoadSceneMode.Single);
-            }
         }
     }
-
-    void Start()
-    {
-        if (IsServer)
-        {
-            LoadSceneAdditively("GameScene");
-            SetActiveScene("GameScene");
-        }
-
-    }
-
 
     public void LoadSceneAdditively(string sceneName)
     {
@@ -64,49 +43,6 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         waitingForSceneEventType = SceneEventType.LoadComplete;
         StartCoroutine(WaitForSceneEvent());
     }
-    public void ReloadSceneAdditively(string sceneName)
-    {
-        if (!IsServer || isProcessingSceneOperation) return;
-
-        StartCoroutine(ReloadSceneRoutine(sceneName));
-    }
-
-    private IEnumerator ReloadSceneRoutine(string sceneName)
-    {
-        isProcessingSceneOperation = true;
-
-        Scene scene = SceneManager.GetSceneByName(sceneName);
-        if (scene.IsValid() && scene.isLoaded)
-        {
-            var unloadStatus = NetworkManager.Singleton.SceneManager.UnloadScene(scene);
-            if (unloadStatus != SceneEventProgressStatus.Started)
-            {
-                Debug.LogError($"Failed to start unloading scene '{sceneName}': {unloadStatus}");
-                isProcessingSceneOperation = false;
-                yield break;
-            }
-
-            waitingForSceneName = sceneName;
-            waitingForSceneEventType = SceneEventType.UnloadComplete;
-            yield return WaitForSceneEvent();
-        }
-
-        var loadStatus = NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
-        if (loadStatus != SceneEventProgressStatus.Started)
-        {
-            Debug.LogError($"Failed to start loading scene '{sceneName}': {loadStatus}");
-            isProcessingSceneOperation = false;
-            yield break;
-        }
-
-        waitingForSceneName = sceneName;
-        waitingForSceneEventType = SceneEventType.LoadComplete;
-
-        yield return WaitForSceneEvent();
-
-        isProcessingSceneOperation = false;
-    }
-
 
     public void SetActiveScene(string sceneName)
     {

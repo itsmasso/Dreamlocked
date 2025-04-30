@@ -11,7 +11,6 @@ using Netcode.Transports.Facepunch;
 
 public class SteamManager : Singleton<SteamManager>
 {
-    Lobby currentLobby;
     
     [Header("UI")]
     [SerializeField]
@@ -27,11 +26,6 @@ public class SteamManager : Singleton<SteamManager>
 
     [SerializeField] 
     private GameObject settingsPanel;
-
-    private float playerCheckTimer = 0f;
-    private const float playerCheckInterval = 1f;
-    
-    private int lastPlayerCount = -1; // Store previous player count
 
    
     void OnEnable()
@@ -56,33 +50,6 @@ public class SteamManager : Singleton<SteamManager>
         SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeft;
 
     }
-
-
-
-  
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        StartCoroutine(DelayedUIBinding(scene));
-    }
-
-    private IEnumerator DelayedUIBinding(Scene scene)
-    {
-        if (scene.name == "MenuScene")
-        {
-            // Wait one frame to allow Unity to finish initializing the new scene objects
-            yield return null;
-
-            LobbyIDInputField = GameObject.Find("LobbyInputField")?.GetComponent<TMP_InputField>();
-            LobbyID = GameObject.Find("LobbyIDText")?.GetComponent<TextMeshProUGUI>();
-            LobbyMenu = GameObject.Find("LobbyMenu");
-            mainMenu = GameObject.Find("MainMenu");
-            settingsPanel = GameObject.Find("SettingsPanel");
-
-            Debug.Log("Rebound UI elements in MenuScene");
-        }
-    }
-
 
     private void LobbyEntered(Lobby lobby)
     {
@@ -110,7 +77,6 @@ public class SteamManager : Singleton<SteamManager>
         yield return new WaitForSeconds(0.1f); // short delay to let LobbyUIManager initialize
         LobbyUIManager.Instance?.RefreshPlayerIcons(memberCount);
     }
-
 
 
     private void LobbyCreated(Result result, Lobby lobby)
@@ -225,7 +191,7 @@ public class SteamManager : Singleton<SteamManager>
     {
         if (NetworkManager.Singleton.IsHost)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene("PersistScene", LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
         }
     }
     public void LeaveLobby()

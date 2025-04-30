@@ -29,7 +29,7 @@ public class TestingNetcodeUI : MonoBehaviour
 		{
 			if(NetworkManager.Singleton.IsHost)
 			{
-				NetworkManager.Singleton.SceneManager.LoadScene("PersistScene", LoadSceneMode.Single);
+				NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
 				
 			}
 		});
@@ -37,8 +37,4 @@ public class TestingNetcodeUI : MonoBehaviour
 		
 	}
 	
-	private void Hide()
-	{
-		gameObject.SetActive(false);
-	}
 }

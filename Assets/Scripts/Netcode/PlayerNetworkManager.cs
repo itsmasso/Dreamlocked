@@ -17,13 +17,15 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
 	public static event Action onRespawnPlayer;
 	[SerializeField] private ScreenManager screenManager;
-	private NetworkVariable<Vector3> currentSpawnPos = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	private Vector3 currentSpawnPos;
 	private Dictionary<ulong, List<ItemData>> savedInventories = new();
 	void Start()
 	{
+		HouseMapGenerator.onFoundSpawnPos += GetSpawnPosition;
 		if (IsServer)
 		{
-			GameManager.Instance.onGameStart += RespawnPlayers;
+			GameManager.Instance.onGameStart += SpawnPlayers;
+			
 			GameManager.Instance.onNextLevel += DespawnPlayers;
 		}
 	}
@@ -99,80 +101,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			return null;
 		}
 	}
-	public void SpectatePlayers()
-	{
-		if (alivePlayers.Count > 0)
-		{
-
-		}
-	}
-
-	public void RespawnPlayers()
-	{
-		StartCoroutine(WaitForHouseMapToLoad("HouseMapLevel"));
-	}
-	private IEnumerator WaitForHouseMapToLoad(string sceneName)
-	{
-		// Check if the scene is already loaded
-		Scene scene = SceneManager.GetSceneByName(sceneName);
-		if (scene.isLoaded)
-		{
-			// Scene is already loaded, so we can proceed directly
-			HandleSceneLoadedClientRpc(sceneName);
-			yield break;  // Skip the coroutine if the scene is already loaded
-		}
-
-		// Wait until the additive scene is fully loaded
-		while (!SceneManager.GetSceneByName(sceneName).isLoaded)
-		{
-			yield return null;
-		}
-
-		// Now wait an extra frame just in case objects are still initializing
-		yield return null;
-
-		// Find the HouseMapGenerator in the loaded scene
-		HandleSceneLoadedClientRpc(sceneName);
-	}
-
-	[ClientRpc]
-	private void HandleSceneLoadedClientRpc(string sceneName)
-	{
-		switch (sceneName)
-		{
-			case "HouseMapLevel":
-				StartCoroutine(WaitUntilLevelGeneratedToSpawnPlayer());
-				break;
-			default:
-				Debug.LogError("Could not find scene");
-				break;
-		}
-
-	}
-	private IEnumerator WaitUntilLevelGeneratedToSpawnPlayer()
-	{
-		//when adding more maps, make sure to generalize map generators like attatch interface with get generator function or abstract class
-		HouseMapGenerator houseMapGenerator = null;
-
-		// Wait until HouseMapGenerator is found
-		while ((houseMapGenerator = FindFirstObjectByType<HouseMapGenerator>()) == null)
-		{
-			yield return null;
-		}
-
-		// Wait until the level is generated
-		yield return new WaitUntil(() => houseMapGenerator.isLevelGenerated);
-		screenManager.HideSleepingLoadingScreen();
-
-		if (IsServer) currentSpawnPos.Value = houseMapGenerator.GetPlayerSpawnPosition();
-
-
-		if (IsServer)
-		{
-			SpawnPlayers(currentSpawnPos.Value);
-		}
-
-	}
+	
 	public NetworkObject GetNextPlayerToSpectate(bool reset = false)
 	{
 		if (alivePlayers.Count == 0)
@@ -198,28 +127,20 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 
 		return selectedPlayer;
 	}
-	// //use this function if we need logic to move players if they are out of bounds for example or something
-	// [ClientRpc]
-	// private void MovePlayerToSpawnPositionClientRpc(NetworkObjectReference playerObjRef, Vector3 spawnPos)
-	// {
-	// 	if (playerObjRef.TryGet(out NetworkObject playerObj))
-	// 	{
-	// 		if (playerObj != null && playerObj.IsOwner)
-	// 		{
-	// 			// If this player object is owned by the client, move it to the spawn position
-	// 			playerObj.transform.position = spawnPos;
-	// 		}
-
-	// 	}
-	// }
-
-	public void SpawnPlayers(Vector3 position)
+	private void GetSpawnPosition(Vector3 spawnPosition)
+	{
+	    currentSpawnPos = spawnPosition;
+	}
+	public Vector3 GetPlayerPosition(){
+		return new Vector3(currentSpawnPos.x, currentSpawnPos.y + 2f, currentSpawnPos.z);
+	}
+	public void SpawnPlayers()
 	{
 		if (IsServer)
 		{
 			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
-				GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(position), Quaternion.identity);
+				GameObject player = Instantiate(playerPrefab);
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
@@ -331,9 +252,11 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		base.OnNetworkDespawn();
 		if (IsServer)
 		{
-			GameManager.Instance.onGameStart -= RespawnPlayers;
+			GameManager.Instance.onGameStart -= SpawnPlayers;
 			GameManager.Instance.onNextLevel -= DespawnPlayers;
+			
 		}
+		HouseMapGenerator.onFoundSpawnPos -= GetSpawnPosition;
 	}
 
 }

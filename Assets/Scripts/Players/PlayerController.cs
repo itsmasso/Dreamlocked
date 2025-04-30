@@ -68,14 +68,19 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	private int currentSpeedBoost = 0;
 	void Awake()
 	{
-		//start character controller disabled
-		gameObject.GetComponent<CharacterController>().enabled = false;
+		//initializing player character controller
+		characterController = GetComponent<CharacterController>();
+		
 	}
 
 	public override void OnNetworkSpawn()
 	{
 		if (IsOwner)
 		{
+			//start character controller disabled
+			gameObject.GetComponent<CharacterController>().enabled = false;
+			Debug.Log(PlayerNetworkManager.Instance.GetPlayerPosition());
+			transform.position = PlayerNetworkManager.Instance.GetPlayerPosition();
 			gameObject.GetComponent<CharacterController>().enabled = true;
 
 		}
@@ -107,8 +112,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			enabledSprinting = false;
 
 
-			//initializing player character controller
-			characterController = GetComponent<CharacterController>();
+
 		}
 
 

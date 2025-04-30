@@ -32,6 +32,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	public event Action onLevelGenerate;
 	public event Action onNextLevel;
 	private Coroutine _gameOverRoutine;
+	public const int MAX_PLAYERS = 4;
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.GeneratingLevel, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private ScreenManager screenManager;
@@ -40,6 +41,8 @@ public class GameManager : NetworkSingleton<GameManager>
 	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private float gameOverScreenDuration = 5f;
 	[SerializeField] private ExitGameManager exitGameManager;
+	public Vector3 playerSpawnPosition;
+	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
 
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
@@ -77,19 +80,22 @@ public class GameManager : NetworkSingleton<GameManager>
 		}
 	}
 
-    public void OnNextLevel()
+	public void OnNextLevel()
 	{
-		if (!IsServer) return;
-		levelLoader.UnloadMap(Map.HouseMap);
-		ClearAudioRpc();
-		StartCoroutine(TransitionToNextLevel());
+		if (IsServer)
+		{
+			levelLoader.UnloadMap(Map.HouseMap);
+			ClearAudioRpc();
+			StartCoroutine(TransitionToNextLevel());
+		}
+
 		//add respawn here
 	}
-	
+
 	[Rpc(SendTo.Everyone)]
 	private void ClearAudioRpc()
 	{
-	    AudioManager.Instance.ClearAllAudio();
+		AudioManager.Instance.ClearAllAudio();
 	}
 
 	private IEnumerator TransitionToNextLevel()
@@ -102,7 +108,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	[Rpc(SendTo.Everyone)]
 	private void StopMenuMusicRpc()
 	{
-	    AudioManager.Instance.StopMenuMusic();
+		AudioManager.Instance.StopMenuMusic();
 	}
 	public void ChangeGameState(GameState newState)
 	{
@@ -112,12 +118,12 @@ public class GameManager : NetworkSingleton<GameManager>
 			netGameState.Value = newState;
 
 			// Stop any pending coroutine
-			if (_gameOverRoutine != null && (newState != GameState.GameOver || newState != GameState.GameBeaten) )
+			if (_gameOverRoutine != null && (newState != GameState.GameOver || newState != GameState.GameBeaten))
 			{
 				StopCoroutine(_gameOverRoutine);
 				_gameOverRoutine = null;
 			}
-			
+
 			switch (netGameState.Value)
 			{
 				case GameState.GeneratingLevel:
@@ -127,7 +133,7 @@ public class GameManager : NetworkSingleton<GameManager>
 					GenerateSecurityCode();
 					ShowSleepLoadingScreenToAllRpc();
 					levelLoader.LoadMap(Map.HouseMap);
-					
+
 					break;
 				case GameState.GameStart:
 					PlayAmbienceRpc();
@@ -158,16 +164,35 @@ public class GameManager : NetworkSingleton<GameManager>
 			}
 		}
 	}
-	
+	public Vector3 DetermineSpawnPosition()
+	{
+		Vector3[] offsets = new Vector3[]
+		{
+			new Vector3(2, 0, 0),
+			new Vector3(-2, 0, 0),
+			new Vector3(0, 0, 2),
+			new Vector3(0, 0, -2)
+		};
+		Vector3 spawnPos = new Vector3(playerSpawnPosition.x + offsets[spawnIndex.Value].x, playerSpawnPosition.y + 2, playerSpawnPosition.z + offsets[spawnIndex.Value].z);
+		RequestServerToIncrementSpawnIndexRpc();
+		return spawnPos;
+
+	}
+	[Rpc(SendTo.Server)]
+	private void RequestServerToIncrementSpawnIndexRpc()
+	{
+		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
+	}
+
 	[Rpc(SendTo.Everyone)]
 	private void StopAmbienceRpc()
 	{
-	    AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
+		AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
 	}
 	[Rpc(SendTo.Everyone)]
 	private void PlayAmbienceRpc()
 	{
-	    AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
+		AudioManager.Instance.Play2DSound(AudioManager.Instance.Get2DSound("RoomAmbience"), 5f);
 	}
 
 	private IEnumerator ReturnToLobbyAfterDelay()
@@ -192,17 +217,17 @@ public class GameManager : NetworkSingleton<GameManager>
 		onGamePlaying?.Invoke();
 
 	}
-	
+
 	[Rpc(SendTo.Everyone)]
 	private void AllHandlesGameBeatenRpc()
 	{
-	    onGameWin?.Invoke();
+		onGameWin?.Invoke();
 	}
-	
+
 	[Rpc(SendTo.Everyone)]
 	private void AllHandlesGameOverRpc()
 	{
-	    onGameLose?.Invoke();
+		onGameLose?.Invoke();
 	}
 
 	[Rpc(SendTo.Everyone)]
@@ -215,32 +240,32 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		screenManager.HideSleepingLoadingScreen();
 	}
-	
+
 	[Rpc(SendTo.Everyone)]
 	public void ShowGameOverScreenToAllRpc()
 	{
-	    screenManager.ShowGameOverScreen();
+		screenManager.ShowGameOverScreen();
 	}
 
 	[Rpc(SendTo.Everyone)]
 	public void ShowGameWinScreenToAllRpc()
 	{
-	    screenManager.ShowGameWinScreen();
+		screenManager.ShowGameWinScreen();
 	}
-	
+
 	[Rpc(SendTo.Everyone)]
 	public void HideGameOverScreenToAllRpc()
 	{
-	    screenManager.HideGameOverScreen();
+		screenManager.HideGameOverScreen();
 	}
 	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 	{
 		//do something here if needed after scene loads
 	}
-	
+
 	public LevelLoader GetLevelLoader()
 	{
-	    return levelLoader;
+		return levelLoader;
 	}
 	public int GetMaxDreamLayer()
 	{
@@ -271,8 +296,8 @@ public class GameManager : NetworkSingleton<GameManager>
 		securityCode.Value = (securityCodeArray[0] * 1000) + (securityCodeArray[1] * 100) + (securityCodeArray[2] * 10) + securityCodeArray[3];
 		Debug.Log("Security Code Generated: " + securityCode.Value);
 	}
-    public override void OnDestroy()
-    {
-        StopAmbienceRpc();
-    }
+	public override void OnDestroy()
+	{
+		StopAmbienceRpc();
+	}
 }

@@ -9,19 +9,17 @@ using System.Linq;
 
 public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 {
-	public const int MAX_PLAYERS = 4;
+	
 	private int currentSpectateIndex = 0;
 	[SerializeField] private GameObject playerPrefab;
 	public List<NetworkObject> alivePlayers = new List<NetworkObject>();
 	public NetworkVariable<int> alivePlayersCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
+
 	public static event Action onRespawnPlayer;
 	[SerializeField] private ScreenManager screenManager;
-	private Vector3 currentSpawnPos;
 	private Dictionary<ulong, List<ItemData>> savedInventories = new();
 	void Start()
 	{
-		HouseMapGenerator.onFoundSpawnPos += GetSpawnPosition;
 		if (IsServer)
 		{
 			GameManager.Instance.onGameStart += SpawnPlayers;
@@ -127,13 +125,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 
 		return selectedPlayer;
 	}
-	private void GetSpawnPosition(Vector3 spawnPosition)
-	{
-	    currentSpawnPos = spawnPosition;
-	}
-	public Vector3 GetPlayerPosition(){
-		return new Vector3(currentSpawnPos.x, currentSpawnPos.y + 2f, currentSpawnPos.z);
-	}
+
 	public void SpawnPlayers()
 	{
 		if (IsServer)
@@ -232,20 +224,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		alivePlayers.Clear();
 	}
 
-	private Vector3 DetermineSpawnPosition(Vector3 pos)
-	{
-		Vector3[] offsets = new Vector3[]
-		{
-			new Vector3(2, 0, 0),
-			new Vector3(-2, 0, 0),
-			new Vector3(0, 0, 2),
-			new Vector3(0, 0, -2)
-		};
-		Vector3 spawnPos = new Vector3(pos.x + offsets[spawnIndex.Value].x, pos.y + 2, pos.z + offsets[spawnIndex.Value].z);
-		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
-		return spawnPos;
 
-	}
 
 	public override void OnNetworkDespawn()
 	{
@@ -256,7 +235,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			GameManager.Instance.onNextLevel -= DespawnPlayers;
 			
 		}
-		HouseMapGenerator.onFoundSpawnPos -= GetSpawnPosition;
+		
 	}
 
 }

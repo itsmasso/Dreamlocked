@@ -66,23 +66,21 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	//player effects
 	private Coroutine speedUpCoroutine;
 	private int currentSpeedBoost = 0;
+
 	void Awake()
 	{
 		//initializing player character controller
 		characterController = GetComponent<CharacterController>();
-		
 	}
 
 	public override void OnNetworkSpawn()
 	{
 		if (IsOwner)
 		{
-			//start character controller disabled
-			gameObject.GetComponent<CharacterController>().enabled = false;
-			Debug.Log(PlayerNetworkManager.Instance.GetPlayerPosition());
-			transform.position = PlayerNetworkManager.Instance.GetPlayerPosition();
-			gameObject.GetComponent<CharacterController>().enabled = true;
-
+			characterController.enabled = false;
+			StartCoroutine(WaitForMapToGenerateAndSpawn());
+			
+			characterController.enabled = true;
 		}
 		else
 		{
@@ -94,8 +92,16 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			PlayerNetworkManager.Instance.RegisterPlayerClientRpc(GetComponent<NetworkObject>());
 		}
 	}
-
-
+private IEnumerator WaitForMapToGenerateAndSpawn()
+{
+    while(GameManager.Instance.playerSpawnPosition == Vector3.zero)
+    {
+        yield return null;
+    }
+    Vector3 spawnPos = GameManager.Instance.DetermineSpawnPosition();
+    transform.position = new Vector3(spawnPos.x, spawnPos.y + 2, spawnPos.z);
+    GameManager.Instance.playerSpawnPosition = Vector3.zero;
+}
 	void Start()
 	{
 
@@ -110,7 +116,6 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 			//setting booleans
 			enabledCrouching = false;
 			enabledSprinting = false;
-
 
 
 		}
@@ -227,7 +232,7 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 
 	void Update()
 	{
-		if (IsOwner)
+		if (IsOwner && characterController.enabled == true)
 		{
 			if (!canMove)
 			{

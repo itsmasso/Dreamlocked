@@ -26,7 +26,6 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	}
 
-	public static event Action<Vector3> onFoundSpawnPos;
 	[Header("Map Properties")]
 	[Tooltip("200x200x200 is recommended")]
 	[SerializeField] private Vector3Int mapSize;
@@ -83,6 +82,8 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private List<GameObject> stairRooms;
 	[SerializeField] private int chanceToSpawnStairs;
 	[SerializeField] private int spawnStairGuarenteedPity;
+	[Header("Player Spawn")]
+
 
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
@@ -110,7 +111,6 @@ public class HouseMapGenerator : NetworkBehaviour
 		Generate();
 
 	}
-
 
 	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
 	{
@@ -159,7 +159,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
 		CreateHallways();
-
+		GameManager.Instance.playerSpawnPosition = GetPlayerSpawnPosition();
 		foreach (Node n in grid.grid)
 		{
 			if (n.cellType == CellType.Hallway)
@@ -173,14 +173,13 @@ public class HouseMapGenerator : NetworkBehaviour
 		aStarComponent.Scan();
 		sw.Stop();
 		isLevelGenerated = true;
-		onFoundSpawnPos?.Invoke(GetPlayerSpawnPosition());
-		UnityEngine.Debug.Log(GetPlayerSpawnPosition());
-		if (IsServer)
-		{	
-			GameManager.Instance.ChangeGameState(GameState.GameStart);
-		}
 
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+		if (IsServer)
+		{
+			GameManager.Instance.ChangeGameState(GameState.GameStart);
+			
+		}
 
 	}
 

@@ -185,40 +185,49 @@ public class HouseMapGenerator : NetworkBehaviour
 	{
 		if (!IsServer)
 		{
-			UnityEngine.Random.InitState(seed);
-
-			Stopwatch sw = new Stopwatch();
-			sw.Start();
-
-			grid = new Grid3D(mapSize, nodeRadius, transform.position);
-			grid.CreateGrid();
-			rooms = new List<GameObject>();
-			hallwayPathFinder = new AStarPathfinder(grid);
-			hallways = new List<Node>();
-			currentHallwaySpawnIndex = 0;
-			specialRoomIndex = 0;
-
-			CreateRooms();
-			MarkRoomsInGrid(rooms);
-			CreateHallways();
-
-			foreach (Node n in grid.grid)
-			{
-				if (n.cellType == CellType.Hallway)
-					SpawnHallways(n);
-				if (n.cellType == CellType.Door)
-					SpawnDoorWay(n);
-			}
-
-			propObjectPlacer.SpawnRoomObjects();
-
-			aStarComponent.Scan();
-			sw.Stop();
-			UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+			StartCoroutine(DelayedSpawn(seed));
 		}
+		else
+		{
+			// Server does not need to wait — already generated.
+			PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
+		}
+	}
+	private IEnumerator DelayedSpawn(int seed)
+	{
+		UnityEngine.Random.InitState(seed);
+
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+
+		grid = new Grid3D(mapSize, nodeRadius, transform.position);
+		grid.CreateGrid();
+		rooms = new List<GameObject>();
+		hallwayPathFinder = new AStarPathfinder(grid);
+		hallways = new List<Node>();
+		currentHallwaySpawnIndex = 0;
+		specialRoomIndex = 0;
+
+		CreateRooms();
+		MarkRoomsInGrid(rooms);
+		CreateHallways();
+
+		foreach (Node n in grid.grid)
+		{
+			if (n.cellType == CellType.Hallway)
+				SpawnHallways(n);
+			if (n.cellType == CellType.Door)
+				SpawnDoorWay(n);
+		}
+
+		propObjectPlacer.SpawnRoomObjects();
+
+		aStarComponent.Scan();
+		sw.Stop();
+		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+
+		yield return null; // Let everything finish initializing
 		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
-
-
 	}
 
 	/*****************************************************************

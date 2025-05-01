@@ -32,7 +32,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	public event Action onLevelGenerate;
 	public event Action onNextLevel;
 	private Coroutine _gameOverRoutine;
-	public const int MAX_PLAYERS = 4;
+
 	public NetworkVariable<int> seed = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<GameState> netGameState = new NetworkVariable<GameState>(GameState.GeneratingLevel, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private ScreenManager screenManager;
@@ -41,8 +41,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private float gameOverScreenDuration = 5f;
 	[SerializeField] private ExitGameManager exitGameManager;
-	public Vector3 playerSpawnPosition;
-	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);
+
 
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
@@ -166,25 +165,7 @@ public class GameManager : NetworkSingleton<GameManager>
 			}
 		}
 	}
-	public Vector3 DetermineSpawnPosition()
-	{
-		Vector3[] offsets = new Vector3[]
-		{
-			new Vector3(2, 0, 0),
-			new Vector3(-2, 0, 0),
-			new Vector3(0, 0, 2),
-			new Vector3(0, 0, -2)
-		};
-		Vector3 spawnPos = new Vector3(playerSpawnPosition.x + offsets[spawnIndex.Value].x, playerSpawnPosition.y + 2, playerSpawnPosition.z + offsets[spawnIndex.Value].z);
-		RequestServerToIncrementSpawnIndexRpc();
-		return spawnPos;
 
-	}
-	[Rpc(SendTo.Server)]
-	private void RequestServerToIncrementSpawnIndexRpc()
-	{
-		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
-	}
 
 	[Rpc(SendTo.Everyone)]
 	private void StopAmbienceRpc()

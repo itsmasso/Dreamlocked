@@ -77,9 +77,6 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	{
 		if (IsOwner)
 		{
-			characterController.enabled = false;
-			StartCoroutine(WaitForMapToGenerateAndSpawn());
-
 			characterController.enabled = true;
 		}
 		else
@@ -91,16 +88,6 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		{
 			PlayerNetworkManager.Instance.RegisterPlayerClientRpc(GetComponent<NetworkObject>());
 		}
-	}
-	private IEnumerator WaitForMapToGenerateAndSpawn()
-	{
-		while (GameManager.Instance.playerSpawnPosition == Vector3.zero)
-		{
-			yield return null;
-		}
-		Vector3 spawnPos = GameManager.Instance.DetermineSpawnPosition();
-		transform.position = new Vector3(spawnPos.x, spawnPos.y + 2, spawnPos.z);
-		GameManager.Instance.playerSpawnPosition = Vector3.zero;
 	}
 
 	void Start()
@@ -364,8 +351,5 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 		speedUpCoroutine = null;
 	}
 
-	public override void OnDestroy()
-	{
 
-	}
 }

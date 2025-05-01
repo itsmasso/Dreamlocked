@@ -85,6 +85,9 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private int spawnStairGuarenteedPity;
 	[Header("Player Spawn")]
 
+	private int receivedSeed;
+	private bool difficultyIsSet;
+	private bool hasGenerated;
 
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
@@ -100,6 +103,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		worldBottomLeft = transform.position - Vector3.right * mapSize.x / 2 - Vector3.up * mapSize.y / 2 - Vector3.forward * mapSize.z / 2;
 		GameManager.Instance.onNextLevel += ClearMap;
 	}
+
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
@@ -108,35 +112,24 @@ public class HouseMapGenerator : NetworkBehaviour
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
 			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
 		}
-		GameManager.Instance.seed.OnValueChanged += OnSeedChanged;
-		if (IsClient && GameManager.Instance.seed.Value != 0)
-		{
-			// Trigger manually in case the value was already set
-			OnSeedChanged(0, GameManager.Instance.seed.Value);
-		}
-	}
-
-	void Start()
-	{
-
-
-	}
-
-	private void OnSeedChanged(int oldSeed, int newSeed)
-	{
-		SetDifficulty();
-		Generate(newSeed);
-	}
-
-	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
-	{
-		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
 	}
 	[Rpc(SendTo.Everyone)]
 	private void AllSetDifficultySORpc(int difficultySOIndex)
 	{
 		currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
 	}
+	void Start()
+	{
+		SetDifficulty();
+		Generate();
+	}
+
+
+	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
+	{
+		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
+	}
+
 	private void SetDifficulty()
 	{
 		if (currentDifficultySetting != null)
@@ -155,11 +148,13 @@ public class HouseMapGenerator : NetworkBehaviour
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
 	}
+	
+	
 
-	public void Generate(int seed)
+	public void Generate()
 	{
 
-		UnityEngine.Random.InitState(seed);
+		UnityEngine.Random.InitState(GameManager.Instance.seed.Value);
 
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
@@ -175,7 +170,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		CreateRooms();
 		MarkRoomsInGrid(rooms);
 		CreateHallways();
-		GameManager.Instance.playerSpawnPosition = GetPlayerSpawnPosition();
+
 		foreach (Node n in grid.grid)
 		{
 			if (n.cellType == CellType.Hallway)
@@ -189,13 +184,13 @@ public class HouseMapGenerator : NetworkBehaviour
 		aStarComponent.Scan();
 		sw.Stop();
 		isLevelGenerated = true;
-
-		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		if (IsServer)
 		{
+			PlayerNetworkManager.Instance.spawnPosition.Value = GetPlayerSpawnPosition();
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
-
 		}
+		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc();
+		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 
 	}
 
@@ -808,7 +803,7 @@ public class HouseMapGenerator : NetworkBehaviour
 			base.OnDestroy();
 			ClearMap();
 			GameManager.Instance.onNextLevel -= ClearMap;
-			GameManager.Instance.seed.OnValueChanged -= OnSeedChanged;
+			GameManager.Instance.onLobby -= ClearMap;
 		}
 
 	}

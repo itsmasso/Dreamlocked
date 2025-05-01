@@ -144,11 +144,17 @@ public class GFClockManager : NetworkSingleton<GFClockManager>, IInteractable
     [Rpc(SendTo.Server)]
     private void ServerInstantResetTimerRpc()
     {
+        StopLightFlickerSfxRpc();
         AudioManager.Instance.Play3DSoundServerRpc(AudioManager.Instance.Get3DSoundFromList(clockRewindSFX), transform.position, true, 1f, 1f, 30f, false, GetComponent<NetworkObject>(), 0f);
         currentTime = TOTAL_TIME;
         timeRunning = true;
         printedActivating = false;
         printedAwakened = false;
+    }
+    [Rpc(SendTo.Everyone)]
+    private void StopLightFlickerSfxRpc()
+    {
+        AudioManager.Instance.Stop2DSound(AudioManager.Instance.Get2DSound("LightFlicker"), 0f);
     }
 
     public MQThreatLevel GetMQThreatLevel()

@@ -40,7 +40,6 @@ public class LevelLoader : NetworkBehaviour
         switch (map)
         {
             case Map.HouseMap:
-                ResetSettings();
                 NetworkSceneLoader.Instance.UnloadSceneAdditively("HouseMapLevel");
                 break;
         }
@@ -67,5 +66,6 @@ public class LevelLoader : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
+        ResetSettings();
     }
 }

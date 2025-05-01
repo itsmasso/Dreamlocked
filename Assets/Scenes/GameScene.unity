@@ -159,6 +159,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 428460060}
+    - target: {fileID: 985240838211853086, guid: badd20b54f3fb7843b68cec92bc5e329, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnExitButtonPressed
+      objectReference: {fileID: 0}
     - target: {fileID: 1818761509972798069, guid: badd20b54f3fb7843b68cec92bc5e329, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -179,6 +183,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -22.88
       objectReference: {fileID: 0}
+    - target: {fileID: 3513595853047651037, guid: badd20b54f3fb7843b68cec92bc5e329, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 428460059}
     - target: {fileID: 4552409197272168391, guid: badd20b54f3fb7843b68cec92bc5e329, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

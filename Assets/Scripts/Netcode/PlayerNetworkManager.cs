@@ -151,14 +151,14 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		}
 	}
 	[Rpc(SendTo.Server)]
-	public void RequestServerToSpawnPlayerRpc(RpcParams rpcParams = default)
+	public void RequestServerToSpawnPlayerRpc(Vector3 position, RpcParams rpcParams = default)
 	{
 		ulong clientId = rpcParams.Receive.SenderClientId;
-		SpawnPlayerForClient(clientId);
+		SpawnPlayerForClient(clientId, position);
 	}
-	private void SpawnPlayerForClient(ulong clientId)
+	private void SpawnPlayerForClient(ulong clientId, Vector3 spawnPosition)
 	{
-		GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(spawnPosition.Value), Quaternion.identity);
+		GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(spawnPosition), Quaternion.identity);
 		NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 		playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 		RegisterPlayerClientRpc(playerNetworkObject);

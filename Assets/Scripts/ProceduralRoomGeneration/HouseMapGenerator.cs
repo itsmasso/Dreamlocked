@@ -189,7 +189,7 @@ public class HouseMapGenerator : NetworkBehaviour
 			PlayerNetworkManager.Instance.spawnPosition.Value = GetPlayerSpawnPosition();
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
 		}
-		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc();
+		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 
 	}

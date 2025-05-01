@@ -34,7 +34,6 @@ public class HouseMapGenerator : NetworkBehaviour
 	private Vector3 worldBottomLeft;
 	[SerializeField] private int floors;
 	[SerializeField] private AstarPath aStarComponent;
-	public bool isLevelGenerated;
 	[SerializeField] private HouseMapDifficultyListSO difficultyListScriptable;
 	private HouseMapDifficultySettingsSO currentDifficultySetting;
 
@@ -85,10 +84,6 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private int spawnStairGuarenteedPity;
 	[Header("Player Spawn")]
 
-	private int receivedSeed;
-	private bool difficultyIsSet;
-	private bool hasGenerated;
-
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
 	[SerializeField] private bool drawGizmos;
@@ -111,27 +106,14 @@ public class HouseMapGenerator : NetworkBehaviour
 		{
 			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
 			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
+			ServerGenerateMap();
+
 		}
 	}
 	[Rpc(SendTo.Everyone)]
 	private void AllSetDifficultySORpc(int difficultySOIndex)
 	{
 		currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
-	}
-	void Start()
-	{
-		SetDifficulty();
-		Generate();
-	}
-
-
-	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
-	{
-		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
-	}
-
-	private void SetDifficulty()
-	{
 		if (currentDifficultySetting != null)
 		{
 			mapSize = currentDifficultySetting.mapSize;
@@ -148,17 +130,25 @@ public class HouseMapGenerator : NetworkBehaviour
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
 	}
-	
-	
-
-	public void Generate()
+	void Start()
 	{
+		// SetDifficulty();
+		// Generate();
+	}
 
+
+	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
+	{
+		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
+	}
+
+	private void ServerGenerateMap()
+	{
 		UnityEngine.Random.InitState(GameManager.Instance.seed.Value);
 
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
-		isLevelGenerated = false;
+
 		grid = new Grid3D(mapSize, nodeRadius, transform.position);
 		grid.CreateGrid();
 		rooms = new List<GameObject>();
@@ -183,14 +173,51 @@ public class HouseMapGenerator : NetworkBehaviour
 
 		aStarComponent.Scan();
 		sw.Stop();
-		isLevelGenerated = true;
-		if (IsServer)
+		PlayerNetworkManager.Instance.spawnPosition.Value = GetPlayerSpawnPosition();
+		GenerateMapClientRpc(GameManager.Instance.seed.Value);
+		GameManager.Instance.ChangeGameState(GameState.GameStart);
+		//PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
+		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+	}
+
+	[Rpc(SendTo.Everyone)]
+	public void GenerateMapClientRpc(int seed)
+	{
+		if (!IsServer)
 		{
-			PlayerNetworkManager.Instance.spawnPosition.Value = GetPlayerSpawnPosition();
-			GameManager.Instance.ChangeGameState(GameState.GameStart);
+			UnityEngine.Random.InitState(seed);
+
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+
+			grid = new Grid3D(mapSize, nodeRadius, transform.position);
+			grid.CreateGrid();
+			rooms = new List<GameObject>();
+			hallwayPathFinder = new AStarPathfinder(grid);
+			hallways = new List<Node>();
+			currentHallwaySpawnIndex = 0;
+			specialRoomIndex = 0;
+
+			CreateRooms();
+			MarkRoomsInGrid(rooms);
+			CreateHallways();
+
+			foreach (Node n in grid.grid)
+			{
+				if (n.cellType == CellType.Hallway)
+					SpawnHallways(n);
+				if (n.cellType == CellType.Door)
+					SpawnDoorWay(n);
+			}
+
+			propObjectPlacer.SpawnRoomObjects();
+
+			aStarComponent.Scan();
+			sw.Stop();
+			UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 		}
 		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
-		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+
 
 	}
 

@@ -77,9 +77,9 @@ public class PlayerController : NetworkBehaviour, ILurkerJumpScare
 	{
 		if (IsOwner)
 		{
-			characterController.enabled = false;
-			Debug.Log(PlayerNetworkManager.Instance.DetermineSpawnPosition(PlayerNetworkManager.Instance.spawnPosition.Value));
-			transform.position = PlayerNetworkManager.Instance.DetermineSpawnPosition(PlayerNetworkManager.Instance.spawnPosition.Value);
+			// characterController.enabled = false;
+			// Debug.Log(PlayerNetworkManager.Instance.DetermineSpawnPosition(PlayerNetworkManager.Instance.spawnPosition.Value));
+			// transform.position = PlayerNetworkManager.Instance.DetermineSpawnPosition(PlayerNetworkManager.Instance.spawnPosition.Value);
 			characterController.enabled = true;
 		}
 		else

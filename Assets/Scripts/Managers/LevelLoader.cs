@@ -25,22 +25,45 @@ public class LevelLoader : NetworkBehaviour
         }
     }
 
-    public void LoadMap(Map map)
+    public void LoadMap(Map map, Action onLoaded = null)
     {
         switch (map)
         {
             case Map.HouseMap:
                 TryChangeHouseMapDifficultySetting();
-                NetworkSceneLoader.Instance.LoadSceneAdditively("HouseMapLevel");
+                NetworkSceneLoader.Instance.LoadSceneAdditively("HouseMapLevel", onLoaded);
                 break;
         }
     }
-    public void UnloadMap(Map map)
+    public void ReloadMap(Map map, Action onReloaded = null)
     {
         switch (map)
         {
             case Map.HouseMap:
-                NetworkSceneLoader.Instance.UnloadSceneAdditively("HouseMapLevel");
+                Scene scene = SceneManager.GetSceneByName("HouseMapLevel");
+                if (scene.IsValid() && scene.isLoaded)
+                {
+                    Debug.Log("[LevelLoader] Scene is loaded, unloading first...");
+                    UnloadMap(map, () =>
+                    {
+                        LoadMap(map, onReloaded);
+                    });
+                }
+                else
+                {
+                    Debug.Log("[LevelLoader] Scene is not loaded, loading directly...");
+                    LoadMap(map, onReloaded);
+                }
+                break;
+        }
+    }
+
+    public void UnloadMap(Map map, Action onUnloaded = null)
+    {
+        switch (map)
+        {
+            case Map.HouseMap:
+                NetworkSceneLoader.Instance.UnloadSceneAdditively("HouseMapLevel", onUnloaded);
                 break;
         }
     }

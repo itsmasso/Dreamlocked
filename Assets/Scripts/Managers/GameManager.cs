@@ -38,10 +38,9 @@ public class GameManager : NetworkSingleton<GameManager>
 	[SerializeField] private ScreenManager screenManager;
 	[SerializeField] private LevelLoader levelLoader;
 	private const int MAX_DREAM_LAYERS = 3;
-	private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	[SerializeField]private NetworkVariable<int> currentDreamLayer = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	[SerializeField] private float gameOverScreenDuration = 5f;
 	[SerializeField] private ExitGameManager exitGameManager;
-
 
 	// Safe Puzzle Combination
 	private int[] securityCodeArray = new int[4];
@@ -70,22 +69,15 @@ public class GameManager : NetworkSingleton<GameManager>
 
 	}
 
-	void Start()
-	{
-		if (IsServer)
-		{
-			currentDreamLayer.Value = 0;
-			ChangeGameState(GameState.GeneratingLevel);
-		}
-	}
-
 	public void OnNextLevel()
 	{
 		if (IsServer)
 		{
-			levelLoader.UnloadMap(Map.HouseMap);
+			//levelLoader.UnloadMap(Map.HouseMap);
 			ClearAudioRpc();
-			StartCoroutine(TransitionToNextLevel());
+			onNextLevel?.Invoke();
+			currentDreamLayer.Value++;
+			ChangeGameState(GameState.GeneratingLevel);
 		}
 
 		//add respawn here
@@ -97,19 +89,12 @@ public class GameManager : NetworkSingleton<GameManager>
 		AudioManager.Instance.ClearAllAudio();
 	}
 
-	private IEnumerator TransitionToNextLevel()
-	{
-		onNextLevel?.Invoke();
-		currentDreamLayer.Value++;
-		yield return new WaitForSeconds(0.1f);
-		ChangeGameState(GameState.GeneratingLevel);
-	}
 	[Rpc(SendTo.Everyone)]
 	private void StopMenuMusicRpc()
 	{
 		AudioManager.Instance.StopMenuMusic();
 	}
-	
+
 
 	public void ChangeGameState(GameState newState)
 	{
@@ -133,7 +118,7 @@ public class GameManager : NetworkSingleton<GameManager>
 					StopMenuMusicRpc();
 					GenerateSecurityCode();
 					ShowSleepLoadingScreenToAllRpc();
-					levelLoader.LoadMap(Map.HouseMap);
+					levelLoader.ReloadMap(Map.HouseMap);
 
 					break;
 				case GameState.GameStart:
@@ -243,7 +228,11 @@ public class GameManager : NetworkSingleton<GameManager>
 	}
 	private void SceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 	{
-		//do something here if needed after scene loads
+		if (IsServer && sceneName == "GameScene")
+		{
+			currentDreamLayer.Value = 0;
+			ChangeGameState(GameState.GeneratingLevel);
+		}
 	}
 
 	public LevelLoader GetLevelLoader()

@@ -14,7 +14,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	[SerializeField] private GameObject playerPrefab;
 	public List<NetworkObject> alivePlayers = new List<NetworkObject>();
 	public NetworkVariable<int> alivePlayersCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
 	public static event Action onRespawnPlayer;
 	[SerializeField] private ScreenManager screenManager;
 	private Dictionary<ulong, List<ItemData>> savedInventories = new();
@@ -25,7 +24,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		if (IsServer)
 		{
 			//GameManager.Instance.onGameStart += SpawnPlayers;
-
 			GameManager.Instance.onNextLevel += DespawnPlayers;
 		}
 	}
@@ -128,13 +126,15 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		return selectedPlayer;
 	}
 
-	public void SpawnPlayers()
+
+
+	public void SpawnPlayers(Vector3 position)
 	{
 		if (IsServer)
 		{
 			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
-				GameObject player = Instantiate(playerPrefab);
+				GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(position), Quaternion.identity);
 				NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
 				playerNetworkObject.SpawnAsPlayerObject(clientId, true);
 				RegisterPlayerClientRpc(playerNetworkObject);
@@ -150,28 +150,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 			}
 		}
 	}
-	[Rpc(SendTo.Server)]
-	public void RequestServerToSpawnPlayerRpc(Vector3 position, RpcParams rpcParams = default)
-	{
-		ulong clientId = rpcParams.Receive.SenderClientId;
-		SpawnPlayerForClient(clientId, position);
-	}
-	private void SpawnPlayerForClient(ulong clientId, Vector3 spawnPosition)
-	{
-		GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(spawnPosition), Quaternion.identity);
-		NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
-		playerNetworkObject.SpawnAsPlayerObject(clientId, true);
-		RegisterPlayerClientRpc(playerNetworkObject);
-		player.GetComponent<PlayerHealth>().ResetHealth();
-		var inventory = LoadInventory(playerNetworkObject.OwnerClientId);
-		player.GetComponent<PlayerInventory>().EnsureEmptyInventorySlots(4);
-		foreach (var itemData in inventory)
-		{
-			player.GetComponent<PlayerInventory>().RepopulateItem(itemData);
-		}
-		player.GetComponent<PlayerInventory>().RequestServerToSelectNewItemRpc(0);
-		Debug.Log($"Spawned player {clientId} at {playerNetworkObject.transform.position}");
-	}
 	public Vector3 DetermineSpawnPosition(Vector3 position)
 	{
 		Vector3[] offsets = new Vector3[]
@@ -183,14 +161,9 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		};
 
 		Vector3 spawnPos = new Vector3(position.x + offsets[spawnIndex.Value].x, position.y + 2, position.z + offsets[spawnIndex.Value].z);
-		RequestServerToIncrementSpawnIndexRpc();
+		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
 		return spawnPos;
 
-	}
-	[Rpc(SendTo.Server)]
-	private void RequestServerToIncrementSpawnIndexRpc()
-	{
-		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
 	}
 
 	public void DespawnPlayers()
@@ -277,7 +250,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		{
 			//GameManager.Instance.onGameStart -= SpawnPlayers;
 			GameManager.Instance.onNextLevel -= DespawnPlayers;
-
 		}
 
 	}

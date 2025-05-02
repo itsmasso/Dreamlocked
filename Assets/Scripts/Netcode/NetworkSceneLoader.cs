@@ -22,13 +22,13 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         }
     }
 
-    public void LoadSceneAdditively(string sceneName)
+    public void LoadSceneAdditively(string sceneName, System.Action onComplete = null)
     {
         if (!IsServer || isProcessingSceneOperation) return;
 
         if (SceneManager.GetSceneByName(sceneName).isLoaded)
         {
-            Debug.LogWarning($"Scene '{sceneName}' is already loaded. If you want to reload a scene, try calling ReloadSceneAdditively().");
+            Debug.LogWarning($"Scene '{sceneName}' is already loaded.");
             return;
         }
 
@@ -41,7 +41,19 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
 
         waitingForSceneName = sceneName;
         waitingForSceneEventType = SceneEventType.LoadComplete;
-        StartCoroutine(WaitForSceneEvent());
+        StartCoroutine(WaitForSceneEvent(onComplete));
+    }
+    public void ReloadScene(string sceneName)
+    {
+        if (!IsServer || isProcessingSceneOperation) return;
+
+        isProcessingSceneOperation = true;
+
+        UnloadSceneAdditively(sceneName, () =>
+        {
+            LoadSceneAdditively(sceneName);
+            isProcessingSceneOperation = false;
+        });
     }
 
     public void SetActiveScene(string sceneName)
@@ -68,7 +80,15 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
 
         Debug.Log($"Active scene set to: {sceneName}");
     }
-    
+
+    private IEnumerator WaitForSceneEventThen(System.Action callback)
+    {
+        while (!string.IsNullOrEmpty(waitingForSceneName))
+            yield return null;
+
+        callback?.Invoke();
+    }
+
     [Rpc(SendTo.Everyone)]
     private void AllSetActiveSceneRpc(string sceneName)
     {
@@ -110,7 +130,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         }
     }
 
-    public void UnloadSceneAdditively(string sceneName)
+    public void UnloadSceneAdditively(string sceneName, System.Action onComplete = null)
     {
         if (!IsServer || isProcessingSceneOperation) return;
 
@@ -136,7 +156,7 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
 
         waitingForSceneName = sceneName;
         waitingForSceneEventType = SceneEventType.UnloadComplete;
-        StartCoroutine(WaitForSceneEvent());
+        StartCoroutine(WaitForSceneEventThen(onComplete));
     }
 
     private void OnSceneEvent(SceneEvent sceneEvent)
@@ -160,12 +180,13 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         }
     }
 
-    private IEnumerator WaitForSceneEvent()
+    private IEnumerator WaitForSceneEvent(System.Action callback)
     {
         while (!string.IsNullOrEmpty(waitingForSceneName))
         {
             yield return null;
         }
+        callback?.Invoke();
     }
 
 

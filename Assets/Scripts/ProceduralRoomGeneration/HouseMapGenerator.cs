@@ -82,7 +82,8 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private List<GameObject> stairRooms;
 	[SerializeField] private int chanceToSpawnStairs;
 	[SerializeField] private int spawnStairGuarenteedPity;
-	[Header("Player Spawn")]
+	[Header("Server")]
+	private HashSet<ulong> acknowledgedClients = new HashSet<ulong>();
 
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
@@ -104,10 +105,9 @@ public class HouseMapGenerator : NetworkBehaviour
 		base.OnNetworkSpawn();
 		if (IsServer)
 		{
-			HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
-			AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
+			//HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
+			//AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
 			ServerGenerateMap();
-
 		}
 	}
 	[Rpc(SendTo.Everyone)]
@@ -130,6 +130,10 @@ public class HouseMapGenerator : NetworkBehaviour
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
 	}
+	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
+	{
+		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
+	}
 	void Start()
 	{
 		// SetDifficulty();
@@ -137,64 +141,19 @@ public class HouseMapGenerator : NetworkBehaviour
 	}
 
 
-	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
-	{
-		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
-	}
 
 	private void ServerGenerateMap()
 	{
-		UnityEngine.Random.InitState(GameManager.Instance.seed.Value);
-
-		Stopwatch sw = new Stopwatch();
-		sw.Start();
-
-		grid = new Grid3D(mapSize, nodeRadius, transform.position);
-		grid.CreateGrid();
-		rooms = new List<GameObject>();
-		hallwayPathFinder = new AStarPathfinder(grid);
-		hallways = new List<Node>();
-		currentHallwaySpawnIndex = 0;
-		specialRoomIndex = 0;
-
-		CreateRooms();
-		MarkRoomsInGrid(rooms);
-		CreateHallways();
-
-		foreach (Node n in grid.grid)
-		{
-			if (n.cellType == CellType.Hallway)
-				SpawnHallways(n);
-			if (n.cellType == CellType.Door)
-				SpawnDoorWay(n);
-		}
-
-		propObjectPlacer.SpawnRoomObjects();
-
-		aStarComponent.Scan();
-		sw.Stop();
-		PlayerNetworkManager.Instance.spawnPosition.Value = GetPlayerSpawnPosition();
-		GenerateMapClientRpc(GameManager.Instance.seed.Value);
-		GameManager.Instance.ChangeGameState(GameState.GameStart);
-		//PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
-		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+		int seed = GameManager.Instance.seed.Value;
+		GenerateMapClientRpc(seed);
 	}
 
 	[Rpc(SendTo.Everyone)]
 	public void GenerateMapClientRpc(int seed)
 	{
-		if (!IsServer)
-		{
-			StartCoroutine(DelayedSpawn(seed));
-		}
-		else
-		{
-			// Server does not need to wait — already generated.
-			PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
-		}
-	}
-	private IEnumerator DelayedSpawn(int seed)
-	{
+		HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
+		AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
+		
 		UnityEngine.Random.InitState(seed);
 
 		Stopwatch sw = new Stopwatch();
@@ -224,10 +183,20 @@ public class HouseMapGenerator : NetworkBehaviour
 
 		aStarComponent.Scan();
 		sw.Stop();
+		NotifyServerLevelReadyRpc();
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
+	}
 
-		yield return null; // Let everything finish initializing
-		PlayerNetworkManager.Instance.RequestServerToSpawnPlayerRpc(GetPlayerSpawnPosition());
+	[Rpc(SendTo.Server)]
+	private void NotifyServerLevelReadyRpc(RpcParams rpcParams = default)
+	{
+		acknowledgedClients.Add(rpcParams.Receive.SenderClientId);
+		if (acknowledgedClients.Count == NetworkManager.Singleton.ConnectedClients.Count)
+		{
+			UnityEngine.Debug.Log(GetPlayerSpawnPosition());
+			PlayerNetworkManager.Instance.SpawnPlayers(GetPlayerSpawnPosition());
+			GameManager.Instance.ChangeGameState(GameState.GameStart);
+		}
 	}
 
 	/*****************************************************************
@@ -823,7 +792,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		{
 			Destroy(child.gameObject);
 		}
-
+		acknowledgedClients.Clear();
 		grid.ClearGrid();
 		delaunay.Clear();
 		rooms.Clear();

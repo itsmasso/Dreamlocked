@@ -43,18 +43,6 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
         waitingForSceneEventType = SceneEventType.LoadComplete;
         StartCoroutine(WaitForSceneEvent(onComplete));
     }
-    public void ReloadScene(string sceneName)
-    {
-        if (!IsServer || isProcessingSceneOperation) return;
-
-        isProcessingSceneOperation = true;
-
-        UnloadSceneAdditively(sceneName, () =>
-        {
-            LoadSceneAdditively(sceneName);
-            isProcessingSceneOperation = false;
-        });
-    }
 
     public void SetActiveScene(string sceneName)
     {

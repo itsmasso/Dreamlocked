@@ -40,6 +40,7 @@ public class LevelLoader : NetworkBehaviour
         switch (map)
         {
             case Map.HouseMap:
+                TryChangeHouseMapDifficultySetting();
                 Scene scene = SceneManager.GetSceneByName("HouseMapLevel");
                 if (scene.IsValid() && scene.isLoaded)
                 {

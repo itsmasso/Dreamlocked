@@ -80,7 +80,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         canAttack = true;
         agent.stopDistance = STOPPING_DISTANCE;
         callTimer = 0;
-       
+
     }
     public override void OnNetworkSpawn()
     {
@@ -88,7 +88,7 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
         if (manager != null) threatLevelNetworkState.Value = manager.GetMQThreatLevel();
     }
 
-    
+
     private void Update()
     {
         //only server can run this code
@@ -180,16 +180,21 @@ public class MannequinMonsterScript : NetworkBehaviour, IAffectedByLight
 
         foreach (Collider collider in colliders)
         {
-            float verticalDifference = Mathf.Abs(transform.position.y - collider.transform.position.y);
-            if (verticalDifference > 2f)
-                continue; // skip if not on the same floor
-
-            float distance = Vector3.Distance(transform.position, collider.transform.position);
-            if (distance < closestDistance)
+            PlayerHealth playerHealth = collider.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth.currentHealth.Value > 0)
             {
-                closestDistance = distance;
-                closestTarget = collider.transform;
+                float verticalDifference = Mathf.Abs(transform.position.y - collider.transform.position.y);
+                if (verticalDifference > 2f)
+                    continue; // skip if not on the same floor
+
+                float distance = Vector3.Distance(transform.position, collider.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestTarget = collider.transform;
+                }
             }
+
         }
 
         currentTarget = closestTarget;

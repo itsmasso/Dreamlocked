@@ -23,17 +23,17 @@ public class PlayerHealth : NetworkBehaviour
     // DELETE THIS BEFORE SUBMITTING
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.P) && IsServer)
-		{
-			RequestServerTakeDamageRpc(25);
-		}
+        if (Input.GetKeyDown(KeyCode.P) && IsServer)
+        {
+            RequestServerTakeDamageRpc(25);
+        }
     }
 
     public void ResetHealth()
     {
         RequestServerToRestoreHealthRpc(playerScriptable.health);
     }
-    
+
     [Rpc(SendTo.Server)]
     public void RequestServerToRestoreHealthRpc(int amount)
     {
@@ -51,14 +51,17 @@ public class PlayerHealth : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        currentHealth.Value -= amount;
-        if (currentHealth.Value <= 0)
+        if (currentHealth.Value > 0)
         {
-            currentHealth.Value = 0;
-            Die();
-        }
+            currentHealth.Value -= amount;
+            if (currentHealth.Value <= 0)
+            {
+                currentHealth.Value = 0;
+                Die();
+            }
 
-        OwnerUpdateHealthRpc(currentHealth.Value);
+            OwnerUpdateHealthRpc(currentHealth.Value);
+        }
 
     }
     [Rpc(SendTo.Owner)]
@@ -82,7 +85,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         onDeath?.Invoke();
     }
-    
+
     [Rpc(SendTo.Everyone)]
     private void HidePlayerFromAllRpc(NetworkObjectReference playerNetworkObjRef)
     {

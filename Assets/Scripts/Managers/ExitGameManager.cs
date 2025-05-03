@@ -71,7 +71,7 @@ public class ExitGameManager : NetworkBehaviour
 
     private System.Collections.IEnumerator ShutdownAndLoadMenu()
     {
-        yield return new WaitForSeconds(0.5f); // Allow client RPCs to complete
+        yield return new WaitForSeconds(1.5f); // Allow client RPCs to complete
 
         NetworkManager.Singleton.Shutdown();
         SceneManager.LoadScene(menuSceneName);

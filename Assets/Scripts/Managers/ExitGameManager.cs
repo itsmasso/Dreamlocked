@@ -10,16 +10,16 @@ public class ExitGameManager : NetworkBehaviour
 
     public void ExitToMenu()
     {
-        if (IsHost)
+        if (IsHost || IsServer)
         {
             AudioManager.Instance.ClearAllAudio();
             KickClientsAndShutdown();
 
-            // Shutdown Netcode
-            Cursor.visible = true;
-		    Cursor.lockState = CursorLockMode.None;
-            NetworkManager.Singleton.Shutdown();
-            SceneManager.LoadScene(menuSceneName);
+            // // Shutdown Netcode
+            // Cursor.visible = true;
+		    // Cursor.lockState = CursorLockMode.None;
+            // NetworkManager.Singleton.Shutdown();
+            // SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {

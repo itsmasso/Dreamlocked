@@ -90,6 +90,6 @@ public class LevelLoader : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
-        ResetSettings();
+        if(IsServer) ResetSettings();
     }
 }

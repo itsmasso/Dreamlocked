@@ -2,8 +2,6 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
-using Unity.Netcode.Components;
 using System;
 using System.Linq;
 
@@ -14,8 +12,6 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	[SerializeField] private GameObject playerPrefab;
 	public List<NetworkObject> alivePlayers = new List<NetworkObject>();
 	public NetworkVariable<int> alivePlayersCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-	public static event Action onRespawnPlayer;
-	[SerializeField] private ScreenManager screenManager;
 	private Dictionary<ulong, List<ItemData>> savedInventories = new();
 	public NetworkVariable<Vector3> spawnPosition = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 	public NetworkVariable<int> spawnIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone);

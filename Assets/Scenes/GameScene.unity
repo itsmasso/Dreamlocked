@@ -1682,10 +1682,6 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 1427393165
       objectReference: {fileID: 0}
-    - target: {fileID: 4896960773208472892, guid: 1c19000ca751bbc49a173c177415ebec, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 1875356097
-      objectReference: {fileID: 0}
     - target: {fileID: 8766952982084490490, guid: 1c19000ca751bbc49a173c177415ebec, type: 3}
       propertyPath: m_LocalPosition.x
       value: 43.52499
@@ -1784,40 +1780,8 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3342722737956144989, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 155573733
+      value: 778705586
       objectReference: {fileID: 0}
-    - target: {fileID: 3342722737956144989, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 882157083
-      objectReference: {fileID: 0}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: bootStrapSceneName
-      value: TestMenuScene
-      objectReference: {fileID: 0}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: currentHouseMapDifficultySetting
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: houseMapDifficultySettingList.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: 'houseMapDifficultySettingList.Array.data[0]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 0435810be2aed984ba6f500571585264, type: 2}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: 'houseMapDifficultySettingList.Array.data[1]'
-      value: 
-      objectReference: {fileID: 11400000, guid: f9a0bc89d1613684cacf3294c153f764, type: 2}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: 'houseMapDifficultySettingList.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 99a2699ec5e197549ab652006dd98f7a, type: 2}
-    - target: {fileID: 5893075887325019960, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
-      propertyPath: 'houseMapDifficultySettingList.Array.data[3]'
-      value: 
-      objectReference: {fileID: 11400000, guid: f50d0f39fc9b55544b8114ec20b1891f, type: 2}
     - target: {fileID: 6446135575099775568, guid: 0e9177e32eec2ac4c94a68e92c5019bf, type: 3}
       propertyPath: m_LocalPosition.x
       value: 705.48175
@@ -1992,18 +1956,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 123707951814638924, guid: f2666248f3c4dbd47a6cf98b14bb1e32, type: 3}
-      propertyPath: gameLevelScene
-      value: GameScene
-      objectReference: {fileID: 0}
-    - target: {fileID: 123707951814638924, guid: f2666248f3c4dbd47a6cf98b14bb1e32, type: 3}
-      propertyPath: persistentScene
-      value: PersistScene
-      objectReference: {fileID: 0}
-    - target: {fileID: 123707951814638924, guid: f2666248f3c4dbd47a6cf98b14bb1e32, type: 3}
-      propertyPath: defaultActiveScene
-      value: GameScene
-      objectReference: {fileID: 0}
     - target: {fileID: 710561222693449498, guid: f2666248f3c4dbd47a6cf98b14bb1e32, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 111806551
@@ -2332,26 +2284,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2764460212279985442, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 1309270397
+      value: 1100401442
       objectReference: {fileID: 0}
-    - target: {fileID: 2764460212279985442, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 3182692800
-      objectReference: {fileID: 0}
-    - target: {fileID: 3130789072453143998, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
-      propertyPath: levelLoader
-      value: 
-      objectReference: {fileID: 2371649504844488818}
-    - target: {fileID: 3130789072453143998, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 7062762779246524609, guid: c58e4e7fde9f52b4e82288982ef50fd6, type: 3}
     - target: {fileID: 3130789072453143998, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
       propertyPath: screenManager
-      value: 
-      objectReference: {fileID: 1550661919}
-    - target: {fileID: 3130789072453143998, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}
-      propertyPath: loadingScreenManager
       value: 
       objectReference: {fileID: 1550661919}
     - target: {fileID: 8006768506943552974, guid: bdca49b2cd86fa748aa2ffd2bb0174c1, type: 3}

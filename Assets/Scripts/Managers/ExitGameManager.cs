@@ -6,8 +6,25 @@ using Steamworks;
 
 public class ExitGameManager : NetworkBehaviour
 {
-    [SerializeField] private string menuSceneName = "MenuScene"; 
+    [SerializeField] private string menuSceneName = "MenuScene";
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (IsClient && !IsHost)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnectedFromHost;
+        }
+    }
 
+    private void OnDisconnectedFromHost(ulong clientId)
+    {
+        if (clientId == NetworkManager.ServerClientId)
+        {
+            Debug.LogWarning("Disconnected from host. Returning to menu...");
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene("MenuScene");
+        }
+    }
     public void ExitToMenu()
     {
         if (IsHost || IsServer)
@@ -15,16 +32,16 @@ public class ExitGameManager : NetworkBehaviour
             AudioManager.Instance.ClearAllAudio();
             KickClientsAndShutdown();
 
-            // // Shutdown Netcode
-            // Cursor.visible = true;
-		    // Cursor.lockState = CursorLockMode.None;
-            // NetworkManager.Singleton.Shutdown();
-            // SceneManager.LoadScene(menuSceneName);
+            // Shutdown Netcode
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene(menuSceneName);
         }
         else if (IsClient)
         {
             Cursor.visible = true;
-		    Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
@@ -36,7 +53,7 @@ public class ExitGameManager : NetworkBehaviour
         SendClientToMenuClientRpc();
 
         // Shut down host networking after delay
-        // StartCoroutine(ShutdownAndLoadMenu());
+        StartCoroutine(ShutdownAndLoadMenu());
     }
 
     [Rpc(SendTo.Everyone)]
@@ -46,17 +63,22 @@ public class ExitGameManager : NetworkBehaviour
         {
             // This runs on clients only
             Cursor.visible = true;
-		    Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.None;
             NetworkManager.Singleton.Shutdown();
             SceneManager.LoadScene(menuSceneName);
         }
     }
 
-    // private System.Collections.IEnumerator ShutdownAndLoadMenu()
-    // {
-    //     yield return new WaitForSeconds(0.5f); // Allow client RPCs to complete
+    private System.Collections.IEnumerator ShutdownAndLoadMenu()
+    {
+        yield return new WaitForSeconds(0.5f); // Allow client RPCs to complete
 
-    //     NetworkManager.Singleton.Shutdown();
-    //     SceneManager.LoadScene(menuSceneName);
-    // }
+        NetworkManager.Singleton.Shutdown();
+        SceneManager.LoadScene(menuSceneName);
+    }
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        NetworkManager.Singleton.OnClientDisconnectCallback -= OnDisconnectedFromHost;
+    }
 }

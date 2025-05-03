@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/TestScene/TestMenuScene.unity
     guid: c0d06d24e4ff96a4d97c948fa6c25f7a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PersistScene.unity
     guid: 74cb9d89049f56b4a9e04b4a5fb4efb1
   - enabled: 1

@@ -16,7 +16,7 @@ public enum CellType
 	Door,
 }
 
-public class HouseMapGenerator : NetworkBehaviour
+public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 {
 	private enum RoomEdgeDirections
 	{
@@ -84,15 +84,15 @@ public class HouseMapGenerator : NetworkBehaviour
 	[SerializeField] private int spawnStairGuarenteedPity;
 	[Header("Server")]
 	private HashSet<ulong> acknowledgedClients = new HashSet<ulong>();
-
+	public bool isLevelGenerated = false;
 	[Header("Debug")]
 	public Color color = new Color(1, 0, 0, 0.1f);
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] private bool drawAllNodes;
 
-	private void Awake()
+	protected override void Awake()
 	{
-
+		base.Awake();
 		nodeDiameter = Mathf.RoundToInt(nodeRadius * 2);
 		// mapSize.y = Mathf.RoundToInt(FLOOR_HEIGHT * floors);
 		spaceBetweenRooms = Mathf.RoundToInt(spaceBetweenRooms / nodeDiameter) * nodeDiameter;
@@ -107,7 +107,6 @@ public class HouseMapGenerator : NetworkBehaviour
 		{
 			LevelLoader levelLoader = GameManager.Instance.GetLevelLoader();
 			AllSetDifficultySORpc(levelLoader.currentDifficultyIndex.Value);
-			ServerGenerateMap();
 		}
 	}
 	[Rpc(SendTo.Everyone)]
@@ -130,6 +129,10 @@ public class HouseMapGenerator : NetworkBehaviour
 			roomsPerFloor = currentDifficultySetting.roomsPerFloor;
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
+		if(IsServer)
+		{
+		    ServerGenerateMap();
+		}
 	}
 	void Start()
 	{
@@ -148,9 +151,8 @@ public class HouseMapGenerator : NetworkBehaviour
 	[Rpc(SendTo.Everyone)]
 	public void GenerateMapClientRpc(int seed)
 	{
-
 		UnityEngine.Random.InitState(seed);
-
+		UnityEngine.Debug.Log(seed);
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 
@@ -179,6 +181,7 @@ public class HouseMapGenerator : NetworkBehaviour
 		aStarComponent.Scan();
 		sw.Stop();
 		NotifyServerLevelReadyRpc();
+		isLevelGenerated = true;
 		UnityEngine.Debug.Log("Finished Generating in " + sw.ElapsedMilliseconds + "ms");
 	}
 
@@ -188,7 +191,8 @@ public class HouseMapGenerator : NetworkBehaviour
 		acknowledgedClients.Add(rpcParams.Receive.SenderClientId);
 		if (acknowledgedClients.Count == NetworkManager.Singleton.ConnectedClients.Count)
 		{
-			UnityEngine.Debug.Log(GetPlayerSpawnPosition());
+			//UnityEngine.Debug.Log(GetPlayerSpawnPosition());
+
 			PlayerNetworkManager.Instance.SpawnPlayers(GetPlayerSpawnPosition());
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
 		}
@@ -235,11 +239,16 @@ public class HouseMapGenerator : NetworkBehaviour
 
 	public Vector3 GetPlayerSpawnPosition()
 	{
-		//UnityEngine.Debug.Log(rooms.Count);
-		Vector3 position = rooms.FirstOrDefault(r => r.GetComponent<Room>().isMainRoom == true).transform.position;
+		var mainRoom = rooms.FirstOrDefault(r => r != null && r.GetComponent<Room>().isMainRoom);
+		if (mainRoom == null)
+		{
+			UnityEngine.Debug.LogError("[HouseMapGenerator] Main room was not found! Falling back to default position.");
+			return Vector3.zero; // or some safe fallback
+		}
 
-		return position;
+		return mainRoom.transform.position;
 	}
+
 
 	public Vector3 GetRandomHallwayPosition()
 	{
@@ -782,18 +791,26 @@ public class HouseMapGenerator : NetworkBehaviour
 	public void ClearMap()
 	{
 		UnityEngine.Debug.Log("Clearing Map");
-		propObjectPlacer.ClearObjects();
-		foreach (Transform child in transform)
+
+		// Only clear what exists
+		if (propObjectPlacer != null)
+			propObjectPlacer.ClearObjects();
+
+		if (transform.childCount > 0)
 		{
-			Destroy(child.gameObject);
+			foreach (Transform child in transform)
+			{
+				Destroy(child.gameObject);
+			}
 		}
-		acknowledgedClients.Clear();
-		grid.ClearGrid();
-		delaunay.Clear();
-		rooms.Clear();
-		hallways.Clear();
-		specialRoomPrefabList.Clear();
-		normalRoomsPrefabList.Clear();
+
+		acknowledgedClients?.Clear();
+		grid?.ClearGrid();
+		delaunay?.Clear();
+		rooms?.Clear();
+		hallways?.Clear();
+		specialRoomPrefabList?.Clear();
+		normalRoomsPrefabList?.Clear();
 	}
 
 	public override void OnDestroy()
@@ -803,7 +820,7 @@ public class HouseMapGenerator : NetworkBehaviour
 			base.OnDestroy();
 			ClearMap();
 			GameManager.Instance.onNextLevel -= ClearMap;
-			GameManager.Instance.onLobby -= ClearMap;
+
 		}
 
 	}

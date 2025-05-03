@@ -167,6 +167,7 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		yield return new WaitForSeconds(gameOverScreenDuration);
 		levelLoader.UnloadMap(Map.HouseMap);
+		HideGameWinScreenToAllRpc();
 		exitGameManager.ExitToMenu();
 		Debug.Log("Returning to Lobby");
 		_gameOverRoutine = null;
@@ -219,6 +220,11 @@ public class GameManager : NetworkSingleton<GameManager>
 	public void ShowGameWinScreenToAllRpc()
 	{
 		screenManager.ShowGameWinScreen();
+	}
+	[Rpc(SendTo.Everyone)]
+	public void HideGameWinScreenToAllRpc()
+	{
+		screenManager.HideGameWinScreen();
 	}
 
 	[Rpc(SendTo.Everyone)]

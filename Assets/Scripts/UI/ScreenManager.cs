@@ -43,6 +43,11 @@ public class ScreenManager : MonoBehaviour
         gameWinScreen.SetActive(true);
     }
     
+    public void HideGameWinScreen()
+    {
+        gameWinScreen.SetActive(false);
+    }
+    
     public void HideGameOverScreen()
     {
         gameOverScreen.SetActive(false);

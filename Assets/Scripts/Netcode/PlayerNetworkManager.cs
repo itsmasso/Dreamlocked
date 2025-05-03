@@ -128,6 +128,7 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 	{
 		if (IsServer)
 		{
+			spawnPosition.Value = position;
 			foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
 			{
 				GameObject player = Instantiate(playerPrefab, DetermineSpawnPosition(position), Quaternion.identity);
@@ -157,9 +158,14 @@ public class PlayerNetworkManager : NetworkSingleton<PlayerNetworkManager>
 		};
 
 		Vector3 spawnPos = new Vector3(position.x + offsets[spawnIndex.Value].x, position.y + 2, position.z + offsets[spawnIndex.Value].z);
-		spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
+		IncrementSpawnIndexRpc();
 		return spawnPos;
 
+	}
+	[Rpc(SendTo.Server)]
+	private void IncrementSpawnIndexRpc()
+	{
+	    spawnIndex.Value = (spawnIndex.Value + 1) % MAX_PLAYERS;
 	}
 
 	public void DespawnPlayers()

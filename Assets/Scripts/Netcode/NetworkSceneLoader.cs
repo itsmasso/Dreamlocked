@@ -162,8 +162,26 @@ public class NetworkSceneLoader : NetworkSingleton<NetworkSceneLoader>
                 break;
 
             case SceneEventType.LoadEventCompleted:
+                Debug.Log($"LoadEventCompleted: Clients loaded scene {sceneEvent.SceneName}: {string.Join(",", sceneEvent.ClientsThatCompleted)}");
+
+                if (sceneEvent.ClientsThatTimedOut != null && sceneEvent.ClientsThatTimedOut.Count > 0)
+                {
+                    Debug.LogWarning($"Clients failed to load scene {sceneEvent.SceneName}: {string.Join(",", sceneEvent.ClientsThatTimedOut)}");
+                }
+
+                if (sceneEvent.ClientsThatCompleted.Count == NetworkManager.Singleton.ConnectedClientsList.Count)
+                {
+                    Debug.Log($"All clients successfully loaded {sceneEvent.SceneName}.");
+                }
+                break;
+
             case SceneEventType.UnloadEventCompleted:
-                Debug.Log($"{sceneEvent.SceneEventType} for clients: {string.Join(",", sceneEvent.ClientsThatCompleted)}");
+                Debug.Log($"UnloadEventCompleted: Clients unloaded scene {sceneEvent.SceneName}: {string.Join(",", sceneEvent.ClientsThatCompleted)}");
+
+                if (sceneEvent.ClientsThatTimedOut != null && sceneEvent.ClientsThatTimedOut.Count > 0)
+                {
+                    Debug.LogWarning($"Clients failed to unload scene {sceneEvent.SceneName}: {string.Join(",", sceneEvent.ClientsThatTimedOut)}");
+                }
                 break;
         }
     }

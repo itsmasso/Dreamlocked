@@ -105,14 +105,15 @@ public class HouseMapGenerator : NetworkBehaviour
 		base.OnNetworkSpawn();
 		if (IsServer)
 		{
-			//HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
-			//AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
+			LevelLoader levelLoader = GameManager.Instance.GetLevelLoader();
+			AllSetDifficultySORpc(levelLoader.currentDifficultyIndex.Value);
 			ServerGenerateMap();
 		}
 	}
 	[Rpc(SendTo.Everyone)]
 	private void AllSetDifficultySORpc(int difficultySOIndex)
 	{
+		UnityEngine.Debug.Log(difficultySOIndex);
 		currentDifficultySetting = difficultyListScriptable.difficultyListSO[difficultySOIndex];
 		if (currentDifficultySetting != null)
 		{
@@ -129,10 +130,6 @@ public class HouseMapGenerator : NetworkBehaviour
 			roomsPerFloor = currentDifficultySetting.roomsPerFloor;
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
-	}
-	private int GetDifficultySOIndex(HouseMapDifficultySettingsSO difficultySetting)
-	{
-		return difficultyListScriptable.difficultyListSO.IndexOf(difficultySetting);
 	}
 	void Start()
 	{
@@ -151,9 +148,7 @@ public class HouseMapGenerator : NetworkBehaviour
 	[Rpc(SendTo.Everyone)]
 	public void GenerateMapClientRpc(int seed)
 	{
-		HouseMapDifficultySettingsSO currentDifficultySettingSO = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
-		AllSetDifficultySORpc(GetDifficultySOIndex(currentDifficultySettingSO));
-		
+
 		UnityEngine.Random.InitState(seed);
 
 		Stopwatch sw = new Stopwatch();

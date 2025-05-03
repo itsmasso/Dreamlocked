@@ -564,6 +564,8 @@ MonoBehaviour:
     m_InternalValue: 0
   screenManager: {fileID: 1550661919}
   levelLoader: {fileID: 2371649504844488818}
+  currentDreamLayer:
+    m_InternalValue: 0
   gameOverScreenDuration: 4
   exitGameManager: {fileID: 734020619}
 --- !u!4 &734020618
@@ -939,7 +941,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 991684641}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!1001 &1051990370
 PrefabInstance:
   m_ObjectHideFlags: 0

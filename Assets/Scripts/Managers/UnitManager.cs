@@ -28,7 +28,8 @@ public class UnitManager : NetworkBehaviour
 	{
 		if (IsServer)
 		{
-			currentDifficultySetting = GameManager.Instance.GetLevelLoader().currentHouseMapDifficultySetting;
+			LevelLoader levelLoader = GameManager.Instance.GetLevelLoader();
+			currentDifficultySetting = levelLoader.houseMapDifficultySettingList[levelLoader.currentDifficultyIndex.Value];
 			lurkerSpawnTimer = currentDifficultySetting.lurkerSpawnDelay;
 			float rand = UnityEngine.Random.value;
 			if (rand <= currentDifficultySetting.chanceToSpawnLurker)

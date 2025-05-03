@@ -14,9 +14,9 @@ public class LevelLoader : NetworkBehaviour
 {
     [Tooltip("Put the scriptable objects in order from easiest to hardest.")]
     public List<HouseMapDifficultySettingsSO> houseMapDifficultySettingList = new List<HouseMapDifficultySettingsSO>();
-    public HouseMapDifficultySettingsSO currentHouseMapDifficultySetting;
+    private HouseMapDifficultySettingsSO currentHouseMapDifficultySetting;
+    public NetworkVariable<int> currentDifficultyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private int nextDifficultyCheckpoint;
-    private int currentDifficultyIndex;
     void Start()
     {
         if (IsServer)
@@ -73,8 +73,8 @@ public class LevelLoader : NetworkBehaviour
     {
         if (GameManager.Instance.GetCurrentDreamLayer() == nextDifficultyCheckpoint)
         {
-            currentDifficultyIndex++;
-            currentHouseMapDifficultySetting = houseMapDifficultySettingList[currentDifficultyIndex];
+            currentDifficultyIndex.Value++;
+            currentHouseMapDifficultySetting = houseMapDifficultySettingList[currentDifficultyIndex.Value];
             nextDifficultyCheckpoint += currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;
         }
     }
@@ -85,7 +85,7 @@ public class LevelLoader : NetworkBehaviour
         //add all resets for all maps here
         currentHouseMapDifficultySetting = houseMapDifficultySettingList[0];
         nextDifficultyCheckpoint = currentHouseMapDifficultySetting.levelsUntilHarderDifficulty;
-        currentDifficultyIndex = 0;
+        currentDifficultyIndex.Value = 0;
     }
     public override void OnDestroy()
     {

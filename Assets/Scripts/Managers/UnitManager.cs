@@ -5,7 +5,7 @@ using System.Linq;
 using Pathfinding;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 public class UnitManager : NetworkBehaviour
 {
@@ -17,18 +17,17 @@ public class UnitManager : NetworkBehaviour
 	[SerializeField] private float minSpawnDistFromPlayers;
 	[SerializeField] private float maxSpawnDistFromPlayers;
 	private bool canSpawnEnemies = false;
-	[SerializeField] private string defaultScene;
 	private HouseMapDifficultySettingsSO currentDifficultySetting;
 	private float lurkerSpawnTimer;
 	private int lurkerSpawnCount;
 	private bool canSpawnLurker;
 	private int mannequinSpawnCount;
+	[SerializeField] private LevelLoader levelLoader;
 	
 	void Start()
 	{
 		if (IsServer)
 		{
-			LevelLoader levelLoader = GameManager.Instance.GetLevelLoader();
 			currentDifficultySetting = levelLoader.houseMapDifficultySettingList[levelLoader.currentDifficultyIndex.Value];
 			lurkerSpawnTimer = currentDifficultySetting.lurkerSpawnDelay;
 			float rand = UnityEngine.Random.value;

@@ -73,6 +73,8 @@ public class GameManager : NetworkSingleton<GameManager>
 	{
 		if (IsServer)
 		{
+			Debug.Log("next level");
+			
 			//levelLoader.UnloadMap(Map.HouseMap);
 			ClearAudioRpc();
 			onNextLevel?.Invoke();
@@ -117,8 +119,7 @@ public class GameManager : NetworkSingleton<GameManager>
 					Debug.Log("Current seed:" + seed.Value);
 					StopMenuMusicRpc();
 					GenerateSecurityCode();
-					ShowSleepLoadingScreenToAllRpc();
-					levelLoader.ReloadMap(Map.HouseMap);
+					levelLoader.LoadMap(Map.HouseMap);
 
 					break;
 				case GameState.GameStart:

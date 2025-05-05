@@ -16,13 +16,19 @@ using Unity.Netcode;
     before the song ends or else they will die.
  *****************************************************************/
 
-public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
+public class RadioManager : NetworkBehaviour, IInteractable
 {
     [SerializeField] private Sound3DSO switchSound, song1, song2, song3, song4;
     private Sound3DSO currentSong;
     void Start()
     {
         //Debug.Log("Start Radio Manger");
+
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
         AudioManager.Instance.Play3DSoundServerRpc(
         AudioManager.Instance.Get3DSoundFromList(GetSongForLevel(GameManager.Instance.GetCurrentDreamLayer(), GameManager.Instance.GetMaxDreamLayer())),
         transform.position, false, 1f, 1f, 20f, true, GetComponent<NetworkObject>(), 2f);
@@ -142,6 +148,7 @@ public class RadioManager : NetworkSingleton<RadioManager>, IInteractable
     private void DescendDreamLevelServerRpc()
     {
         Debug.Log("Descending Dream Level...");
+        
         GameManager.Instance.OnNextLevel();
     }
 

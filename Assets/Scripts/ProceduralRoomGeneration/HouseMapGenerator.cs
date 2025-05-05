@@ -103,11 +103,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	public override void OnNetworkSpawn()
 	{
 		base.OnNetworkSpawn();
-		if (IsServer)
-		{
-			LevelLoader levelLoader = GameManager.Instance.GetLevelLoader();
-			AllSetDifficultySORpc(levelLoader.currentDifficultyIndex.Value);
-		}
 	}
 	[Rpc(SendTo.Everyone)]
 	private void AllSetDifficultySORpc(int difficultySOIndex)
@@ -129,21 +124,12 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 			roomsPerFloor = currentDifficultySetting.roomsPerFloor;
 			propObjectPlacer.hallwayLightSpawnInterval = currentDifficultySetting.hallwayLightSpawnSpacing;
 		}
-		if(IsServer)
-		{
-		    ServerGenerateMap();
-		}
-	}
-	void Start()
-	{
-		// SetDifficulty();
-		// Generate();
 	}
 
-
-
-	private void ServerGenerateMap()
+	public void ServerGenerateMap(int difficultySOIndex)
 	{
+		if(!IsServer) return;
+		AllSetDifficultySORpc(difficultySOIndex);
 		int seed = GameManager.Instance.seed.Value;
 		GenerateMapClientRpc(seed);
 	}
@@ -192,7 +178,6 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 		if (acknowledgedClients.Count == NetworkManager.Singleton.ConnectedClients.Count)
 		{
 			//UnityEngine.Debug.Log(GetPlayerSpawnPosition());
-
 			PlayerNetworkManager.Instance.SpawnPlayers(GetPlayerSpawnPosition());
 			GameManager.Instance.ChangeGameState(GameState.GameStart);
 		}
@@ -791,7 +776,7 @@ public class HouseMapGenerator : NetworkSingleton<HouseMapGenerator>
 	public void ClearMap()
 	{
 		UnityEngine.Debug.Log("Clearing Map");
-
+		isLevelGenerated = false;
 		// Only clear what exists
 		if (propObjectPlacer != null)
 			propObjectPlacer.ClearObjects();

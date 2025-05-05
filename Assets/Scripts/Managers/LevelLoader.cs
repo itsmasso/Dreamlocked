@@ -17,59 +17,39 @@ public class LevelLoader : NetworkBehaviour
     private HouseMapDifficultySettingsSO currentHouseMapDifficultySetting;
     public NetworkVariable<int> currentDifficultyIndex = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private int nextDifficultyCheckpoint;
+    [SerializeField] private HouseMapGenerator houseMapGenerator;
     void Start()
     {
+
         if (IsServer)
         {
+            //GameManager.Instance.onNextLevel += TryChangeHouseMapDifficultySetting;
             ResetSettings();
         }
     }
 
-    public void LoadMap(Map map, Action onLoaded = null)
+    public void LoadMap(Map map)
     {
         switch (map)
         {
             case Map.HouseMap:
                 TryChangeHouseMapDifficultySetting();
-                NetworkSceneLoader.Instance.LoadSceneAdditively("HouseMapLevel", onLoaded);
-                break;
-        }
-    }
-    public void ReloadMap(Map map, Action onReloaded = null)
-    {
-        switch (map)
-        {
-            case Map.HouseMap:
-                TryChangeHouseMapDifficultySetting();
-                Scene scene = SceneManager.GetSceneByName("HouseMapLevel");
-                if (scene.IsValid() && scene.isLoaded)
-                {
-                    Debug.Log("[LevelLoader] Scene is loaded, unloading first...");
-                    UnloadMap(map, () =>
-                    {
-                        LoadMap(map, onReloaded);
-                    });
-                }
-                else
-                {
-                    Debug.Log("[LevelLoader] Scene is not loaded, loading directly...");
-                    LoadMap(map, onReloaded);
-                }
+                houseMapGenerator.ServerGenerateMap(currentDifficultyIndex.Value);
                 break;
         }
     }
 
-    public void UnloadMap(Map map, Action onUnloaded = null)
+    public void UnloadMap(Map map)
     {
         switch (map)
         {
             case Map.HouseMap:
-                NetworkSceneLoader.Instance.UnloadSceneAdditively("HouseMapLevel", onUnloaded);
+                houseMapGenerator.ClearMap();
                 break;
         }
     }
 
-    private void TryChangeHouseMapDifficultySetting()
+    public void TryChangeHouseMapDifficultySetting()
     {
         if (GameManager.Instance.GetCurrentDreamLayer() == nextDifficultyCheckpoint)
         {
@@ -90,6 +70,11 @@ public class LevelLoader : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
-        if(IsServer) ResetSettings();
+        if (IsServer)
+        {
+            //GameManager.Instance.onNextLevel -= TryChangeHouseMapDifficultySetting;
+            ResetSettings();
+        }
+
     }
 }

@@ -23,10 +23,10 @@ public class PlayerHealth : NetworkBehaviour
     // DELETE THIS BEFORE SUBMITTING
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P) && IsServer)
-        {
-            RequestServerTakeDamageRpc(25);
-        }
+        // if (Input.GetKeyDown(KeyCode.P) && IsServer)
+        // {
+        //     RequestServerTakeDamageRpc(25);
+        // }
     }
 
     public void ResetHealth()

@@ -29,6 +29,6 @@ Dreamlocked is a 3D horror game developed in Unity that places players in a drea
 You can view the detailed project report below:
 
 - [Game Proposal https://docs.google.com/document/d/1cMy01HbnFYewB3vItnmTeG8HnLVEAAhKzqm3os5pzQ0/edit?usp=sharing]
-- [Final Outline https://docs.google.com/document/d/1cMy01HbnFYewB3vItnmTeG8HnLVEAAhKzqm3os5pzQ0/edit?usp=sharing]
+- [Final Outline [https://docs.google.com/document/d/1cMy01HbnFYewB3vItnmTeG8HnLVEAAhKzqm3os5pzQ0/edit?usp=sharing](https://docs.google.com/document/d/1I4vlswLImBpjntAk3BA87BwBeQ36DOxddKykGhGeQlk/edit?usp=sharing)]
 
 ---

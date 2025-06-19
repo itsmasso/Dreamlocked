@@ -7,7 +7,7 @@ Dreamlocked is a 3D horror game developed in Unity that places players in a drea
 ## Features
 
 - Online multiplayer support via Steam (Steamworks SDK)
-- Atmospheric environments with dynamic lighting and sound
+- Procedurally generated atmospheric environments with dynamic lighting and sound
 - Intelligent AI enemies with patrol and chase behaviors
 - Puzzle-solving and key-based progression
 - Gamepad and keyboard/mouse support

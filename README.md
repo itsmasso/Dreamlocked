@@ -4,13 +4,7 @@ Dreamlocked is a 3D horror game developed in Unity that places players in a drea
 
 ---
 ## Download & Play
-- The game is in the process of being deployed to Steam so use the download link below to play for now. This is the Steam page for it: https://store.steampowered.com/app/3709240/Dreamlocked/?beta=0
-> ⚠️ **Note:** Steam **must be open** to launch the game.
-
-- 🔗 **Download Link**: https://drive.google.com/file/d/1k1540kBi775RNXV_l285mkf4YP5gP2Q_/view?usp=sharing
-- Extract the `.zip` and launch the game through the provided `.exe` file.
-- Launch Steam before playing in order to host a lobby.
-
+- https://store.steampowered.com/app/3709240/Dreamlocked
 ---
 ## Features
 

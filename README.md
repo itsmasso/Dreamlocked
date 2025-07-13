@@ -1,6 +1,6 @@
 # 3D Horror Multiplayer (Steam)
 
-Dreamlocked is a 3D horror game developed in Unity that places players in a dream world filled with danger and mystery. The core gameplay loop focuses on navigating dream layers, solving puzzles, and surviving encounters with aggressive entities. Environments are procedurally generated and feature both recurring and random challenges that increase tension as players progress. The objective is to descend into the dream world, complete a core task, and then escape.
+Dreamlocked is a 3D horror game school project developed in Unity that places players in a dream world filled with danger and mystery. The core gameplay loop focuses on navigating dream layers, solving puzzles, and surviving encounters with aggressive entities. Environments are procedurally generated and feature both recurring and random challenges that increase tension as players progress. The objective is to descend into the dream world, complete a core task, and then escape.
 
 ---
 ## Download & Play
